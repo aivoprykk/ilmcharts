@@ -48,6 +48,10 @@ var ilm = (function (my) {
 		};
 		this.charts = [];
 		this.chartorder = ["temp","wind_speed","wind_dir"];
+
+	        this.months = ['Jaanuar', 'Veebruar', 'Märts', 'Aprill', 'Mai', 'Juuni',
+                        'Juuli', 'August', 'September', 'Octoober', 'November', 'Detsember'];
+		this.weekdays = ['Pühapäev', 'Esmaspäev', 'Teisipäev', 'Kolmapäev', 'Neljapäev', 'Reede', 'Laupäev'];
 	}
 
 	App.prototype = {
@@ -160,7 +164,17 @@ var ilm = (function (my) {
 		},
 		setDate: function(d) {
 			this.date = new Date().getTime() - d;
+		},
+		getTimeStr: function (d, f) {
+			d = new Date(d);
+			var dsep = "." + (d.getMonth() < 10 ? "0" : "") + d.getMonth() + ".";
+			if (f) { dsep = ". " + my.months[(d.getMonth()-1)].toLowerCase() + " "; }
+			return (d.getDate() < 10 ? "0" : "") + d.getDate() 
+				+ dsep + d.getFullYear()
+				+ " " + (d.getHours()<10?"0":"") + d.getHours()
+				+ ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();
 		}
+    
 	};
 	
 	if (win.ilm === undefined) {
@@ -244,9 +258,8 @@ var ilm = (function (my) {
 			useUTC : false
 		},
 		lang: {
-			months: ['Jaanuar', 'Veebruar', 'Märts', 'Aprill', 'Mai', 'Juuni', 
-			'Juuli', 'August', 'September', 'Octoober', 'November', 'December'],
-			weekdays: ['Pühapäev', 'Esmaspäev', 'Teisipäev', 'Kolmapäev', 'Neljapäev', 'Reede', 'Laupäev']
+			months: my.months,
+			weekdays: my.weekdays
 		}
 	});
 
@@ -494,7 +507,7 @@ var ilm = (function (my) {
 				//+ " [ Suund: <b>" + s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1] + "</b> ° "
 				//+ "(<b>" + my.dirs(s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1]) + "</b>) ]"
 				//+ " [ Rõhk: <b>" + s.avg_press_series.data[s.avg_press_series.data.length - 1][1] + "</b> hPa ]"
-				+ '</div><div class="row">Andmed seisuga <b>' + d.toLocaleString() + "</b></div>"
+				+ '</div><div class="row"><b>Tartu ilm</b> ' + my.getTimeStr(d,1) + "</div>"
 
 			);
 			
@@ -547,14 +560,16 @@ var ilm = (function (my) {
 			$('#curmeta').html(
 				'<a href="http://energia.emu.ee/weather/' 
 				+ '">EMU.ee</a>, andmed viimati uuendatud: ' 
-				+ new Date(my.lastdate).toLocaleString()
+				//+ new Date(my.lastdate).toLocaleString()
+				+ my.getTimeStr(my.lastdate)
 				+ ', Järgmine uuendus: ' 
-				+ new Date(my.lastdate + updateinterval).toLocaleString()				
+				//+ new Date(my.lastdate + updateinterval).toLocaleString()
+				+ my.getTimeStr(my.lastdate + updateinterval)
 			);
     };
     
     var setEmuFileName = function (d) {
-    	var d = new Date(d);
+    	d = new Date(d);
 		var daystr = d.getFullYear() + "-" + (d.getMonth() < 9 ? "0" : "") + (d.getMonth() + 1) + "-" + (d.getDate() < 10 ? "0" : "") + d.getDate();
 		return "emu_data/ARC-"+daystr+'.txt';
     };
@@ -631,9 +646,8 @@ var ilm = (function (my) {
 			useUTC : false
 		},
 		lang: {
-			months: ['Jaanuar', 'Veebruar', 'Märts', 'Aprill', 'Mai', 'Juuni', 
-			'Juuli', 'August', 'September', 'Octoober', 'November', 'December'],
-			weekdays: ['Pühapäev', 'Esmaspäev', 'Teisipäev', 'Kolmapäev', 'Neljapäev', 'Reede', 'Laupäev']
+			months: my.months,
+			weekdays: my.weekdays
 		}
 	});
 
@@ -954,28 +968,18 @@ var ilm = (function (my) {
 					'<a href="' 
 					+ $xml.find('links link')[3].getAttribute("url") 
 					+ '">Yr.no</a> andmed viimati uuendatud: ' 
-					+ yr_get_time($xml,'lastupdate')
-					//(function (d) {
-                    //                            return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
-                    //                    })($xml.find('lastupdate').text().match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/))
-                    .toLocaleString()
-					//+ new Date($xml.find('lastupdate').text().replace(/T/, ' ')).toLocaleString()
+					+ my.getTimeStr(yr_get_time($xml,'lastupdate'))
 					+ ', Järgmine uuendus: ' 
-					+ yr_get_time($xml,'nextupdate')
-					//(function (d) {
-                    //                            return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
-                    //                    })($xml.find('nextupdate').text().match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)).toLocaleString()
-					//+ new Date($xml.find('nextupdate').text().replace(/T/, ' '))
-					.toLocaleString()				
+					+ my.getTimeStr(yr_get_time($xml,'nextupdate'))
 				);
 
 				$('#wgmeta').html(
 					'<a href="' 
 					+ "http://www.windguru.cz/ee/?sc=266923&amp;wj=ms&amp;tj=c&amp;fhours=180&amp;odh=4&amp;doh=22&amp;vp=1&amp;pi=1"
 					+ '">Windguru.cz</a> andmed viimati uuendatud: ' 
-					+ new Date(wg.update_last).toLocaleString()
+					+ my.getTimeStr(wg.update_last)
 					+ ', Järgmine uuendus: ' 
-					+ new Date(wg.update_next).toLocaleString()			
+					+ my.getTimeStr(wg.update_next)
 				);
 			});
 
