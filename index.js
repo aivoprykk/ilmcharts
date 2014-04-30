@@ -214,9 +214,9 @@ var lingid={
    {'name': "WindGuru",'url':'http://www.windguru.cz/','list': [
     {'href':'int/?go=1&amp;lang=eng&amp;wj=ms&amp;tj=c&amp;odh=4&amp;doh=22&amp;fhours=180&amp;vp=1&amp;pi=2&amp;pu=413733','title':"Eesti Meri",'id':'windguru_meri'},
     {'href':'int/?go=1&amp;lang=eng&amp;wj=ms&amp;tj=c&amp;odh=4&amp;doh=22&amp;fhours=180&amp;vp=1&amp;pi=1&amp;pu=413733','title':"Sisej&auml;rved",'id':'windguru_jarved'},
-    {'href':'ee/index.php?sc=266923','title':"Saadj&auml;rv",'id':'windguru_saadjarv'},
-    {'href':'ee/index.php?sc=192609','title':"V&otilde;rtsj&auml;rv",'id':'windguru_vortsjarv'},
-    {'href':'ee/index.php?sc=365700','title':"Tartu",'id':'windguru_tartu'},
+    {'href':'ee/index.php?sc=266923&amp;wj=ms&amp;tj=c&amp;odh=4&amp;doh=22&amp;fhours=180&amp;vp=1&amp;pi=1','title':"Saadj&auml;rv",'id':'windguru_saadjarv'},
+    {'href':'ee/index.php?sc=192609&amp;wj=ms&amp;tj=c&amp;odh=4&amp;doh=22&amp;fhours=180&amp;vp=1&amp;pi=1','title':"V&otilde;rtsj&auml;rv",'id':'windguru_vortsjarv'},
+    {'href':'ee/index.php?sc=365700&amp;wj=ms&amp;tj=c&amp;odh=4&amp;doh=22&amp;fhours=180&amp;vp=1&amp;pi=1','title':"Tartu",'id':'windguru_tartu'},
    ]},
    {'name': "YR.no",'url':'http://www.yr.no/place/Estonia/','list': [
     {'href':'Tartumaa/Tartu/hour_by_hour.html','title':"Tartu",'id':'yr_tartu'},
