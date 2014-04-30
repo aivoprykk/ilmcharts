@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="et">
+<head>
+<meta charset="utf-8">
+<title>Ilmajaam::Tartus</title>
+<link rel="stylesheet" type="text/css" media="all" href="css/ilm.css">
+<script src="js/jquery/jquery.min.js"></script>
+<script src="js/highcharts/js/highcharts.js"></script>
+</head>
+<body>
+<div id="sisu">
+<div id="backgr">
+<img src="css/ranna-001.jpg" alt=""/>
+</div>
+<div id="bghide"></div>
+<div id="dots"></div>
+<div id="ajaraam">
+</div>
+<div id="container">
+<div class="float">
+<!--div id="temp1" class="chart-frame1"></div>
+<div id="wind_speed1" class="chart-frame1"></div>
+<div id="wind_dir1" class="chart-frame2"></div-->
+<div class="meta">
+<div id="curmeta"></div>
+</div>
+</div>
+<div class="float">
+<!--div id="temp2" class="chart-frame1"></div>
+<div id="wind_speed2" class="chart-frame1"></div>
+<div id="wind_dir2" class="chart-frame2"></div-->
+<div class="meta">
+<div id="yrmeta"></div>
+<div id="wgmeta"></div>
+</div>
+</div>
+</div>
+</div>
+<div id="popup" style="display:none;">
+<div id="popup_in">
+<div style="width:100%;text-align:right;padding-right:0.5em;"><a href="#" onclick="return ilm.showLinks();" id="sl">Sulge</a></div>
+<div id="lingid"></div>
+</div>
+</div>
+<script src="/tartu/index.js"></script>
+<script src="js/ilm.js"></script>
+<script type="text/javascript">
+(function (w) {
+	var $ = w.$, $__ = w.$__, doc = document;
+	var contid = 0;
+	function fixCharts(width, fn) {
+		$(fn).css("width", width);
+		$(doc).ready(function () {
+				var inner = $(fn).width();
+				setTimeout(function () {
+					$.each(w.ilm.charts, function (i, obj) {
+						obj.setSize($(fn).width() - 6, obj.containerHeight, false);
+					});
+				}, 500);
+			});
+	}
+	function setWidth() {
+		console.log(w.ilm.getWidth());
+		var inner = ((w.ilm.getWidth() < 1024) ? "100" : "50") + "%";
+		$('.float').each(function () {
+			fixCharts(inner, this);
+		});
+	}
+	w.ilm.showLinks = function () {
+		var v = $__("popup");
+		if (!v) return false;
+		if (v.style.display === "block") {
+			$__("bghide").style.display = "none";
+			$__("popup").style.display = "none";
+			w.lingid.show(0);
+		} else {
+			w.lingid.show(1);
+			var height = 0, width = 0;
+			var obj = $.find(".kaks");
+			$__("popup").style.display = "block";
+			$__("bghide").style.display = "block";
+			$(doc).ready(function () {
+				$.each(obj, function (i, o) {
+					var a = $(o).height() + 2,
+						b = $(o).width() + 2;
+					if (a > height) height = a;
+					if (b > width) width = b;
+					else o.style.height = (height) + "px";
+				});
+				$.each(obj, function (i, o) {o.style.width = width + "px"});
+			});
+		}
+		return false;
+	};
+	$(doc).ready(function () {
+		setWidth();
+		w.onresize = function () { 
+			//setTimeout(x.setContainerWidth,50);
+			w.clearTimeout(contid);
+			contid = w.setTimeout(setWidth, 50);
+		};
+		w.ilm.loadBase();
+		w.ilm.loadInt(1000 * 60); // 1min
+		w.ilm.loadEstInt(1000 * 60 * 10); // 10min
+		$('#backgr').css("display", "block");
+		$(w).on("keydown", function (e) {
+			//w.console.log("pressed" + e.keyCode);
+			var obj = $__("popup");
+			if(!obj) return;
+			if (e.keyCode === 27 || e.keyCode === 13 ) {
+				w.ilm.showLinks();
+			}
+			/*if (e.keyCode === 27 && obj.style.display === "block") {
+				w.ilm.showLinks();
+			}
+			else if (e.keyCode === 13 && obj.style.display === "none") {
+				w.ilm.showLinks();
+			}*/
+		});
+	});
+})(window);
+</script>
+</body>
+</html>
