@@ -32,7 +32,11 @@ float: left;
 }
 #yrmeta, #wgmeta, #curmeta {
 margin-left: 50px;
-font-size: 9px;
+font-size: 60%;
+color: whitesmoke;
+}
+.meta a {
+color: lightgray;
 }
 .chart-frame1, .chart-frame2 {
 max-width: 750px;
