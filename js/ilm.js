@@ -975,7 +975,7 @@ var ilm = (function (my) {
 
 				$('#wgmeta').html(
 					'<a href="' 
-					+ "http://www.windguru.cz/ee/?sc=266923&amp;wj=ms&amp;tj=c&amp;fhours=180&amp;odh=4&amp;doh=22&amp;vp=1&amp;pi=1"
+					+ "http://www.windguru.cz/ee/?go=1&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22"
 					+ '">Windguru.cz</a> andmed viimati uuendatud: ' 
 					+ my.getTimeStr(wg.update_last)
 					+ ', Järgmine uuendus: ' 
