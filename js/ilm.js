@@ -228,7 +228,7 @@ var ilm = (function (my) {
 							e=c;
 							//console.log("viiega:"+c[1]);
 						} else {
-							my.lastdate=d=new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1-$2-$3")+" "+c[1]).getTime();
+							my.lastdate=d=new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1/$2/$3")+" "+c[1]).getTime();
 							if(my.timeframe && (my.start-my.lastdate) <= my.timeframe) {
 								//obj.min_ws_series.data.push([d, my.ntof2p(c[12])]);
 								//console.log("wind_avg("+c[7]+" "+my.conv_knot2ms(my.ntof2p(c[7]))+" "+my.conv_kmh2ms(my.ntof2p(c[7]))+" "+my.conv_mh2ms(my.ntof2p(c[7]))+")");
