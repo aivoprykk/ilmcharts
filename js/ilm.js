@@ -10,6 +10,7 @@ var ilm = (function (my) {
 		this.lastdate = new Date().getTime();//-(4*24*3600);
 		this.date = 0;
 		this.start = this.lastdate;
+		this.logo = "Ma ja Sa Ilm"
  		this.chartoptions = {
 			chart: {
 				zoomType: 'x',
@@ -167,8 +168,9 @@ var ilm = (function (my) {
 		},
 		getTimeStr: function (d, f) {
 			d = new Date(d);
-			var dsep = "." + (d.getMonth() < 10 ? "0" : "") + d.getMonth() + ".";
-			if (f) { dsep = ". " + my.months[(d.getMonth()-1)].toLowerCase() + " "; }
+			console.log(d);
+			var dsep = "." + (d.getMonth() < 10 ? "0" : "") + (d.getMonth()+1) + ".";
+			if (f) { dsep = ". " + my.months[(d.getMonth())].toLowerCase() + " "; }
 			return (d.getDate() < 10 ? "0" : "") + d.getDate() 
 				+ dsep + d.getFullYear()
 				+ " " + (d.getHours()<10?"0":"") + d.getHours()
@@ -499,17 +501,20 @@ var ilm = (function (my) {
 			options.wind_speed.series.push(s.max_ws_series);
 			
 			d = new Date(my.lastdate);
-			$("#ajaraam").html(
-				'<div class="row" style="float:right;"><a href="#" onclick="return ilm.showLinks();">Lingid</a>'
+			/*$("#ajaraam").html(
+				'<div class="row-fix" style="float:right;"><a href="#" onclick="return ilm.showLinks();">Lingid</a>'
 				//+ " [ Temperatuur: <b>" + s.avg_temp_series.data[s.avg_temp_series.data.length - 1][1] + "</b> °C ]"
 				//+ " [ Tuul: <b>" + s.avg_ws_series.data[s.avg_ws_series.data.length - 1][1] + "</b> m/s"
 				//+ " (pagid: <b>" + s.max_ws_series.data[s.max_ws_series.data.length - 1][1] + "</b>) ]"
 				//+ " [ Suund: <b>" + s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1] + "</b> ° "
 				//+ "(<b>" + my.dirs(s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1]) + "</b>) ]"
 				//+ " [ Rõhk: <b>" + s.avg_press_series.data[s.avg_press_series.data.length - 1][1] + "</b> hPa ]"
-				+ '</div><div class="row"><b>Tartu ilm</b> ' + my.getTimeStr(d,1) + "</div>"
+				+ '</div><div class="row-fix"><b>Tartu ilm</b> ' + my.getTimeStr(d,1) + "</div>"
 
-			);
+			);*/
+			$("#time-stamp").html(
+			'<b>Tartu</b> ' + my.getTimeStr(d,1)
+			).show();
 			
 			if (s.avg_ws_series.data.length) {
 			options.wind_speed.title.text = 
@@ -559,7 +564,7 @@ var ilm = (function (my) {
 			my.charts[2] = new Highcharts.Chart(options.temp);
 			$('#curmeta').html(
 				'<a href="http://energia.emu.ee/weather/' 
-				+ '">EMU.ee</a>, andmed viimati uuendatud: ' 
+				+ '" onclick="window.open(this.href);return false;">EMU.ee</a>, andmed viimati uuendatud: ' 
 				//+ new Date(my.lastdate).toLocaleString()
 				+ my.getTimeStr(my.lastdate)
 				+ ', Järgmine uuendus: ' 
@@ -967,7 +972,7 @@ var ilm = (function (my) {
 				$('#yrmeta').html(
 					'<a href="' 
 					+ $xml.find('links link')[3].getAttribute("url") 
-					+ '">Yr.no</a> andmed viimati uuendatud: ' 
+					+ '" onclick="window.open(this.href);return false;">Yr.no</a> andmed viimati uuendatud: ' 
 					+ my.getTimeStr(yr_get_time($xml,'lastupdate'))
 					+ ', Järgmine uuendus: ' 
 					+ my.getTimeStr(yr_get_time($xml,'nextupdate'))
@@ -976,7 +981,7 @@ var ilm = (function (my) {
 				$('#wgmeta').html(
 					'<a href="' 
 					+ "http://www.windguru.cz/ee/?go=1&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22"
-					+ '">Windguru.cz</a> andmed viimati uuendatud: ' 
+					+ '" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: ' 
 					+ my.getTimeStr(wg.update_last)
 					+ ', Järgmine uuendus: ' 
 					+ my.getTimeStr(wg.update_next)
@@ -998,6 +1003,7 @@ var ilm = (function (my) {
     my.reloadest = function () {
     	my.loadEstInt();
     };
+    
     return my;
 
 })(window.ilm || {});

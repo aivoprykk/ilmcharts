@@ -2,33 +2,67 @@
 <html lang="et">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ilmajaam::Tartus</title>
+<link type="text/css" rel="stylesheet" href="css/bootstrap.min.css" />
 <link rel="stylesheet" type="text/css" media="all" href="css/ilm.css">
-<script src="js/jquery/jquery.min.js"></script>
-<script src="js/highcharts/js/highcharts.js"></script>
 </head>
-<body>
-<div id="sisu">
+<body  style="padding-top:25px">
+<div id="header">
+<div class="navbar navbar-inverse navbar-fixed-top">
+<div class="navbar-header">
+<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#ilm-navbar-collapse-1">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<a class="navbar-brand" href="/">Ma ja Sa Ilm</a>
+<!--a style="display:inline-block;padding:5px;text-decoration:none" href="#"><span id="time-stamp"></span></a-->
+<button type="button" style="display:none" class="btn btn-default btn-xs navbar-btn" id="time-stamp"></button>
+</div>
+<div class="collapse navbar-collapse"  id="ilm-navbar-collapse-1">
+
+<ul class="nav navbar-nav navbar-right">
+<li id="ilmalingid"><a href="#">Lingid</a></li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li class="dropdown">
+<a id="ilm-seaded" href="#" class="dropdown-toggle" data-toggle="dropdown">Info</a>
+<ul class="dropdown-menu">
+<li><a href="http://github.com/aivoprykk/ilmcharts">Projekt GitHubis</a></li>
+<li class="divider"></li>
+<li><a href="http://emu.ee/">Maaülikool</a></li>
+<li><a href="http://yr.no/">Yr</a></li>
+<li><a href="http://windguru.cz/">Windguru</a></li>
+<li class="divider"></li>
+<li><a href="http://jquery.com/">JQuery</a></li>
+<li><a href="http://highcharts.com/">Highcharts</a></li>
+<li><a href="http://getbootstrap.com/">Bootstrap</a></li>
+
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+</div>
+</div>
 <div id="backgr">
 <img src="css/ranna-001.jpg" alt=""/>
 </div>
 <div id="bghide"></div>
 <div id="dots"></div>
-<div id="ajaraam">
-</div>
-<div id="container">
-<div class="float">
-<!--div id="temp1" class="chart-frame1"></div>
-<div id="wind_speed1" class="chart-frame1"></div>
-<div id="wind_dir1" class="chart-frame2"></div-->
+<div id="sisu">
+<!--div id="ajaraam" class="row-fluid">
+</div-->
+<div id="container" class="col-lg-12">
+<div class="float col-lg-6">
 <div class="meta">
 <div id="curmeta"></div>
 </div>
 </div>
-<div class="float">
-<!--div id="temp2" class="chart-frame1"></div>
-<div id="wind_speed2" class="chart-frame1"></div>
-<div id="wind_dir2" class="chart-frame2"></div-->
+<div class="float col-lg-6">
 <div class="meta">
 <div id="yrmeta"></div>
 <div id="wgmeta"></div>
@@ -36,12 +70,15 @@
 </div>
 </div>
 </div>
-<div id="popup" style="display:none;">
-<div id="popup_in">
-<div style="width:100%;text-align:right;padding-right:0.5em;"><a href="#" onclick="return ilm.showLinks();" id="sl">Sulge</a></div>
-<div id="lingid"></div>
+<div id="popup" class="panel panel-primary" style="display:none;">
+<div id="popup_in" class="panel-heading">
+<b class="panel-title>"<a href="#" onclick="return ilm.showLinks();" id="sl">Sulge</a></b>
 </div>
+<div id="lingid" class="panel-body"></div>
 </div>
+<script src="js/jquery/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/highcharts/js/highcharts.js"></script>
 <script src="/tartu/index.js"></script>
 <script src="js/ilm.js"></script>
 <script type="text/javascript">
@@ -70,6 +107,7 @@
 		var v = $__("popup");
 		if (!v) return false;
 		if (v.style.display === "block") {
+		    $("#ilmalingid").removeClass("active");
 			$__("bghide").style.display = "none";
 			$__("popup").style.display = "none";
 			w.lingid.show(0);
@@ -77,6 +115,7 @@
 			w.lingid.show(1);
 			var height = 0, width = 0;
 			var obj = $.find(".kaks");
+		    $("#ilmalingid").addClass("active");
 			$__("popup").style.display = "block";
 			$__("bghide").style.display = "block";
 			$(doc).ready(function () {
@@ -93,12 +132,15 @@
 		return false;
 	};
 	$(doc).ready(function () {
-		setWidth();
-		w.onresize = function () { 
+		//setWidth();
+		$("#ilmalingid").click(function(e){
+			return ilm.showLinks();
+		});
+		/*w.onresize = function () { 
 			//setTimeout(x.setContainerWidth,50);
 			w.clearTimeout(contid);
 			contid = w.setTimeout(setWidth, 50);
-		};
+		};*/
 		w.ilm.loadBase();
 		w.ilm.loadInt(1000 * 60); // 1min
 		w.ilm.loadEstInt(1000 * 60 * 10); // 10min

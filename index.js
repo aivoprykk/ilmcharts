@@ -294,7 +294,7 @@ var lingid={
   if(state!=undefined) linkState=state;
   else linkState=(linkState)?0:1;
   if(linkState==0){ g.innerHTML="Viited"; cookie.clear('linkState'); }
-  else { str=t.process(t.JSON); g.innerHTML="Viited (klikk varjamiseks)"; cookie.refresh('linkState',linkState); }
+  else { str=t.process(t.JSON); g.innerHTML="Lingid (klikk varjamiseks)"; cookie.refresh('linkState',linkState); }
   f.innerHTML=str;
   fade('lingid',(str)?0:100,(str)?100:0,200);
   bHeight();
