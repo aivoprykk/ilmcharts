@@ -30,4 +30,5 @@ EDITOR=vi crontab -e
 4) Browse app from webserver, when graphs are filled it's working.
 
 This project is licensed under the terms of the GPL license.
+
 Have a good weather! 
