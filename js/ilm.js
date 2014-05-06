@@ -10,7 +10,7 @@ var ilm = (function (my) {
 		this.lastdate = new Date().getTime();//-(4*24*3600);
 		this.date = 0;
 		this.start = this.lastdate;
-		this.logo = "Ma ja Sa Ilm"
+		this.logo = "Graafikud"
  		this.chartoptions = {
 			chart: {
 				zoomType: 'x',
@@ -168,7 +168,7 @@ var ilm = (function (my) {
 		},
 		getTimeStr: function (d, f) {
 			d = new Date(d);
-			console.log(d);
+			//console.log(d);
 			var dsep = "." + (d.getMonth() < 10 ? "0" : "") + (d.getMonth()+1) + ".";
 			if (f) { dsep = ". " + my.months[(d.getMonth())].toLowerCase() + " "; }
 			return (d.getDate() < 10 ? "0" : "") + d.getDate() 
@@ -217,7 +217,7 @@ var ilm = (function (my) {
 			if(data.data.length) {
 				my.lastdate = parseInt(data.data[data.data.length - 1].time_stamp, 10) * 1000;
 			}
-			console.log("count rows processed:" + data.data.length);
+			//console.log("count rows processed:" + data.data.length);
 		} else {
 			my.datamode = "emu";
 			//emu data
@@ -583,7 +583,7 @@ var ilm = (function (my) {
 		var d, now;
 		now = d = (my.date > 0) ? new Date(my.date).getTime() : new Date().getTime();
 		//url = url || my.dataurl + '&hours=7&res=10m&wind_speed=1&dewpoint=1&outdoor_temperature=1&windchill=1&wind_direction=1&absolute_pressure=1';
-		console.log("Loading all data at " + (now));
+		//console.log("Loading all data at " + (now));
 		//fake data...
 		//ajaxopt.delta="2y";
 		var json_full="";
@@ -592,7 +592,7 @@ var ilm = (function (my) {
 				ajaxopt={};
 				my.dataurl = setEmuFileName(d);
 			}
-			console.log("Get source: " + my.dataurl);
+			//console.log("Get source: " + my.dataurl);
 			$.ajax({url: my.dataurl, data: ajaxopt}).done(function (json) {
 				json_full += json;
 				if(my.datamode === "emu" && (d-1+(24 * 3600 * 1000)) < now) {
@@ -616,7 +616,7 @@ var ilm = (function (my) {
 		if (e) {
 			currentExtremes = this.getExtremes();
 			range = e.max - e.min;
-			console.log("loading again " + range + " " + e.max + " " + e.min);
+			//console.log("loading again " + range + " " + e.max + " " + e.min);
 		}
 		my.loadCur(my.dataurl + '&hours=7&res=10m&wind_speed=1&dewpoint=1&outdoor_temperature=1&windchill=1&wind_direction=1&absolute_pressure=1');
 	}
@@ -811,7 +811,7 @@ var ilm = (function (my) {
 		if (!place) {
 			place = my.fcplaces[0] + "/";
 		}
-		console.log("Loading yr xml data at " + (new Date().getTime()));
+		//console.log("Loading yr xml data at " + (new Date().getTime()));
 		$.ajax({
 			type: "get",
 			url: "yr_data/" + place + "forecast_hour_by_hour.xml"
@@ -935,7 +935,7 @@ var ilm = (function (my) {
 						return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
 					})(wg.initdate.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/));
 				d = (wgd.getTime()) - (new Date().getTimezoneOffset() * 60 * 1000) + 1800000;
-				console.log("wg time " + wgd + " " + new Date(d));
+				//console.log("wg time " + wgd + " " + new Date(d));
 				var t = 0;
 				for (var i = 0, j = wg.hours.length; i < j; ++i) {
 					if (wg.hours[i] > 72) { break; }

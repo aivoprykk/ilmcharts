@@ -152,6 +152,13 @@ display: inline-block;
 min-height: 25px;
 margin-bottom: 0px;
 }
+.navbar-inverse {
+background-color: #39485d;
+border-color: #3C4A5A;
+}
+.navbar-header {
+white-space:nowrap;
+}
 .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {
 padding-right: 3px;
 padding-left: 3px;
@@ -164,6 +171,5 @@ margin-bottom: 1px;
 .navbar-btn.btn-xs {
 margin-top: 5px;
 margin-bottom: 4px;
-margin-left: 15px;
-display:inherit;
+margin-left: 5px;
 }

@@ -10,40 +10,37 @@
 <body  style="padding-top:25px">
 <div id="header">
 <div class="navbar navbar-inverse navbar-fixed-top">
+<div class="container-fluid">
 <div class="navbar-header">
-<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#ilm-navbar-collapse-1">
-<span class="sr-only">Toggle navigation</span>
-<span class="icon-bar"></span>
-<span class="icon-bar"></span>
-<span class="icon-bar"></span>
-</button>
-<a class="navbar-brand" href="/">Ma ja Sa Ilm</a>
-<!--a style="display:inline-block;padding:5px;text-decoration:none" href="#"><span id="time-stamp"></span></a-->
-<button type="button" style="display:none" class="btn btn-default btn-xs navbar-btn" id="time-stamp"></button>
+	<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#ilm-navbar-collapse-1">
+	<span class="sr-only">Toggle navigation</span>
+	<span class="icon-bar"></span>
+	<span class="icon-bar"></span>
+	<span class="icon-bar"></span>
+	</button>
+	<a id="pagelogo" class="navbar-brand" href="/">Ilm</a>
+	<!--a style="display:inline-block;padding:5px;text-decoration:none" href="#"><span id="time-stamp"></span></a-->
+	<button type="button" style="display:none" class="btn btn-default btn-xs navbar-btn" id="time-stamp"></button>
 </div>
 <div class="collapse navbar-collapse"  id="ilm-navbar-collapse-1">
-
-<ul class="nav navbar-nav navbar-right">
-<li id="ilmalingid"><a href="#">Lingid</a></li>
-</ul>
-<ul class="nav navbar-nav navbar-right">
-<li class="dropdown">
-<a id="ilm-seaded" href="#" class="dropdown-toggle" data-toggle="dropdown">Info</a>
-<ul class="dropdown-menu">
-<li><a href="http://github.com/aivoprykk/ilmcharts">Projekt GitHubis</a></li>
-<li class="divider"></li>
-<li><a href="http://emu.ee/">Maaülikool</a></li>
-<li><a href="http://yr.no/">Yr</a></li>
-<li><a href="http://windguru.cz/">Windguru</a></li>
-<li class="divider"></li>
-<li><a href="http://jquery.com/">JQuery</a></li>
-<li><a href="http://highcharts.com/">Highcharts</a></li>
-<li><a href="http://getbootstrap.com/">Bootstrap</a></li>
-
-</ul>
-</li>
-</ul>
-
+	<ul class="nav navbar-nav navbar-right">
+	<li id="ilmalingid"><a href="#">Lingid</a></li>
+	<li class="dropdown">
+	<a id="ilm-seaded" href="#" class="dropdown-toggle" data-toggle="dropdown">Info</a>
+	<ul class="dropdown-menu">
+	<li><a href="http://github.com/aivoprykk/ilmcharts">Projekt GitHubis</a></li>
+	<li class="divider"></li>
+	<li><a href="http://energia.emu.ee/">Maaülikool</a></li>
+	<li><a href="http://yr.no/">Yr</a></li>
+	<li><a href="http://windguru.cz/">Windguru</a></li>
+	<li class="divider"></li>
+	<li><a href="http://jquery.com/">JQuery</a></li>
+	<li><a href="http://highcharts.com/">Highcharts</a></li>
+	<li><a href="http://getbootstrap.com/">Bootstrap</a></li>
+	
+	</ul>
+	</li>
+	</ul>	
 </div>
 </div>
 </div>
@@ -132,15 +129,20 @@
 		return false;
 	};
 	$(doc).ready(function () {
+		$("#pagelogo").html(ilm.logo);
 		//setWidth();
 		$("#ilmalingid").click(function(e){
 			return ilm.showLinks();
 		});
-		/*w.onresize = function () { 
+
+		/*
+		w.onresize = function () { 
 			//setTimeout(x.setContainerWidth,50);
 			w.clearTimeout(contid);
 			contid = w.setTimeout(setWidth, 50);
-		};*/
+		};
+		*/
+
 		w.ilm.loadBase();
 		w.ilm.loadInt(1000 * 60); // 1min
 		w.ilm.loadEstInt(1000 * 60 * 10); // 10min
