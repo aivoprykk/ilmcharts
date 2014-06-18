@@ -200,13 +200,9 @@ var lingid={
  'list': [ 
   {'name':'Ilmalingid',
   'list': [ 
-   {'name': 'Ilm.ee','url':'http://www.ilm.ee/','list': [
-    {'href':'tartu','title':"Ilmavaatlused - Tartu",'id':'ilmee_tartu'},
-   ]},
-   { 'name': 'EMHI','url':'http://www.emhi.ee/','list': [
-    {'href':'?ide=21&amp;v_kiht=1','title':"Ilmavaatlused - kaart",'id':'emhi_kaart'},
-    {'href':'?ide=19,394,423,426','title':"Prognoos - Hirlam",'id':'emhi_hirlam'},
-    {'href':'?ide=19,394,416,1203','title':"Prognoos - Suur Hirlam",'id':'emhi_hirlam_suur'},
+   { 'name': 'EMHI','url':'http://www.ilmateenistus.ee/','list': [
+    {'href':'/ilm/ilmavaatlused/vaatlusandmed/tuul/','title':"Ilmavaatlused - kaart",'id':'emhi_kaart'},
+    {'href':'/ilm/prognoosid/mudelprognoosid/eesti/#layers/tuul10ms,tuul10mb','title':"Prognoos - Suur Hirlam",'id':'emhi_hirlam_suur'},
    ]},
    {'name': "WeatherOnline",'url':'http://www.weatheronline.co.uk/','list': [
     {'href':'marine/weather?LEVEL=3&LANG=en&MENU=0&TIME=18&MN=gfs&WIND=g005','title':"Soome Laht",'id':'weatheronline_sl'},
@@ -243,7 +239,7 @@ var lingid={
     {'href':'teeinfo.evenet.ee/?mapdatatype=9','title':"Teeinfo",'id':'teeinfo'},
     {'href':'surf.paper.ee/','title':"Surf.Paper.EE",'id':'paper'},
     {'href':'palts.com/a/et_EE/ilmajaam/','title':"Palts.COM",'id':'palts'},
-    {'href':'ilm.zoig.ee/','title':"Zoig.EE",'id':'zoig','app':'?k=5163487&amp;p=1022'},
+    {'href':'ilm.zoig.ee/','title':"Zoig.EE",'id':'zoig','app':'?k=516'},
     {'href':'http://www.kalastusinfo.ee/sisu/ilm/ilm-peipsi-jarvel.php','title':"Peipsi Ilmajaamad",'id':'kalastusinfo'},
     {'href':'www.wunderground.com/global/stations/26242.html','title':"WUnderground Tartu",'id':'wground'},
     {'href':'http://www.timeanddate.com/worldclock/astronomy.html?n=242','title':"Päikesetõus/loojang",'id':'sunclock'},
