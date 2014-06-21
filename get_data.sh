@@ -83,11 +83,14 @@ print 0;
 '
 }
 
+for place in tabivere tamme; do
 #wguru
 wg_file=windguru_forecast.json
-wg_dir=wg_data/tabivere
-wg_url='http://www.windguru.cz/int/widget_json.php?callback=wg_data&lng=ee&s=266923&params=[WINDSPD,GUST,MWINDSPD,SMER,TMPE,TCDC,APCPs]&odh=0&doh=24&fhours=72&wj=msd&tj=c&waj=m&lng=ee'
-[ x"${wg_dir}" != x"" ] && [ -d "${wg_dir}" ] && mkdir -p "${wg_dir}"
+wg_dir=wg_data/$place
+wg_place=266923
+[ "$place" = "tamme" ] && wg_place=192609
+wg_url='http://www.windguru.cz/int/widget_json.php?callback=wg_data&lng=ee&s='$wg_place'&params=[WINDSPD,GUST,MWINDSPD,SMER,TMPE,TCDC,APCPs]&odh=0&doh=24&fhours=72&wj=msd&tj=c&waj=m&lng=ee'
+[ -d "${wg_dir}" ] || {  [ x"$wg_dir" != x"" ] && mkdir -p "${wg_dir}" || continue; }
 if [ -e ${wg_dir}/${wg_file} ]; then
   wg_t=`wg_time ${wg_dir} ${wg_file}`;
 else
@@ -119,10 +122,11 @@ fi
 
 #yr.no
 yr_file=forecast_hour_by_hour.xml
-yr_dir=yr_data/tabivere
-#yr_url='http://www.yr.no/sted/Estland/Jõgevamaa/Tabivere~587488/forecast_hour_by_hour.xml'
-yr_url='http://www.yr.no/sted/Estland/Jõgevamaa/Tabivere~587488/varsel_time_for_time.xml'
-[ x"${yr_dir}" != x"" ] && [ -d "${yr_dir}" ] && mkdir -p "${yr_dir}"
+yr_dir=yr_data/$place
+yr_place='Jõgevamaa/Tabivere~587488';
+[ "$place" = "tamme" ] && yr_place='Tartumaa/Tamme'
+yr_url='http://www.yr.no/sted/Estland/'$yr_place'/varsel_time_for_time.xml'
+[ -d "${yr_dir}" ] || { [ x"${yr_dir}" != x"" ] && mkdir -p "${yr_dir}" || continue; }
 
 if [ -e ${yr_dir}/${yr_file} ]; then
   yr_t=`yr_time ${yr_dir} ${yr_file}`;
@@ -152,4 +156,5 @@ if [ $force -gt 0 -o $yr_t -lt 0 ]; then
     fi
   fi
 fi
+done ##places
 )

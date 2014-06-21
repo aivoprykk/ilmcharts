@@ -1,16 +1,72 @@
 var ilm = (function (my) {
 	var win = window, doc = document;
+	function State(opt) {
+		opt = opt||{};
+		var defaults = {
+			id : 'ilmchartsstore01',
+			datamode : opt.datamode||'emu',
+			timeframe :  opt.timeframe||24*3600*1000,
+			fcplace : opt.fcplace||'tabivere',
+			curplace : opt.curplace||'emu',
+			chartorder : ["temp","wind_speed","wind_dir"]
+		};
+		this.id = defaults.id;
+		this.attr = defaults;
+		return this;
+	};
+	State.prototype = {
+		save: function(){
+			if (localStorage) localStorage.setItem(this.id, JSON.stringify(this.toJSON()));
+			return this;
+		},
+		load: function(){
+			if(localStorage) this.set(JSON.parse(localStorage.getItem(this.id)));
+			return this;
+		},
+		set: function(opt){
+			if(!opt) return this;
+			var changed = false;
+			for(var a in this.attr) {
+				if(a!="id" && opt[a] && opt[a] != this.attr[a]) {
+					this.attr[a] = opt[a];
+					changed = true;
+					console.log(a + " " + opt[a]);
+				}
+			}
+			if (changed) this.save();
+			return this;
+		},
+		get: function(name){
+			return this.attr[name] || null;
+		},
+		destroy: function() {
+			if (localStorage) localStorage.removeItem(this.id);
+			return this;
+		},
+		toJSON: function() {
+			var ret = {};
+			for(var a in this.attr) {
+				if(a!="id") ret[a] = this.attr[a];
+			}
+			return ret;
+		}
+	};
 	function App(placeholder) {
+		this.state = new State().load();
 		this.placeholder = placeholder || '#container';
 		this.dataurl = "/cgi-bin/cpp/ilm/image.cgi?t=json";
 		this.digits = 1;
-		this.fcplaces = ["tabivere", "tartu", "sangla"];
-		this.datamode = "emu";
-		this.timeframe = 24*3600*1000;
+		this.fcplaces = {"tabivere":{id:"tabivere",name:'Saadjärv',wglink:"266923",yrlink:"Jõgevamaa/Tabivere~587488"}, "tamme":{id:"tamme",name:'Võrtsjärv',"wglink":192609,yrlink:"Tartumaa/Tamme"}};
+		this.fcplace = this.state.attr.fcplace;
+		this.curplaces = {"emu":{id:"emu",name:"Tartu EMU"}};
+		this.curplace = this.state.attr.curplace;
+		this.datamode = this.state.attr.datamode;
+		this.timeframe = this.state.attr.timeframe;
 		this.lastdate = new Date().getTime();//-(4*24*3600);
 		this.date = 0;
 		this.start = this.lastdate;
-		this.logo = "Graafikud"
+		this.historyactive=false;
+		this.logo = "Graafikud";
  		this.chartoptions = {
 			chart: {
 				zoomType: 'x',
@@ -49,9 +105,8 @@ var ilm = (function (my) {
 		};
 		this.charts = [];
 		this.chartorder = ["temp","wind_speed","wind_dir"];
-
-	        this.months = ['Jaanuar', 'Veebruar', 'Märts', 'Aprill', 'Mai', 'Juuni',
-                        'Juuli', 'August', 'September', 'Octoober', 'November', 'Detsember'];
+		this.months = ['Jaanuar', 'Veebruar', 'Märts', 'Aprill', 'Mai', 'Juuni',
+			'Juuli', 'August', 'September', 'Octoober', 'November', 'Detsember'];
 		this.weekdays = ['Pühapäev', 'Esmaspäev', 'Teisipäev', 'Kolmapäev', 'Neljapäev', 'Reede', 'Laupäev'];
 	}
 
@@ -64,6 +119,7 @@ var ilm = (function (my) {
 			$(div).children().each(function ( k, l) {
 				for (i = 0, j = l.childNodes.length; i < j; ++i){
 					el = l.childNodes[i];
+					if(el.classname && el.className.match(/title/)) continue;
 					if(el.className && el.className.match(/meta/)) {
 						break;
 					}
@@ -82,6 +138,7 @@ var ilm = (function (my) {
 				if (l.className && l.className.match(/float/)) {
 					for (i = 0, j = l.childNodes.length; i < j; ++i){
 						el = l.childNodes[i];
+						if(el.classname && el.className.match(/title/)) continue;
 						if(el.className && el.className.match(/meta/)) {
 							break;
 						}
@@ -163,18 +220,95 @@ var ilm = (function (my) {
 			}
 			return max;
 		},
-		setDate: function(d) {
-			this.date = new Date().getTime() - d;
+		setFrame: function(d) {
+			if(d && /^\d*d/.test(d)) {
+				var x  = d.replace(/d*$/,"");
+				this.timeframe = x*24*3600*1000;
+			} else if (d && /^\d*h/.test(d)) {
+				var x  = d.replace(/h*$/,"");
+				this.timeframe = x*3600*1000;
+			} else if (d && /^\d+$/.test(d)) {
+				this.timeframe = x;
+			}
+			this.state.set({'timeframe':this.timeframe});
+			return false;
 		},
-		getTimeStr: function (d, f) {
+		getFrame: function (d) {
+			var f = parseInt(this.timeframe,10),
+			t = f / (24*3600*1000);
+			if(t % 1 === 0){
+				return t + 'd';
+			}
+			t = f / (3600*1000);
+			if (t % 1 === 0) {
+				return t + 'h';
+			}
+			return f;
+		},
+		setCurPlace: function(d) {
+			this.setPlace(d, 'curplace')
+			return false;
+		},
+		setEstPlace: function(d) {
+			this.setPlace(d)
+			return false;
+		},
+		setPlace: function(d, name) {
+			name = name || 'fcplace';
+			places=this[name+'s'] || this.fcplaces;
+			place = this[name] || this.fcplace;
+			var j = {};
+			if(d) {
+				for(var i in places){
+					if(i == d) { j[name] = this[name] = d; break; }
+				}
+			}
+			this.state.set(j);
+			return false;
+		},
+		nextCurPlace: function() {
+			return this.nextPlace('curplace');
+		},
+		nextPlace: function(name) {
+			name = name || 'fcplace';
+			places = this[name+'s'] || this.fcplaces;
+			place = this[name] || this.fcplace;
+			var p = '', that = false, j = '';
+			for(var i in places){
+				if(!j) j=i;
+				if(that) p=i;
+				if(i==place) that=true;
+			}
+			if(!p) p=j;
+			//console.log(name + ' ' + p + ' ' + place);
+			return p;
+		},
+		setDate: function(d) {
+			var ret = 0,cur = new Date().getTime();
+			if(d && /^\d*-\d*-\d*/.test(d)) {
+				ret = new Date(d).getTime();
+			} else if(d && /^\d+$/.test(d)) {
+				ret = new Date().getTime() - d;
+			}
+			if(ret && ret > cur){
+				ret = cur;
+			}
+			if (ret) {
+				this.historyactive=(cur-(3600*1000)>ret) ? true : false;
+				this.start = this.lastdate = this.date = ret;
+			}
+		},
+		getTimeStr: function (d, f, g) {
 			d = new Date(d);
 			//console.log(d);
+			var ret ='';
 			var dsep = "." + (d.getMonth() < 10 ? "0" : "") + (d.getMonth()+1) + ".";
 			if (f) { dsep = ". " + my.months[(d.getMonth())].toLowerCase() + " "; }
-			return (d.getDate() < 10 ? "0" : "") + d.getDate() 
-				+ dsep + d.getFullYear()
-				+ " " + (d.getHours()<10?"0":"") + d.getHours()
+			ret = (d.getDate() < 10 ? "0" : "") + d.getDate() 
+				+ dsep + d.getFullYear();
+			if(!g) ret += " " + (d.getHours()<10?"0":"") + d.getHours()
 				+ ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();
+			return ret;
 		}
     
 	};
@@ -184,7 +318,9 @@ var ilm = (function (my) {
 	} else {
 		my = win.ilm;
 	}
-	//my.setDate((24*3600*1000));
+	//my.setDate("2014-04-25T00:00:00");
+	//my.setFrame('3d');
+	console.log(my.getTimeStr(my.date) + " " + my.timeframe)
 	return my;
 })(ilm || {});
 
@@ -201,10 +337,10 @@ var ilm = (function (my) {
         if(data.data){
 			$.each(data.data, function (a, b) {
 				d = parseInt(b.time_stamp, 10) * 1000;
-				obj.min_ws_series.data.push([d, my.ntof2p(b.min_wind_speed)]);
+				//obj.min_ws_series.data.push([d, my.ntof2p(b.min_wind_speed)]);
 				obj.avg_ws_series.data.push([d, my.ntof2p(b.avg_wind_speed)]);
 				obj.max_ws_series.data.push([d, my.ntof2p(b.max_wind_speed)]);
-				obj.min_wd_series.data.push([d, my.ntof2p(b.min_wind_direction)]);
+				//obj.min_wd_series.data.push([d, my.ntof2p(b.min_wind_direction)]);
 				obj.avg_wd_series.data.push([d, my.ntof2p(b.avg_wind_direction)]);
 				obj.max_wd_series.data.push([d, my.ntof2p(b.max_wind_direction)]);
 				obj.avg_temp_series.data.push([d, my.ntof2p(b.avg_outdoor_temperature)]);
@@ -231,6 +367,7 @@ var ilm = (function (my) {
 							//console.log("viiega:"+c[1]);
 						} else {
 							my.lastdate=d=new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1/$2/$3")+" "+c[1]).getTime();
+							//console.log(my.getTimeStr(my.lastdate) + " " + my.timeframe + " " + (my.start-my.lastdate))
 							if(my.timeframe && (my.start-my.lastdate) <= my.timeframe) {
 								//obj.min_ws_series.data.push([d, my.ntof2p(c[12])]);
 								//console.log("wind_avg("+c[7]+" "+my.conv_knot2ms(my.ntof2p(c[7]))+" "+my.conv_kmh2ms(my.ntof2p(c[7]))+" "+my.conv_mh2ms(my.ntof2p(c[7]))+")");
@@ -512,29 +649,28 @@ var ilm = (function (my) {
 				+ '</div><div class="row-fix"><b>Tartu ilm</b> ' + my.getTimeStr(d,1) + "</div>"
 
 			);*/
-			$("#time-stamp").html(
-			'<b>Tartu</b> ' + my.getTimeStr(d,1)
-			).show();
+			$("#curplace").html('Andmed <b>'+my.curplaces[my.curplace].name+'</b>').show();
+			$("#curtime").html(my.getTimeStr(d,1,my.historyactive?1:0)).show();
 			
 			if (s.avg_ws_series.data.length) {
 			options.wind_speed.title.text = 
-				" Tuule kiirus [ <b>" + s.avg_ws_series.data[s.avg_ws_series.data.length - 1][1] + "</b> m/s"
-				+ " (pagid: <b>" + s.max_ws_series.data[s.max_ws_series.data.length - 1][1] + "</b> m/s) ]";
+				" Tuule kiirus"+(!my.historyactive? " [ <b>" + s.avg_ws_series.data[s.avg_ws_series.data.length - 1][1] + "</b> m/s"
+				+ " (pagid: <b>" + s.max_ws_series.data[s.max_ws_series.data.length - 1][1] + "</b> m/s) ]":'');
 			} else {
 			options.wind_speed.title.text = "Tuule kiiruse andmed puuduvad";
 			}
 			if (s.avg_wd_series.data.length) {
 			options.wind_dir.title.text = 
-				" Tuule suund [ <b>" + s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1] + "</b> ° "
-				+ "(<b>" + my.dirs(s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1]) + "</b>) ]";
+				" Tuule suund"+(!my.historyactive? " [ <b>" + s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1] + "</b> ° "
+				+ "(<b>" + my.dirs(s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1]) + "</b>) ]":'');
 			} else {
 			options.wind_dir.title.text = "Tuule suuna andmed puuduvad";
 			}
 			if (s.avg_temp_series.data.length) {
 			options.temp.title.text =
-				" Temperatuur [ <b>" + s.avg_temp_series.data[s.avg_temp_series.data.length - 1][1] + "</b> °C ],"
-				+ " Rõhk [ <b>" + s.avg_press_series.data[s.avg_press_series.data.length - 1][1] + "</b> hPa ],"
-				+ " Niiskus [ <b>" + s.avg_humid_series.data[s.avg_humid_series.data.length - 1][1] + "</b> % ]";
+				" Temperatuur"+(!my.historyactive? " [ <b>" + s.avg_temp_series.data[s.avg_temp_series.data.length - 1][1] + "</b> °C ]":"")+","
+				+ " Rõhk"+(!my.historyactive? " [ <b>" + s.avg_press_series.data[s.avg_press_series.data.length - 1][1] + "</b> hPa ]":"")+","
+				+ " Niiskus"+(!my.historyactive? " [ <b>" + s.avg_humid_series.data[s.avg_humid_series.data.length - 1][1] + "</b> % ]":"");
 			} else {
 			options.temp.title.text = "Temperatuuri andmed puuduvad";
 			}
@@ -588,21 +724,16 @@ var ilm = (function (my) {
 		//ajaxopt.delta="2y";
 		var json_full="";
 		var cb = function(d) {
-			if(my.datamode === "emu") {
+			if(my.curplace === "emu") {
 				ajaxopt={};
 				my.dataurl = setEmuFileName(d);
 			}
 			//console.log("Get source: " + my.dataurl);
 			$.ajax({url: my.dataurl, data: ajaxopt}).done(function (json) {
 				json_full += json;
-				if(my.datamode === "emu" && (d-1+(24 * 3600 * 1000)) < now) {
+				if(my.curplace === "emu" && (d-1+(24 * 3600 * 1000)) < now) {
 					d += (24 * 3600 * 1000);
 					cb(d);
-					//my.dataurl = setEmuFileName(d.setDate(d.getDate()+1));
-					//$.ajax({url: my.dataurl, data: ajaxopt}).done(function (json) {
-					//	json_full += json;
-					//	afterGetUrl(json_full);
-					//});
 				} else {
 					afterGetUrl(json_full);
 				}
@@ -808,10 +939,8 @@ var ilm = (function (my) {
 	}
 
 	my.loadEst = function (place) {
-		if (!place) {
-			place = my.fcplaces[0] + "/";
-		}
-		//console.log("Loading yr xml data at " + (new Date().getTime()));
+		place = (place || my.fcplace || 'tabivere') + "/";
+		//console.log("Loading yr xml " + place + " data at " + (new Date().getTime()));
 		$.ajax({
 			type: "get",
 			url: "yr_data/" + place + "forecast_hour_by_hour.xml"
@@ -968,10 +1097,12 @@ var ilm = (function (my) {
 				i1 = intPlotLine(my.charts[3], i1);
 				i2 = intPlotLine(my.charts[4], i2);
 				i3 = intPlotLine(my.charts[5], i3);
-				
+				$("#fctitle").html(
+					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(wg.update_last,1)
+				).show();
 				$('#yrmeta').html(
 					'<a href="' 
-					+ $xml.find('links link')[3].getAttribute("url") 
+					+ 'http://www.yr.no/place/Estonia/'+my.fcplaces[my.fcplace].yrlink+'/hour_by_hour.html' 
 					+ '" onclick="window.open(this.href);return false;">Yr.no</a> andmed viimati uuendatud: ' 
 					+ my.getTimeStr(yr_get_time($xml,'lastupdate'))
 					+ ', Järgmine uuendus: ' 
@@ -980,7 +1111,7 @@ var ilm = (function (my) {
 
 				$('#wgmeta').html(
 					'<a href="' 
-					+ "http://www.windguru.cz/ee/?go=1&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22"
+					+ "http://www.windguru.cz/ee/?go=1&amp;sc="+my.fcplaces[my.fcplace].wglink+"&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22"
 					+ '" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: ' 
 					+ my.getTimeStr(wg.update_last)
 					+ ', Järgmine uuendus: ' 

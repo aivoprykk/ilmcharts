@@ -201,8 +201,8 @@ var lingid={
   {'name':'Ilmalingid',
   'list': [ 
    { 'name': 'EMHI','url':'http://www.ilmateenistus.ee/','list': [
-    {'href':'/ilm/ilmavaatlused/vaatlusandmed/tuul/','title':"Ilmavaatlused - kaart",'id':'emhi_kaart'},
-    {'href':'/ilm/prognoosid/mudelprognoosid/eesti/#layers/tuul10ms,tuul10mb','title':"Prognoos - Suur Hirlam",'id':'emhi_hirlam_suur'},
+    {'href':'ilm/ilmavaatlused/vaatlusandmed/tuul/','title':"Ilmavaatlused - tuul",'id':'emhi_kaart'},
+    {'href':'ilm/prognoosid/mudelprognoosid/eesti/#layers/tuul10ms,tuul10mb','title':"Prognoos - Suur Hirlam",'id':'emhi_hirlam_suur'},
    ]},
    {'name': "WeatherOnline",'url':'http://www.weatheronline.co.uk/','list': [
     {'href':'marine/weather?LEVEL=3&LANG=en&MENU=0&TIME=18&MN=gfs&WIND=g005','title':"Soome Laht",'id':'weatheronline_sl'},
@@ -216,6 +216,7 @@ var lingid={
    ]},
    {'name': "YR.no",'url':'http://www.yr.no/place/Estonia/','list': [
     {'href':'Tartumaa/Tartu/hour_by_hour.html','title':"Tartu",'id':'yr_tartu'},
+    {'href':'Tartumaa/Tamme/hour_by_hour.html','title':"Tamme",'id':'yr_tamme'},
     {'href':'Jõgevamaa/Tabivere~793956/hour_by_hour.html','title':"Tabivere",'id':'yr_tabivere'},
     {'href':'Harjumaa/Tallinn/hour_by_hour.html','title':"Tallinn",'id':'yr_tallinn'},
    ]},
