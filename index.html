@@ -228,24 +228,16 @@
 			w.ilm.reload();
 			return false;
 		});
-		/*
-		w.onresize = function () { 
-			//setTimeout(x.setContainerWidth,50);
-			w.clearTimeout(contid);
-			contid = w.setTimeout(setWidth, 50);
-		};
-		*/
-
 		w.ilm.loadBase();
 		w.ilm.loadInt(1000 * 60); // 1min
 		w.ilm.loadEstInt(1000 * 60 * 10); // 10min
-		$('#backgr').css("display", "block");
+		$('#backgr').css({"display":"block"});
 		$(w).on("keydown", function (e) {
 			//w.console.log("pressed" + e.keyCode);
-			var obj = $__("popup");
+			var obj = $("#popup");
 			if(!obj) return;
 			if (e.keyCode === 27 || e.keyCode === 13 ) {
-				w.ilm.showLinks();
+				w.ilm.Popup("lingid",w.ilm.Lingid);
 			}
 			/*if (e.keyCode === 27 && obj.style.display === "block") {
 				w.ilm.showLinks();

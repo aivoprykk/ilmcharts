@@ -135,7 +135,10 @@ line-height: 1.5em;
 vertical-align: top;
 display: inline-block;
 }
-#sl { z-index: 1000; }
+#sl {
+z-index: 1000;
+cursor: pointer;
+}
 
 /*bootstrap overrides*/
 .nav > li > a, .navbar-text {
