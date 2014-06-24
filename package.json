@@ -17,8 +17,8 @@
     "url": "https://github.com/aivoprykk/ilmcharts.git"
   },
   "license": {
-    "type": "GNU",
-    "url": "https://github.com/aivoprykk/ilmcharts/GNU-LICENSE.txt"
+    "type": "MIT",
+    "url": "https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

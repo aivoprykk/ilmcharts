@@ -29,23 +29,42 @@ module.exports = function (grunt) {
 
     // Task configuration.
     clean: {
-      dist: ['js/<%= pkg.name %>.js', 'js/<%= pkg.name %>.min.js', 'css/<%= pkg.name %>.min.css']
+      dist: [
+      	'public/js/*.js',
+      	'public/css/*.css'
+      ]
     },
     concat: {
-      src: {
+    	css: {
+			options: {
+				stripBanners: false,
+				process: function(src, filepath) {
+					 return (/ilm.css/.test(filepath) ?  grunt.template.process('<%= banner %>\n') : '') + src;
+				}
+			},
+			src: [
+				'node_modules/bootstrap/dist/css/bootstrap.css',
+				'node_modules/jquery-ui/themes/base/jquery.ui.core.css',
+				'node_modules/jquery-ui/themes/base/jquery.ui.theme.css',
+				'node_modules/jquery-ui/themes/base/jquery.ui.datepicker.css',
+				'src/css/ilm.css'
+			],
+			dest: 'public/css/<%= pkg.name %>.css'
+		},
+      js: {
 		options: {
 			banner: '<%= banner %>\n<%= jqueryCheck %>',
 			stripBanners: false,
 			separator: ';'
 		},
 		src: [
-			'js/core.js',
-			'js/history.js',
-			'js/forecast.js',
-			'js/links.js',
-			'js/docfix.js'
+			'src/js/core.js',
+			'src/js/history.js',
+			'src/js/forecast.js',
+			'src/js/links.js',
+			'src/js/docfix.js'
 		],
-		dest: 'js/<%= pkg.name %>.js'
+		dest: 'public/js/<%= pkg.name %>.js'
       },
       libs: {
 		options: {
@@ -56,14 +75,14 @@ module.exports = function (grunt) {
 		},
 		src: [
 			'node_modules/jquery/dist/jquery.js',
-			'js/highcharts/js/highcharts.js',
+			'contrib/highcharts/js/highcharts.js',
 			'node_modules/underscore/underscore.js',
 			'node_modules/backbone/backbone.js',
 			'node_modules/jquery-ui/core.js',
 			'node_modules/jquery-ui/datepicker.js',
 			'node_modules/bootstrap/dist/js/bootstrap.js'
 		],
-		dest: 'js/libs.js'
+		dest: 'public/js/libs.js'
 	  }
     },
     uglify: {
@@ -75,15 +94,15 @@ module.exports = function (grunt) {
         options: {
           banner: '<%= banner %>'
         },
-        src: '<%= concat.src.dest %>',
-        dest: 'js/<%= pkg.name %>.min.js'
+        src: '<%= concat.js.dest %>',
+        dest: 'public/js/<%= pkg.name %>.min.js'
       },
       libs: {
       options: {
         preserveComments: false
       },
         src: '<%= concat.libs.dest %>',
-        dest: 'js/libs.min.js'
+        dest: 'public/js/libs.min.js'
       }
     },
     jshint: {
@@ -100,7 +119,7 @@ module.exports = function (grunt) {
 				jQuery: true
 			  },
 		  },
-		  src: '<%= concat.src.src %>'
+		  src: '<%= concat.js.src %>'
       }
     },
     jscs: {
@@ -132,27 +151,21 @@ module.exports = function (grunt) {
       },
       src: {
 		  src: [
-			'css/ilm.css'
+			'src/css/ilm.css'
 		  ]
       }
     },
     cssmin: {
 		src: {
 			files: {
-				'css/<%= pkg.name %>.min.css': [ 
-					'node_modules/bootstrap/dist/css/bootstrap.css',
-					'node_modules/jquery-ui/themes/base/jquery.ui.core.css',
-					'node_modules/jquery-ui/themes/base/jquery.ui.theme.css',
-					'node_modules/jquery-ui/themes/base/jquery.ui.datepicker.css',
-					'css/ilm.css'
-				]
+				'public/css/<%= pkg.name %>.min.css': 'public/css/<%= pkg.name %>.css'
 			}
 		}
     },
     csscomb: {
       dist: {
         files: {
-          'css/<%= pkg.name %>.min.css': 'css/<%= pkg.name %>.min.css'
+          'public/css/<%= pkg.name %>.css': 'public/css/<%= pkg.name %>.css'
         }
       }
     },
@@ -164,17 +177,26 @@ module.exports = function (grunt) {
         },
         files: {
           src: [
-            'css/<%= pkg.name %>.min.css',
+            'src/css/ilm.css',
           ]
         }
       }
     },
 
     copy: {
-      fonts: {
+      "bootstrap-fonts": {
         expand: true,
-        src: 'fonts/*',
-        dest: 'dist/'
+        flatten: true,
+        src: 'node_modules/bootstrap/fonts/*',
+        dest: 'public/fonts',
+        filter: 'isFile'
+      },
+      "jquery-ui": {
+        expand: true,
+        flatten: true,
+        src: 'node_modules/jquery-ui/themes/base/images/*',
+        dest: 'public/css/images',
+        filter: 'isFile'
       }
     },
     watch: {
@@ -186,7 +208,7 @@ module.exports = function (grunt) {
         }
       },
       js: {
-        files: '<%= concat.src.src %>',
+        files: '<%= concat.js.src %>',
         tasks: ['jshint:src', 'concat:src', 'uglify:src'],
         options: {
           livereload: true,
@@ -194,7 +216,7 @@ module.exports = function (grunt) {
       },
       css: {
         files: [ '<%= csslint.src.src %>', ],
-        tasks: ['csslint:src', 'cssmin:src'],
+        tasks: ['csslint:src', 'concat:css', 'cssmin:src'],
         options: {
           livereload: true,
         }
@@ -224,10 +246,10 @@ module.exports = function (grunt) {
   require('load-grunt-tasks')(grunt, {scope: 'devDependencies'});
 
   // JS distribution task.
-  grunt.registerTask('dist-js', ['concat', 'uglify']);
+  grunt.registerTask('dist-js', ['concat:js','concat:libs', 'uglify']);
 
   // CSS distribution task.
-  grunt.registerTask('dist-css', ['cssmin', 'usebanner']);
+  grunt.registerTask('dist-css', ['concat:css', 'cssmin', 'copy']);
 
   grunt.registerTask('test-js', ['jshint', 'jscs:src']);
   grunt.registerTask('test-css', ['csslint:src']);

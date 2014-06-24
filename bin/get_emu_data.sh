@@ -5,7 +5,7 @@ force=0;
 [ x$1 != x ] && [ $1 = force ] && { force=1; lab=1; }
 [ x$1 != x ] && [ $1 = lab ] && lab=1
 
-path=`dirname $0`
+path=`dirname $0`/public
 (
 
 cd $path

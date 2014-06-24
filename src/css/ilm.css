@@ -74,7 +74,7 @@ top: 0;
 left: 0;
 right: 0;
 bottom: 0;
-background-image: url("bg_mask.png");
+background-image: url("images/bg_mask.png");
 z-index: -1;
 opacity: 0.6;
 }
@@ -129,15 +129,15 @@ a {
 text-decoration:none;
 }
 .h {
-line-height: 1.5em;
+	line-height: 1.5em;
 }
 .lingid {
-vertical-align: top;
-display: inline-block;
+	vertical-align: top;
+	display: inline-block;
 }
 .ilm-sl {
-z-index: 1000;
-cursor: pointer;
+	z-index: 1000;
+	cursor: pointer;
 }
 .ilm-pagelogo {
 	height: 25px;
@@ -157,19 +157,19 @@ cursor: pointer;
     padding: 5px 15px;
 }
 .navbar {
-min-height: 25px;
-margin-bottom: 0;
+	min-height: 25px;
+	margin-bottom: 0;
 }
 .navbar-inverse {
-background-color: #39485d;
-border-color: #3C4A5A;
+	background-color: #39485d;
+	border-color: #3C4A5A;
 }
 .navbar-header {
-white-space:nowrap;
+	white-space:nowrap;
 }
 .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {
-padding-right: 3px;
-padding-left: 3px;
+	padding-right: 3px;
+	padding-left: 3px;
 }
 .navbar-toggle {
 padding: 3px 10px;

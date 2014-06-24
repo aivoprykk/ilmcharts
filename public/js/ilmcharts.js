@@ -1,7 +1,15 @@
+/*!
+ * Ilmcharts v1.1.0 (http://ilm.majasa.ee)
+ * Copyright 2012-2014 Aivo Pruekk
+ * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
+ */
+
+if (typeof jQuery === 'undefined') { throw new Error('Ilmcharts\'s JavaScript requires jQuery') }
+
 var ilm = (function (my) {
-	var win = window, doc = document;
+	var w = window, doc = document;
 	function State(opt) {
-		opt = opt||{};
+		opt = opt || {};
 		var defaults = {
 			id : 'ilmchartsstore01',
 			datamode : opt.datamode||'emu',
@@ -13,21 +21,25 @@ var ilm = (function (my) {
 		this.id = defaults.id;
 		this.attr = defaults;
 		return this;
-	};
+	}
 	State.prototype = {
 		save: function(){
-			if (localStorage) localStorage.setItem(this.id, JSON.stringify(this.toJSON()));
+			if (localStorage) {
+				localStorage.setItem(this.id, JSON.stringify(this.toJSON()));
+			}
 			return this;
 		},
 		load: function(){
-			if(localStorage) this.set(JSON.parse(localStorage.getItem(this.id)));
+			if(localStorage) {
+				this.set(JSON.parse(localStorage.getItem(this.id)));
+			}
 			return this;
 		},
 		set: function(opt){
 			if(!opt) return this;
 			var changed = false;
 			for(var a in this.attr) {
-				if(a!="id" && opt[a] && opt[a] != this.attr[a]) {
+				if(a !== "id" && opt[a] && opt[a] !== this.attr[a]) {
 					this.attr[a] = opt[a];
 					changed = true;
 					console.log(a + " " + opt[a]);
@@ -46,7 +58,7 @@ var ilm = (function (my) {
 		toJSON: function() {
 			var ret = {};
 			for(var a in this.attr) {
-				if(a!="id") ret[a] = this.attr[a];
+				if(a !== "id") ret[a] = this.attr[a];
 			}
 			return ret;
 		}
@@ -112,9 +124,7 @@ var ilm = (function (my) {
 
 	App.prototype = {
 		reorder: function (div) {
-			var el = null;
-			var i, j;
-			var co = this.chartorder;
+			var el = null, i, j, co = this.chartorder;
 			if(!div) { div = this.placeholder; }
 			$(div).children().each(function ( k, l) {
 				for (i = 0, j = l.childNodes.length; i < j; ++i){
@@ -131,9 +141,8 @@ var ilm = (function (my) {
 			});
 		},
 		loadBase: function (div) {
-			var el = null, child = null, newel = null, i, j;
+			var el = null, child = null, newel = null, i, j, co = this.chartorder;
 			if(!div) { div = this.placeholder; }
-			var co = this.chartorder;
 			$(div).children().each(function ( k, l) {
 				if (l.className && l.className.match(/float/)) {
 					for (i = 0, j = l.childNodes.length; i < j; ++i){
@@ -154,11 +163,7 @@ var ilm = (function (my) {
 			});
 		},
 		dirs: function (dir) {
-			if ((dir >= 0 && dir <= 11.25)
-			 || (dir >= 348.75 && dir <= 360)
-			) {
-				return "N";
-			}
+			if ((dir >= 0 && dir <= 11.25) || (dir >= 348.75 && dir <= 360) ) { return "N"; }
 			if ((dir > 11.25  && dir <= 33.75)) { return "NNE"; } 
 			if ((dir > 33.75  && dir <= 56.25)) { return "NE"; } 
 			if ((dir > 56.25  && dir <= 78.75)) { return "ENE"; } 
@@ -197,7 +202,7 @@ var ilm = (function (my) {
 		},
 		getWidth: function (i) {
 			i = i || null;
-			return (win.innerWidth) ? win.innerWidth :
+			return (w.innerWidth) ? w.innerWidth :
 				(doc.documentElement && doc.documentElement.clientWidth) ? doc.documentElement.clientWidth :
 					(doc.body && doc.body.clientWidth) ? doc.body.clientWidth : i;
 		},
@@ -221,14 +226,15 @@ var ilm = (function (my) {
 			return max;
 		},
 		setFrame: function(d) {
+			var x = '';
 			if(d && /^\d*d/.test(d)) {
-				var x  = d.replace(/d*$/,"");
+				x  = d.replace(/d*$/,"");
 				this.timeframe = x*24*3600*1000;
 			} else if (d && /^\d*h/.test(d)) {
-				var x  = d.replace(/h*$/,"");
+				x  = d.replace(/h*$/,"");
 				this.timeframe = x*3600*1000;
 			} else if (d && /^\d+$/.test(d)) {
-				this.timeframe = x;
+				this.timeframe = d;
 			}
 			this.state.set({'timeframe':this.timeframe});
 			return false;
@@ -246,11 +252,11 @@ var ilm = (function (my) {
 			return f;
 		},
 		setCurPlace: function(d) {
-			this.setPlace(d, 'curplace')
+			this.setPlace(d, 'curplace');
 			return false;
 		},
 		setEstPlace: function(d) {
-			this.setPlace(d)
+			this.setPlace(d);
 			return false;
 		},
 		setPlace: function(d, name) {
@@ -260,7 +266,7 @@ var ilm = (function (my) {
 			var j = {};
 			if(d) {
 				for(var i in places){
-					if(i == d) { j[name] = this[name] = d; break; }
+					if(i === d) { j[name] = this[name] = d; break; }
 				}
 			}
 			this.state.set(j);
@@ -271,15 +277,15 @@ var ilm = (function (my) {
 		},
 		nextPlace: function(name) {
 			name = name || 'fcplace';
-			places = this[name+'s'] || this.fcplaces;
+			places = this[name + 's'] || this.fcplaces;
 			place = this[name] || this.fcplace;
 			var p = '', that = false, j = '';
 			for(var i in places){
-				if(!j) j=i;
-				if(that) p=i;
-				if(i==place) that=true;
+				if (!j) j = i;
+				if (that) p = i;
+				if(i === place) that = true;
 			}
-			if(!p) p=j;
+			if(!p) p = j;
 			//console.log(name + ' ' + p + ' ' + place);
 			return p;
 		},
@@ -304,29 +310,27 @@ var ilm = (function (my) {
 			var ret ='';
 			var dsep = "." + (d.getMonth() < 10 ? "0" : "") + (d.getMonth()+1) + ".";
 			if (f) { dsep = ". " + my.months[(d.getMonth())].toLowerCase() + " "; }
-			ret = (d.getDate() < 10 ? "0" : "") + d.getDate() 
-				+ dsep + d.getFullYear();
-			if(!g) ret += " " + (d.getHours()<10?"0":"") + d.getHours()
-				+ ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();
+			ret = (d.getDate() < 10 ? "0" : "") + d.getDate() + dsep + d.getFullYear();
+			if(!g) ret += " " + (d.getHours()<10?"0":"") + d.getHours() + ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();
 			return ret;
 		}
     
 	};
 	
-	if (win.ilm === undefined) {
+	if (w.ilm === undefined) {
 		my = new App();
 	} else {
-		my = win.ilm;
+		my = w.ilm;
 	}
 	//my.setDate("2014-04-25T00:00:00");
 	//my.setFrame('3d');
-	console.log(my.getTimeStr(my.date) + " " + my.timeframe)
+	console.log(my.getTimeStr(my.date) + " " + my.timeframe);
 	return my;
 })(ilm || {});
-
+;
 (function (my) {
-	var $ = window.$,
-		Highcharts = window.Highcharts,
+	var w = window, $ = w.$,
+		Highcharts = w.Highcharts,
 		drawupdates = 0,
 		updateinterval = 60000,
 		options = {};
@@ -357,7 +361,7 @@ var ilm = (function (my) {
 		} else {
 			my.datamode = "emu";
 			//emu data
-			var c,d,e,f;
+			var c,e,f;
 			$.each(data.split("\n"),function(a, b) {
 					if (b && !b.match(/^--/)) {
 						c = b.split(/\s+?/);
@@ -402,7 +406,7 @@ var ilm = (function (my) {
 		}
 	});
 
-	options["wind_speed"] = $.extend(true, {}, my.chartoptions, {
+	options.wind_speed = $.extend(true, {}, my.chartoptions, {
 		title: {
 			text: 'Tuule kiirus'
 		},
@@ -486,7 +490,7 @@ var ilm = (function (my) {
 		}
 	});
 
-	options["wind_dir"] = $.extend(true, {}, my.chartoptions, {
+	options.wind_dir = $.extend(true, {}, my.chartoptions, {
 		title: {
 			text: 'Tuule suund'
 		},
@@ -521,7 +525,7 @@ var ilm = (function (my) {
 		}
 	});
 
-	options["temp"] = $.extend(true, {}, my.chartoptions, {
+	options.temp = $.extend(true, {}, my.chartoptions, {
 		title: {
 			text: 'Temperatuur, õhurõhk ja -niiskus'
 		},
@@ -654,23 +658,23 @@ var ilm = (function (my) {
 			
 			if (s.avg_ws_series.data.length) {
 			options.wind_speed.title.text = 
-				" Tuule kiirus"+(!my.historyactive? " [ <b>" + s.avg_ws_series.data[s.avg_ws_series.data.length - 1][1] + "</b> m/s"
-				+ " (pagid: <b>" + s.max_ws_series.data[s.max_ws_series.data.length - 1][1] + "</b> m/s) ]":'');
+				" Tuule kiirus"+(!my.historyactive? " [ <b>" + s.avg_ws_series.data[s.avg_ws_series.data.length - 1][1] + "</b> m/s" +
+					" (pagid: <b>" + s.max_ws_series.data[s.max_ws_series.data.length - 1][1] + "</b> m/s) ]":'');
 			} else {
 			options.wind_speed.title.text = "Tuule kiiruse andmed puuduvad";
 			}
 			if (s.avg_wd_series.data.length) {
 			options.wind_dir.title.text = 
-				" Tuule suund"+(!my.historyactive? " [ <b>" + s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1] + "</b> ° "
-				+ "(<b>" + my.dirs(s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1]) + "</b>) ]":'');
+				" Tuule suund"+(!my.historyactive? " [ <b>" + s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1] + "</b> ° " +
+					"(<b>" + my.dirs(s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1]) + "</b>) ]":'');
 			} else {
 			options.wind_dir.title.text = "Tuule suuna andmed puuduvad";
 			}
 			if (s.avg_temp_series.data.length) {
 			options.temp.title.text =
-				" Temperatuur"+(!my.historyactive? " [ <b>" + s.avg_temp_series.data[s.avg_temp_series.data.length - 1][1] + "</b> °C ]":"")+","
-				+ " Rõhk"+(!my.historyactive? " [ <b>" + s.avg_press_series.data[s.avg_press_series.data.length - 1][1] + "</b> hPa ]":"")+","
-				+ " Niiskus"+(!my.historyactive? " [ <b>" + s.avg_humid_series.data[s.avg_humid_series.data.length - 1][1] + "</b> % ]":"");
+				" Temperatuur"+(!my.historyactive? " [ <b>" + s.avg_temp_series.data[s.avg_temp_series.data.length - 1][1] + "</b> °C ]":"")+"," +
+					" Rõhk"+(!my.historyactive? " [ <b>" + s.avg_press_series.data[s.avg_press_series.data.length - 1][1] + "</b> hPa ]":"")+"," +
+					" Niiskus"+(!my.historyactive? " [ <b>" + s.avg_humid_series.data[s.avg_humid_series.data.length - 1][1] + "</b> % ]":"");
 			} else {
 			options.temp.title.text = "Temperatuuri andmed puuduvad";
 			}
@@ -699,13 +703,13 @@ var ilm = (function (my) {
 			my.charts[1] = new Highcharts.Chart(options.wind_dir);
 			my.charts[2] = new Highcharts.Chart(options.temp);
 			$('#curmeta').html(
-				'<a href="http://energia.emu.ee/weather/' 
-				+ '" onclick="window.open(this.href);return false;">EMU.ee</a>, andmed viimati uuendatud: ' 
-				//+ new Date(my.lastdate).toLocaleString()
-				+ my.getTimeStr(my.lastdate)
-				+ ', Järgmine uuendus: ' 
-				//+ new Date(my.lastdate + updateinterval).toLocaleString()
-				+ my.getTimeStr(my.lastdate + updateinterval)
+				'<a href="http://energia.emu.ee/weather/'  +
+					'" onclick="window.open(this.href);return false;">EMU.ee</a>, andmed viimati uuendatud: ' + 
+					//new Date(my.lastdate).toLocaleString() +
+					my.getTimeStr(my.lastdate) +
+					', Järgmine uuendus: ' +
+					//new Date(my.lastdate + updateinterval).toLocaleString() +
+					my.getTimeStr(my.lastdate + updateinterval)
 			);
     };
     
@@ -738,7 +742,7 @@ var ilm = (function (my) {
 					afterGetUrl(json_full);
 				}
 			});
-		}
+		};
 		cb(d-my.timeframe);
     };
     
@@ -770,10 +774,10 @@ var ilm = (function (my) {
 	return my;
 
 })(ilm || {});
-(function (my) {
-	var win = window,
-		$ = win.$,
-		Highcharts = window.Highcharts,
+;(function (my) {
+	var w = window,
+		$ = w.$,
+		Highcharts = w.Highcharts,
 		updateinterval = 60000,
 		options = {};
 	
@@ -1011,8 +1015,8 @@ var ilm = (function (my) {
 			var yr_get_time = function(xml,name) {
 				return (function (d) {
 						return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
-                })((xml.find ? xml.find(name).text() : xml.getAttribute("from")).match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/))
-			}
+                })((xml.find ? xml.find(name).text() : xml.getAttribute("from")).match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/));
+			};
 			$xml.find('tabular time').each(function (i, times) {
 				//var yrd = (function (d) {
 				//		return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
@@ -1101,21 +1105,21 @@ var ilm = (function (my) {
 					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(wg.update_last,1)
 				).show();
 				$('#yrmeta').html(
-					'<a href="' 
-					+ 'http://www.yr.no/place/Estonia/'+my.fcplaces[my.fcplace].yrlink+'/hour_by_hour.html' 
-					+ '" onclick="window.open(this.href);return false;">Yr.no</a> andmed viimati uuendatud: ' 
-					+ my.getTimeStr(yr_get_time($xml,'lastupdate'))
-					+ ', Järgmine uuendus: ' 
-					+ my.getTimeStr(yr_get_time($xml,'nextupdate'))
+					'<a href="' +
+						'http://www.yr.no/place/Estonia/'+my.fcplaces[my.fcplace].yrlink+'/hour_by_hour.html' + 
+						'" onclick="window.open(this.href);return false;">Yr.no</a> andmed viimati uuendatud: '	+ 
+						my.getTimeStr(yr_get_time($xml,'lastupdate')) +
+						', Järgmine uuendus: ' +
+						my.getTimeStr(yr_get_time($xml,'nextupdate'))
 				);
 
 				$('#wgmeta').html(
-					'<a href="' 
-					+ "http://www.windguru.cz/ee/?go=1&amp;sc="+my.fcplaces[my.fcplace].wglink+"&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22"
-					+ '" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: ' 
-					+ my.getTimeStr(wg.update_last)
-					+ ', Järgmine uuendus: ' 
-					+ my.getTimeStr(wg.update_next)
+					'<a href="' +
+						"http://www.windguru.cz/ee/?go=1&amp;sc="+my.fcplaces[my.fcplace].wglink+"&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22" +
+						'" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: ' + 
+						my.getTimeStr(wg.update_last) +
+						', Järgmine uuendus: ' + 
+						my.getTimeStr(wg.update_next)
 				);
 			});
 
@@ -1138,3 +1142,231 @@ var ilm = (function (my) {
     return my;
 
 })(window.ilm || {});
+;(function (my) {
+	var w = window, $ = w.$;
+	my.lingid = my.lingid || {
+		JSON: {
+			'list': [ 
+				{'name':'Ilmalingid',
+				'list': [ 
+				{ 'name': 'EMHI','url':'http://www.ilmateenistus.ee/','list': [
+				{'href':'ilm/ilmavaatlused/vaatlusandmed/tuul/','title':"Ilmavaatlused - tuul",'id':'emhi_kaart'},
+				{'href':'ilm/prognoosid/mudelprognoosid/eesti/#layers/tuul10ms,tuul10mb','title':"Prognoos - Suur Hirlam",'id':'emhi_hirlam_suur'},
+				]},
+				{'name': "WeatherOnline",'url':'http://www.weatheronline.co.uk/','list': [
+				{'href':'marine/weather?LEVEL=3&LANG=en&MENU=0&TIME=18&MN=gfs&WIND=g005','title':"Soome Laht",'id':'weatheronline_sl'},
+				]},
+				{'name': "WindGuru",'url':'http://www.windguru.cz/','list': [
+				{'href':'int/?go=1&amp;lang=ee&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180&amp;vp=1&amp;pi=2&amp;pu=413733','title':"Eesti Meri",'id':'windguru_meri'},
+				{'href':'int/?go=1&amp;lang=ee&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180&amp;vp=1&amp;pi=1&amp;pu=413733','title':"Sisej&auml;rved",'id':'windguru_jarved'},
+				{'href':'int/?go=1&amp;lang=ee&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"Saadj&auml;rv",'id':'windguru_saadjarv'},
+				{'href':'int/?go=1&amp;lang=ee&amp;sc=192609&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"V&otilde;rtsj&auml;rv",'id':'windguru_vortsjarv'},
+				{'href':'int/?go=1&amp;lang=ee&amp;sc=365700&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"Tartu",'id':'windguru_tartu'},
+				]},
+				{'name': "YR.no",'url':'http://www.yr.no/place/Estonia/','list': [
+				{'href':'Tartumaa/Tartu/hour_by_hour.html','title':"Tartu",'id':'yr_tartu'},
+				{'href':'Tartumaa/Tamme/hour_by_hour.html','title':"Tamme",'id':'yr_tamme'},
+				{'href':'Jõgevamaa/Tabivere~793956/hour_by_hour.html','title':"Tabivere",'id':'yr_tabivere'},
+				{'href':'Harjumaa/Tallinn/hour_by_hour.html','title':"Tallinn",'id':'yr_tallinn'},
+				]},
+				{'name': 'GisMeteo.ru','url':'http://www.gismeteo.ru/towns/','list': [
+				{'href':'26231.htm','title':"P&auml;rnu",'id':'gismeteo_parnu'},
+				{'href':'26038.htm','title':"Tallinn",'id':'gismeteo_tallinn'},
+				{'href':'26242.htm','title':"Tartu",'id':'gismeteo_tartu'},
+				]},
+				{'name': 'Meteo.pl','url':'http://new.meteo.pl/um/php/meteorogram_map_um.php?lang=en&ntype=0u','list': [
+				{'href':'&row=227&col=325','title':"Saadj&auml;rv",'id':'meteopl_saadjarv'},
+				{'href':'&row=234&col=318','title':"Võrtsj&auml;rv",'id':'meteopl_vortsjarv'},
+				{'href':'&row=213&col=332','title':"Peipsi Mustvee",'id':'meteopl_peipsi'},
+				]},
+				{'name': 'Windfinder.com','url':'http://www.windfinder.com/forecast/','list': [
+				{'href':'aeksi_saadjaerv','title':"Saadj&auml;rv",'id':'windfinder_saadjarv'},
+				{'href':'tartu_airport','title':"Tartu",'id':'windfinder_tartu'},
+				{'href':'mustvee_peipus&wf_cmp=2','title':"Mustvee Peipsi",'id':'windfinder_mustvee'},
+				]},
+				{'name': 'Muud','url':'http://','list':[
+				{'href':'d.naerata.eu/','title':"Naerata.eu",'id':'naerata'},
+				{'href':'teeinfo.evenet.ee/?mapdatatype=9','title':"Teeinfo",'id':'teeinfo'},
+				{'href':'surf.paper.ee/','title':"Surf.Paper.EE",'id':'paper'},
+				{'href':'palts.com/a/et_EE/ilmajaam/','title':"Palts.COM",'id':'palts'},
+				{'href':'ilm.zoig.ee/','title':"Zoig.EE",'id':'zoig','app':'?k=516'},
+				{'href':'http://www.kalastusinfo.ee/sisu/ilm/ilm-peipsi-jarvel.php','title':"Peipsi Ilmajaamad",'id':'kalastusinfo'},
+				{'href':'www.wunderground.com/global/stations/26242.html','title':"WUnderground Tartu",'id':'wground'},
+				{'href':'http://www.timeanddate.com/worldclock/astronomy.html?n=242','title':"Päikesetõus/loojang",'id':'sunclock'},
+				]},
+				]},
+				{'name':'Surfilingid',
+				'list':[
+				{'name':'Eesti','url':'http://','list': [ 
+				{'href':'www.surf.ee/chat/','title':"Surf.ee chat",'id':'surfichat'},
+				{'href':'www.surf.ee/turg/','title':"Surf.ee turg",'id':'surfiturg'},
+				{'href':'www.lesurf.ee/','title':"L&otilde;una surfarid",'id':'lesurf'},
+				{'href':'www.purjelaualiit.ee/','title':"Eesti Purjelaualiit",'id':'purjelaualiit'},
+				{'href':'www.gps-speedsurfing.com/','title':"GPS Speedsurfing",'id':'gps-speedsurfing'},
+				]},
+				]}
+			]
+		},
+		process: function(f,u){
+			var t=this,s='',i=0,patt=new RegExp("^http");
+			u=(u === undefined)?'':u;
+			if(f.href!==null && f.href){
+				s +='<li>';
+				s +='<a href="' +
+					((patt.test(f.href) === false)?u:'')+f.href +
+					((f.title)?'" title="'+f.title:'') +
+					((f.id)?'" id="'+f.id:'') +
+					'" onclick="'+'a=\''+((f.app)?f.app:'')+'\';return openNew(this.href+a);">';
+				s +=((f.name)?f.name:f.title)+'</a></li>';
+			} else if(f.list){
+				if(f.name) { 
+					s+='<div class="lingid">';
+					if(!f.list[0].href) s+='<div class="ok">';
+					s+= f.name;
+					if(!f.list[0].href) s+= '</div>';
+				}
+				if(f.url){ s+='<ul>'; }
+				for(i in f.list) { s+=t.process(f.list[i],f.url); }
+					if(f.url){ s+='</ul>'; }
+					if(f.name) {
+					s+='</div>';
+				}
+			}
+			return s;
+		}
+	};
+   
+	return my;
+
+})(ilm || {});
+;(function (w) {
+	var $ = w.$,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+	contid = 0;
+	function fixCharts(width, fn) {
+		$(fn).css("width", width);
+		$(d).ready(function () {
+				var inner = $(fn).width();
+				setTimeout(function () {
+					$.each(w.ilm.charts, function (i, obj) {
+						obj.setSize($(fn).width() - 6, obj.containerHeight, false);
+					});
+				}, 500);
+			});
+	}
+	function setWidth() {
+		console.log(w.ilm.getWidth());
+		var inner = ((w.ilm.getWidth() < 1024) ? "100" : "50") + "%";
+		$('.float').each(function () {
+			fixCharts(inner, this);
+		});
+	}
+	w.ilm.popup="";
+	w.ilm.Options = function(state){
+		var t = this, f = $("#lingid"), g = $("#sl"), html = '', z = '';
+		g.html("Seaded (klikk varjamiseks)");
+		var getattr = function (base) {
+			html = '';
+			if (base) {
+				for(var i in base) {
+					if(typeof base[i] === 'object') html += '<div>'+i + " " + getattr(base[i]) + '</div>';
+					else html = '<div>'+i+" "+base[i]+"</div>";
+				}
+			}
+			return html;
+		};
+		if(w.ilm.state.attr) {
+			z = w.ilm.getFrame();
+			//html = getattr(w.ilm.state.attr);
+			html += '<div><label for="timeframe">Ajaraam</label> <select onchange="ilm.setFrame(this.options[this.selectedIndex].value);ilm.reload();return false;" id="timeframe" name="timeframe">' +
+				'<option value="1d"' + (z==='1d' ? ' selected' : '') + '>1 päev</option><option value="2d"'+(z==='2d'?' selected':'')+'>2 päeva</option><option value="3d"'+(z==='3d'?' selected':'')+'>3 päeva</option>' +
+				'</select></div>';
+			html += '<div><label for="forecast">Ennustus</label> <select onchange="ilm.setEstPlace(this.options[this.selectedIndex].value);ilm.reloadest();return false;" id="forecast" name="forecast">';
+			html += '<option value="tabivere"'+(ilm.fcplace==='tabivere'?' selected':'')+'>Saadjärv</option><option value="tamme"'+(ilm.fcplace==='tamme'?' selected':'')+'>Võrtsjärv Tamme</option>';
+			html += '</select></div>';
+		} else {
+			html = "<div>Siia tulevad seaded</div>";
+		}
+		f.html(html);
+		return false;
+	};
+	w.ilm.Lingid = function (state) {
+		var t = this, f = $("#lingid"), g = $("#sl");
+		g.html("Lingid (klikk varjamiseks)");
+		f.html(w.ilm.lingid.process(w.ilm.lingid.JSON));
+		return false;		
+	};
+	w.ilm.Popup = function(name, cb) {
+		var v = $("#popup");
+		if(!v) return false;
+		var b = $("#bghide"), y = w.innerHeight || e.clientHeight || g.clientHeight,
+		act = v.attr("name");
+		if (act) $("#ilm-" + act).removeClass("active");
+		if(name && (!act || (act && act !== name))) {
+			b.css({height : $(d).height(), position : 'absolute', left : 0, top : 0}).show();
+			v.attr("name", name);
+			$("#ilm-" + name).addClass("active");
+			if(cb) cb.call(this, name);
+			v.css({top : ((y/2) - (v.height()/2)) + $(w).scrollTop()}).show();
+		}
+		else if(v.is(":visible")) {
+			v.hide();
+			b.hide();
+			v.attr("name", "");
+		}
+		return false;
+	};
+	$(d).ready(function () {
+		$("#pagelogo").html(ilm.logo);
+		//setWidth();
+		$("#ilm-lingid").click(function(e){
+			//ilm.showLinks();
+			w.ilm.Popup("lingid",w.ilm.Lingid);
+			return false;
+		});
+		$("#ilm-seaded").click(function(e){
+			w.ilm.Popup("seaded",w.ilm.Options);
+			return false;
+		});
+		$("#fctitle").on("click",function(){
+			w.ilm.setEstPlace(w.ilm.nextPlace());
+			w.ilm.reloadest();
+			return false;
+		});
+		$("#datepicker").datepicker({
+			dateFormat: 'yy-mm-dd',
+			onSelect: function(dateText, inst) {
+				w.ilm.setDate(dateText+"T00:00:00");
+				w.ilm.reload();
+			}
+		});
+		$("#curtime").on("click",function(){
+			$("#datepicker").datepicker('show');
+		});
+		$("#curplace").on("click",function(){
+			w.ilm.setCurPlace(w.ilm.nextCurPlace());
+			w.ilm.reload();
+			return false;
+		});
+		w.ilm.loadBase();
+		w.ilm.loadInt(1000 * 60); // 1min
+		w.ilm.loadEstInt(1000 * 60 * 10); // 10min
+		$('#backgr').css({"display" : "block"});
+		$(w).on("keydown", function (e) {
+			//w.console.log("pressed" + e.keyCode);
+			var obj = $("#popup");
+			if(!obj) return;
+			if (e.keyCode === 27 || e.keyCode === 13 ) {
+				w.ilm.Popup("lingid", w.ilm.Lingid);
+			}
+			/*if (e.keyCode === 27 && obj.style.display === "block") {
+				w.ilm.showLinks();
+			}
+			else if (e.keyCode === 13 && obj.style.display === "none") {
+				w.ilm.showLinks();
+			}*/
+		});
+	});
+})(window);
