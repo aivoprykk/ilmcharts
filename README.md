@@ -29,7 +29,7 @@ EDITOR=vi crontab -e
 
 4) Browse app from webserver, when graphs are filled it's working.
 ```
-curl 'http://your.web.server/ilmcharts/public
+curl http://your.web.server/ilmcharts/public
 ```
 
 This project is licensed under the terms of the MIT license.
