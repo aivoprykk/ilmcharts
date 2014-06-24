@@ -1,0 +1,50 @@
+{
+  "name": "ilmcharts",
+  "description": "Domestic weather application http://ilm.majasa.ee",
+  "version": "1.1.0",
+  "keywords": [
+    "weather",
+    "graph"
+  ],
+  "homepage": "http://ilm.majasa.ee",
+  "author": "Aivo Pruekk",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "style": "./css/style.css",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aivoprykk/ilmcharts.git"
+  },
+  "license": {
+    "type": "GNU",
+    "url": "https://github.com/aivoprykk/ilmcharts/GNU-LICENSE.txt"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-cli": "~0.1.13",
+    "grunt-banner": "~0.2.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-uglify": "0.3.2",
+    "grunt-contrib-csslint": "~0.2.0",
+    "grunt-contrib-cssmin": "~0.7.0",
+    "grunt-contrib-jshint": "*",
+    "grunt-contrib-jscs": "*",
+    "grunt-contrib-watch": "*",
+    "grunt-jsonlint": "1.0.4",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-exec": "0.4.3",
+    "grunt-sed": "~0.1.1",
+    "grunt-git-authors": "1.2.0",
+    "load-grunt-tasks": "0.3.0",
+    "underscore": "~1.6.0",
+    "backbone": "~1.1.2",
+    "jquery": "~2.1.1",
+    "jquery-ui": "~1.10.5",
+    "bootstrap": "~3.1.1"
+  },
+  "scripts": {
+    "build": "npm install && grunt"
+  }
+}

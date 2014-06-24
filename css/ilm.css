@@ -1,26 +1,26 @@
 body {
-font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif;
-color: #274b6d;
-margin: 0;
-padding: 0;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif;
+	color: #274b6d;
+	margin: 0;
+	padding: 0;
 }
-#sisu {
+.ilm-sisu {
 	padding: 0.5em;
 	position: absolute;
 	right: 0;
 	left: 0;
 	top: inherit;
 }
-#pealkiri {
+.ilm-pealkiri {
 font-size: 14px;
 }
-#ajaraam {
+.ilm-ajaraam {
 font-size: 14px;
 padding: 0.5em 1em;
 color: white;
 background-color: green;
 }
-#ajaraam a {
+.ilm-ajaraam a {
 text-decoration: none;
 color: white;
 }
@@ -34,7 +34,7 @@ padding-top: 0.3em;
 width: 49%;
 float: left;
 }*/
-#yrmeta, #wgmeta, #curmeta {
+.ilm-meta {
 margin-left: 50px;
 font-size: 60%;
 color: whitesmoke;
@@ -52,7 +52,7 @@ height: 280px;
 .chart-frame2 {
 height: 230px;
 }
-#backgr {
+.ilm-backgr {
 position: fixed;
 top: 0;
 left: 0;
@@ -62,13 +62,13 @@ z-index: -1;
 opacity: 0.7;
 display: none;
 }
-#backgr img {
+.ilm-backgr img {
 min-height: 100%;
 min-width: 1024px;
 width: 100%;
 height: auto;
 }
-#dots {
+.ilm-dots {
 position: fixed;
 top: 0;
 left: 0;
@@ -78,7 +78,7 @@ background-image: url("bg_mask.png");
 z-index: -1;
 opacity: 0.6;
 }
-#bghide {
+.ilm-bghide {
 display: none;
 top:0;
 left:0;
@@ -89,7 +89,7 @@ background-color: rgb(46,46,46);
 opacity: 0.4;
 position: fixed;
 }
-#popup {
+.ilm-popup {
 display: none;
 position: absolute;
 padding: 1em;
@@ -103,7 +103,7 @@ top: 10%;
 left: 10%;
 right: 10%;
 }
-#popup div {
+.ilm-popup div {
 position: relative;
 }
 .yks {
@@ -114,8 +114,8 @@ float:left;
 }
 ul {
 list-style: none;
-margin: 0px;
-padding: 0px;
+margin: 0;
+padding: 0;
 border-top: 1px solid grey;
 }
 .lingid {
@@ -135,25 +135,30 @@ line-height: 1.5em;
 vertical-align: top;
 display: inline-block;
 }
-#sl {
+.ilm-sl {
 z-index: 1000;
 cursor: pointer;
 }
-
+.ilm-pagelogo {
+	height: 25px;
+}
+.title {
+	padding: 0 0.3em;
+}
 /*bootstrap overrides*/
+
 .nav > li > a, .navbar-text {
     padding: 5px 15px;
 }
 .navbar-brand {
     float: left;
     font-size: 18px;
-    height: 25px;
     line-height: 20px;
     padding: 5px 15px;
 }
 .navbar {
 min-height: 25px;
-margin-bottom: 0px;
+margin-bottom: 0;
 }
 .navbar-inverse {
 background-color: #39485d;
@@ -171,7 +176,7 @@ padding: 3px 10px;
 margin-top: 5px;
 margin-bottom: 1px;
 }
-.navbar-btn.btn-xs {
+.navbar-btn .btn-xs {
 margin-top: 5px;
 margin-bottom: 4px;
 margin-left: 5px;
