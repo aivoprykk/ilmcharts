@@ -202,7 +202,7 @@ var ilm = (function (my) {
 			if( Object.prototype.toString.call( input ) !== '[object Array]' ) {
 				return 0;
 			}
-			var i=0,j=input.length,sum=0;
+			var i = 0, j = input.length, sum = 0;
 			for(;i<j;i++) sum += parseFloat(input[i]);
 			return parseFloat((sum/j).toFixed(1));
 		},
@@ -210,7 +210,7 @@ var ilm = (function (my) {
 			if( Object.prototype.toString.call( input ) !== '[object Array]' ) {
 				return 0;
 			}
-			var i=0,j=input.length,k=0;max=0;
+			var i = 0, j = input.length, k = 0, max = 0;
 			for(;i<j;i++) {
 				k = parseFloat(input[i]);
 				if (max < k) max = k;
@@ -253,11 +253,11 @@ var ilm = (function (my) {
 		},
 		setPlace: function(d, name) {
 			name = name || 'fcplace';
-			places=this[name+'s'] || this.fcplaces;
-			place = this[name] || this.fcplace;
-			var j = {};
+			var places=this[name+'s'] || this.fcplaces,
+			place = this[name] || this.fcplace,
+			j = {}, i;
 			if(d) {
-				for(var i in places){
+				for(i in places){
 					if(i === d) { j[name] = this[name] = d; break; }
 				}
 			}
@@ -269,10 +269,10 @@ var ilm = (function (my) {
 		},
 		nextPlace: function(name) {
 			name = name || 'fcplace';
-			places = this[name + 's'] || this.fcplaces;
-			place = this[name] || this.fcplace;
-			var p = '', that = false, j = '';
-			for(var i in places){
+			var places = this[name + 's'] || this.fcplaces,
+			place = this[name] || this.fcplace,
+			p = '', that = false, j = '', i;
+			for(i in places){
 				if (!j) j = i;
 				if (that) p = i;
 				if(i === place) that = true;
@@ -299,8 +299,7 @@ var ilm = (function (my) {
 		getTimeStr: function (d, f, g) {
 			d = new Date(d);
 			//console.log(d);
-			var ret ='';
-			var dsep = "." + (d.getMonth() < 10 ? "0" : "") + (d.getMonth()+1) + ".";
+			var ret ='', dsep = "." + (d.getMonth() < 10 ? "0" : "") + (d.getMonth()+1) + ".";
 			if (f) { dsep = ". " + my.months[(d.getMonth())].toLowerCase() + " "; }
 			ret = (d.getDate() < 10 ? "0" : "") + d.getDate() + dsep + d.getFullYear();
 			if(!g) ret += " " + (d.getHours()<10?"0":"") + d.getHours() + ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();

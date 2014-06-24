@@ -1,0 +1,76 @@
+doctype html
+html(lang="#{lang}")
+	head
+		title= title
+		meta(charset='#{charset}')
+		meta(name='viewport', content='width=device-width')
+		meta(name='description' content='#{desc}')
+		link(rel='stylesheet',href='#{cssapp}',media='screen')
+		
+		<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+		<!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js">
+		</script><![endif]-->
+
+	body(style='padding-top:25px')
+		#header
+			div.navbar.navbar-inverse.navbar-fixed-top
+				div.container-fluid
+					div.navbar-header
+						button.navbar-toggle(type="button" data-toggle="collapse" data-target="#ilm-navbar-collapse-1")
+							span.sr-only Toggle navigation
+							span.icon-bar
+							span.icon-bar
+							span.icon-bar
+						a#pagelogo.ilm-pagelogo.navbar-brand(href="/") Ilm
+					#ilm-navbar-collapse-1.collapse.navbar-collapse
+						ul.nav.navbar-nav.navbar-right
+							li#ilm-seaded
+								a(href="#") Seaded
+							li#ilm-lingid
+								a(href="#") Lingid
+							li.dropdown
+								a.dropdown-toggle(href="#" data-toggle="dropdown") Info
+								ul.dropdown-menu
+									li
+										a(href="#{giturl}") Projekt GitHubis
+									li.divider
+									li
+										a(href="http://energia.emu.ee/") Maaülikool
+									li
+										a(href="http://yr.no/") Yr
+									li
+										a(href="http://windguru.cz/") Windguru
+									li.divider
+									li
+										a(href="http://jquery.com/") JQuery
+									li
+										a(href="http://highcharts.com/") Highcharts
+									li
+										a(href="http://getbootstrap.com/") Bootstrap
+		#backgr.ilm-backgr
+			img(src="css/images/ranna-001.jpg" alt="Peipsi pilt")
+		#bghide.ilm-bghide
+		#dots.ilm-dots
+		#sisu.ilm-sisu
+			#container.col-lg-12
+				div.float.col-lg-6
+					div.title.btn-group
+						a#curplace.btn.btn-default.btn-xs.navbar-btn(style="display:none")
+						a#curtime.btn.btn-default.btn-xs.navbar-btn(style="display:none")
+						input#datepicker(type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0")
+					div.meta
+						#curmeta.ilm-meta
+				div.float.col-lg-6
+					div.title
+						a#fctitle.btn.btn-default.btn-xs.navbar-btn(style="display:none")
+					div.meta
+						#yrmeta.ilm-meta
+						#wgmeta.ilm-meta
+		#popup.ilm-popup.panel.panel-primary(style="display:none;")
+			#popup_in.panel-heading
+				b.panel-title
+					a#sl.ilm-sl(href="#" onclick="return ilm.Popup();") Sulge
+			#lingid.panel-body
+		script(src="#{jscontrib}")
+		script(src="#{jsapp}")
+

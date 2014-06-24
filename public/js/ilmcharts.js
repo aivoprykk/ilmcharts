@@ -1,5 +1,5 @@
 /*!
- * Ilmcharts v1.1.0 (http://ilm.majasa.ee)
+ * Ilmcharts v1.1.1 (http://ilm.majasa.ee)
  * Copyright 2012-2014 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
@@ -210,7 +210,7 @@ var ilm = (function (my) {
 			if( Object.prototype.toString.call( input ) !== '[object Array]' ) {
 				return 0;
 			}
-			var i=0,j=input.length,sum=0;
+			var i = 0, j = input.length, sum = 0;
 			for(;i<j;i++) sum += parseFloat(input[i]);
 			return parseFloat((sum/j).toFixed(1));
 		},
@@ -218,7 +218,7 @@ var ilm = (function (my) {
 			if( Object.prototype.toString.call( input ) !== '[object Array]' ) {
 				return 0;
 			}
-			var i=0,j=input.length,k=0;max=0;
+			var i = 0, j = input.length, k = 0, max = 0;
 			for(;i<j;i++) {
 				k = parseFloat(input[i]);
 				if (max < k) max = k;
@@ -261,11 +261,11 @@ var ilm = (function (my) {
 		},
 		setPlace: function(d, name) {
 			name = name || 'fcplace';
-			places=this[name+'s'] || this.fcplaces;
-			place = this[name] || this.fcplace;
-			var j = {};
+			var places=this[name+'s'] || this.fcplaces,
+			place = this[name] || this.fcplace,
+			j = {}, i;
 			if(d) {
-				for(var i in places){
+				for(i in places){
 					if(i === d) { j[name] = this[name] = d; break; }
 				}
 			}
@@ -277,10 +277,10 @@ var ilm = (function (my) {
 		},
 		nextPlace: function(name) {
 			name = name || 'fcplace';
-			places = this[name + 's'] || this.fcplaces;
-			place = this[name] || this.fcplace;
-			var p = '', that = false, j = '';
-			for(var i in places){
+			var places = this[name + 's'] || this.fcplaces,
+			place = this[name] || this.fcplace,
+			p = '', that = false, j = '', i;
+			for(i in places){
 				if (!j) j = i;
 				if (that) p = i;
 				if(i === place) that = true;
@@ -307,8 +307,7 @@ var ilm = (function (my) {
 		getTimeStr: function (d, f, g) {
 			d = new Date(d);
 			//console.log(d);
-			var ret ='';
-			var dsep = "." + (d.getMonth() < 10 ? "0" : "") + (d.getMonth()+1) + ".";
+			var ret ='', dsep = "." + (d.getMonth() < 10 ? "0" : "") + (d.getMonth()+1) + ".";
 			if (f) { dsep = ". " + my.months[(d.getMonth())].toLowerCase() + " "; }
 			ret = (d.getDate() < 10 ? "0" : "") + d.getDate() + dsep + d.getFullYear();
 			if(!g) ret += " " + (d.getHours()<10?"0":"") + d.getHours() + ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();
@@ -1063,14 +1062,14 @@ var ilm = (function (my) {
 				jsonp: "callback",
 				jsonpCallback: "wg_data"
 			}).done(function (json) {
-				var wg = json.fcst.fcst[3];
-				var wgd = (function (d) {
+				var wg = json.fcst.fcst[3],
+				wgd = (function (d) {
 						return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
-					})(wg.initdate.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/));
-				d = (wgd.getTime()) - (new Date().getTimezoneOffset() * 60 * 1000) + 1800000;
+					})(wg.initdate.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/)),
+				d = (wgd.getTime()) - (new Date().getTimezoneOffset() * 60 * 1000) + 1800000,
 				//console.log("wg time " + wgd + " " + new Date(d));
-				var t = 0;
-				for (var i = 0, j = wg.hours.length; i < j; ++i) {
+				t = 0, i = 0, j = wg.hours.length;
+				for (; i < j; ++i) {
 					if (wg.hours[i] > 72) { break; }
 					//console.log("wg thing " + wg.hours[i] + " " + new Date(d));
 					t = d + (wg.hours[i] * 3600 * 1000);

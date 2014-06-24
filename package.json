@@ -1,7 +1,9 @@
 {
   "name": "ilmcharts",
   "description": "Domestic weather application http://ilm.majasa.ee",
-  "version": "1.1.0",
+  "version": "1.1.1",
+  "language": "et",
+  "charset": "utf-8",
   "keywords": [
     "weather",
     "graph"
@@ -11,7 +13,6 @@
   "scripts": {
     "test": "grunt test"
   },
-  "style": "./css/style.css",
   "repository": {
     "type": "git",
     "url": "https://github.com/aivoprykk/ilmcharts.git"
@@ -29,6 +30,7 @@
     "grunt-contrib-uglify": "0.3.2",
     "grunt-contrib-csslint": "~0.2.0",
     "grunt-contrib-cssmin": "~0.7.0",
+    "grunt-contrib-jade": "~0.9.1",
     "grunt-contrib-jshint": "*",
     "grunt-contrib-jscs": "*",
     "grunt-contrib-watch": "*",
@@ -38,6 +40,7 @@
     "grunt-sed": "~0.1.1",
     "grunt-git-authors": "1.2.0",
     "load-grunt-tasks": "0.3.0",
+    "grunt-html-validation": "~0.1.13",
     "underscore": "~1.6.0",
     "backbone": "~1.1.2",
     "jquery": "~2.1.1",

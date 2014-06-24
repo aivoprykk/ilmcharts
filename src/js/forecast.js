@@ -287,14 +287,14 @@
 				jsonp: "callback",
 				jsonpCallback: "wg_data"
 			}).done(function (json) {
-				var wg = json.fcst.fcst[3];
-				var wgd = (function (d) {
+				var wg = json.fcst.fcst[3],
+				wgd = (function (d) {
 						return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
-					})(wg.initdate.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/));
-				d = (wgd.getTime()) - (new Date().getTimezoneOffset() * 60 * 1000) + 1800000;
+					})(wg.initdate.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/)),
+				d = (wgd.getTime()) - (new Date().getTimezoneOffset() * 60 * 1000) + 1800000,
 				//console.log("wg time " + wgd + " " + new Date(d));
-				var t = 0;
-				for (var i = 0, j = wg.hours.length; i < j; ++i) {
+				t = 0, i = 0, j = wg.hours.length;
+				for (; i < j; ++i) {
 					if (wg.hours[i] > 72) { break; }
 					//console.log("wg thing " + wg.hours[i] + " " + new Date(d));
 					t = d + (wg.hours[i] * 3600 * 1000);

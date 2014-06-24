@@ -35,6 +35,10 @@ module.exports = function (grunt) {
       ]
     },
     concat: {
+    	html: {
+			src: 'src/html/index.html',
+			dest: 'public/index.html'
+		},
     	css: {
 			options: {
 				stripBanners: false,
@@ -199,6 +203,54 @@ module.exports = function (grunt) {
         filter: 'isFile'
       }
     },
+    jade: {
+      options: {
+          data: {
+          	  title: "Ilmajaam",
+          	  lang: '<%= pkg.language %>',
+          	  charset: '<%= pkg.charset %>',
+          	  desc: '<%= pkg.description %>',
+          	  giturl: '<%= pkg.repository.url %>',
+          	  cssapp: 'css/<%= pkg.name %>.min.css',
+          	  jsapp: 'js/<%= pkg.name %>.min.js',
+          	  jscontrib: 'js/libs.min.js'
+          }
+      },
+      dist: {
+        options: {
+          pretty: false,
+          filters: {
+          	  min: function(block){return block.replace(/\r?\n/g,'');}
+          },
+        },
+        files: {
+          'public/index.html': 'src/jade/index.jade'
+        }
+      },
+      dev: {
+        options: {
+          pretty: true,
+        },
+        files: {
+          'public/index.debug.html': 'src/jade/index.jade'
+        }
+      }
+    },
+    validation: {
+      options: {
+        charset: 'utf-8',
+        doctype: 'HTML5',
+        failHard: true,
+        reset: true,
+        relaxerror: [
+          'Bad value X-UA-Compatible for attribute http-equiv on element meta.',
+          'Element img is missing required attribute src.'
+        ]
+      },
+      files: {
+        src: 'src/**/*.html'
+      }
+    },
     watch: {
       gruntfile: {
 		  files: 'Gruntfile.js',
@@ -207,9 +259,23 @@ module.exports = function (grunt) {
           livereload: true,
         }
       },
+      jade: {
+        files: 'src/**/*.jade',
+        tasks: ['jade'],
+        options: {
+          livereload: true,
+        }
+      },
+      html: {
+        files: 'src/**/*.html',
+        tasks: ['validate','concat:html'],
+        options: {
+          livereload: true,
+        }
+      },
       js: {
         files: '<%= concat.js.src %>',
-        tasks: ['jshint:src', 'concat:src', 'uglify:src'],
+        tasks: ['jshint:src', 'concat:js', 'uglify:src'],
         options: {
           livereload: true,
         }
@@ -232,7 +298,10 @@ module.exports = function (grunt) {
         recursive: true
       }
     },
-
+	index: {
+		src: 'src/html/index.html',
+		dest: 'public/index.html'
+	},
     exec: {
       npmUpdate: {
         command: 'npm update'
@@ -251,13 +320,18 @@ module.exports = function (grunt) {
   // CSS distribution task.
   grunt.registerTask('dist-css', ['concat:css', 'cssmin', 'copy']);
 
+  // HTML distribution task.
+  grunt.registerTask('dist-html', ['concat:html']);
+  grunt.registerTask('dist-jade', ['jade:dist']);
+  grunt.registerTask('dev-jade', ['jade:dev']);
+
   grunt.registerTask('test-js', ['jshint', 'jscs:src']);
   grunt.registerTask('test-css', ['csslint:src']);
+  grunt.registerTask('test-html', ['validation']);
   grunt.registerTask('test', ['test-js', 'test-css']);
 
   // Full distribution task.
-  grunt.registerTask('dist', ['clean', 'dist-css', 'dist-js']);
-
+  grunt.registerTask('dist', ['clean', 'dist-css', 'dist-js', 'jade']);
   // Default task.
   grunt.registerTask('default', ['dist']);
 
