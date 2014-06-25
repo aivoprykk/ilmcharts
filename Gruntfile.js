@@ -26,7 +26,15 @@ module.exports = function (grunt) {
             ' * Licensed under <%= pkg.license.type %> (<%= pkg.license.url %>)\n' +
             ' */\n',
     jqueryCheck: 'if (typeof jQuery === \'undefined\') { throw new Error(\'Ilmcharts\\\'s JavaScript requires jQuery\') }\n\n',
-
+    publicDir: '/public',
+    publicJs: '<%=publicDir%>/js',
+    publicCss: '<%=publicDir%>/css',
+    srcDir: '/src',
+    srcJs: '<%=srcDir%>/js',
+    srcCss: '<%=srcDir%>/css',
+    srcHtml: '<%=srcDir%>/html',
+    srcJade: '<%=srcDir%>/jade',
+    contribDir: '/contrib',
     // Task configuration.
     clean: {
       dist: [
@@ -140,7 +148,40 @@ module.exports = function (grunt) {
       		"standard": "Jquery"
         },
       	files: {
-      		src: '<%= concat.src.src %>'
+      		src: '<%= concat.js.src %>'
+      	}
+      },
+      debug: {
+      	options: {
+      		"standard": "Jquery",
+      		"disallowTrailingWhitespace": true,
+      		"requireCurlyBraces": null,
+      		"requireSpaceAfterKeywords": [
+				"if",
+				"else",
+				"for",
+				"while",
+				"do",
+				"switch",
+				"return",
+				"try",
+				"catch"
+			],
+			"requireSpaceBeforeBlockStatements": true,
+			"requireSpacesInConditionalExpression": {
+				"afterTest": true,
+				"beforeConsequent": true,
+				"afterConsequent": true,
+				"beforeAlternate": true
+			},
+			"requireSpacesInFunctionExpression": {
+				"beforeOpeningRoundBrace": true,
+				"beforeOpeningCurlyBrace": true
+			},
+      		"report" : "xml"
+        },
+      	files: {
+      		src: '<%= concat.js.src %>'
       	}
       }
     },
@@ -203,25 +244,28 @@ module.exports = function (grunt) {
         filter: 'isFile'
       }
     },
+    jadeOpt: {
+	  title: "Ilmajaam",
+	  name: '<%= pkg.name %>',
+	  lang: '<%= pkg.language %>',
+	  charset: '<%= pkg.charset %>',
+	  desc: '<%= pkg.description %>',
+	  giturl: '<%= pkg.repository.url %>',
+      css: 'css/<%= pkg.name %>',
+      js: 'js/<%= pkg.name %>',
+      contrib: 'js/libs',
+    },
     jade: {
-      options: {
-          data: {
-          	  title: "Ilmajaam",
-          	  lang: '<%= pkg.language %>',
-          	  charset: '<%= pkg.charset %>',
-          	  desc: '<%= pkg.description %>',
-          	  giturl: '<%= pkg.repository.url %>',
-          	  cssapp: 'css/<%= pkg.name %>.min.css',
-          	  jsapp: 'js/<%= pkg.name %>.min.js',
-          	  jscontrib: 'js/libs.min.js'
-          }
-      },
       dist: {
         options: {
+          data: {
+          	  opt: '<%= jadeOpt %>',
+          	  dev: false
+          },
           pretty: false,
           filters: {
           	  min: function(block){return block.replace(/\r?\n/g,'');}
-          },
+          }
         },
         files: {
           'public/index.html': 'src/jade/index.jade'
@@ -229,7 +273,11 @@ module.exports = function (grunt) {
       },
       dev: {
         options: {
-          pretty: true,
+          data: {
+          	  opt: '<%= jadeOpt %>',
+          	  dev:true
+          },
+          pretty: true
         },
         files: {
           'public/index.debug.html': 'src/jade/index.jade'
@@ -247,8 +295,15 @@ module.exports = function (grunt) {
           'Element img is missing required attribute src.'
         ]
       },
-      files: {
-        src: 'src/**/*.html'
+      src: {
+		  files: {
+			src: 'src/**/*.html'
+		  }
+	  },
+      pub: {
+		  files: {
+			src: 'public/*.html'
+		  }      	  
       }
     },
     watch: {
@@ -261,14 +316,14 @@ module.exports = function (grunt) {
       },
       jade: {
         files: 'src/**/*.jade',
-        tasks: ['jade'],
+        tasks: ['jade','validate:pub'],
         options: {
           livereload: true,
         }
       },
       html: {
         files: 'src/**/*.html',
-        tasks: ['validate','concat:html'],
+        tasks: ['validate:src','concat:html'],
         options: {
           livereload: true,
         }
@@ -324,11 +379,15 @@ module.exports = function (grunt) {
   grunt.registerTask('dist-html', ['concat:html']);
   grunt.registerTask('dist-jade', ['jade:dist']);
   grunt.registerTask('dev-jade', ['jade:dev']);
+  
 
   grunt.registerTask('test-js', ['jshint', 'jscs:src']);
+  grunt.registerTask('test-js-debug', ['jshint', 'jscs:debug']);
   grunt.registerTask('test-css', ['csslint:src']);
-  grunt.registerTask('test-html', ['validation']);
-  grunt.registerTask('test', ['test-js', 'test-css']);
+  grunt.registerTask('test-html', ['validation:src']);
+  grunt.registerTask('test-jade', ['validation:pub']);
+  
+  grunt.registerTask('test', ['test-js', 'test-css', 'test-html','test-jade']);
 
   // Full distribution task.
   grunt.registerTask('dist', ['clean', 'dist-css', 'dist-js', 'jade']);

@@ -5,9 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Domestic weather application http://ilm.majasa.ee">
-    <link rel="stylesheet" href="css/ilmcharts.min.css" media="screen"><!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js">
-    </script><![endif]-->
+    <link rel="stylesheet" href="css/ilmcharts.css" media="screen">
+    <!-- [if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
   </head>
   <body style="padding-top:25px">
     <div id="header">
@@ -44,9 +43,8 @@
     <div id="sisu" class="ilm-sisu">
       <div id="container" class="col-lg-12">
         <div class="float col-lg-6">
-          <div class="title btn-group"><a id="curplace" style="display:none" class="btn btn-default btn-xs navbar-btn"></a><a id="curtime" style="display:none" class="btn btn-default btn-xs navbar-btn"></a>
-            <input id="datepicker" type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0">
-          </div>
+          <div class="title btn-group"><a id="curplace" style="display:none" class="btn btn-default btn-xs navbar-btn"></a><a id="curtime" style="display:none" class="btn btn-default btn-xs navbar-btn"></a></div>
+          <input id="datepicker" type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0">
           <div class="meta">
             <div id="curmeta" class="ilm-meta"></div>
           </div>
@@ -64,7 +62,7 @@
       <div id="popup_in" class="panel-heading"><b class="panel-title"><a id="sl" href="#" onclick="return ilm.Popup();" class="ilm-sl">Sulge</a></b></div>
       <div id="lingid" class="panel-body"></div>
     </div>
-    <script src="js/libs.min.js"></script>
-    <script src="js/ilmcharts.min.js"></script>
+    <script src="js/libs.js"></script>
+    <script src="js/ilmcharts.js"></script>
   </body>
 </html>
