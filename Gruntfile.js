@@ -145,7 +145,6 @@ module.exports = function (grunt) {
       },
       src: {
       	options: {
-      		"standard": "Jquery"
         },
       	files: {
       		src: '<%= concat.js.src %>'
@@ -154,31 +153,8 @@ module.exports = function (grunt) {
       debug: {
       	options: {
       		"standard": "Jquery",
-      		"disallowTrailingWhitespace": true,
-      		"requireCurlyBraces": null,
-      		"requireSpaceAfterKeywords": [
-				"if",
-				"else",
-				"for",
-				"while",
-				"do",
-				"switch",
-				"return",
-				"try",
-				"catch"
-			],
-			"requireSpaceBeforeBlockStatements": true,
-			"requireSpacesInConditionalExpression": {
-				"afterTest": true,
-				"beforeConsequent": true,
-				"afterConsequent": true,
-				"beforeAlternate": true
-			},
-			"requireSpacesInFunctionExpression": {
-				"beforeOpeningRoundBrace": true,
-				"beforeOpeningCurlyBrace": true
-			},
-      		"report" : "xml"
+      		"report" : "checkstyle",
+      		"report-file" : "public/jscs-report.html"
         },
       	files: {
       		src: '<%= concat.js.src %>'
@@ -240,6 +216,13 @@ module.exports = function (grunt) {
         expand: true,
         flatten: true,
         src: 'node_modules/jquery-ui/themes/base/images/*',
+        dest: 'public/css/images',
+        filter: 'isFile'
+      },
+      app: {
+        expand: true,
+        flatten: true,
+        src: 'src/css/images/*',
         dest: 'public/css/images',
         filter: 'isFile'
       }

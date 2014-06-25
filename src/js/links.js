@@ -1,5 +1,9 @@
 (function (my) {
 	var w = window, $ = w.$;
+	w.openNew = w.openNew || function(url) {
+		w.open(url,'_new');
+		return false;
+	};
 	my.lingid = my.lingid || {
 		JSON: {
 			'list': [ 

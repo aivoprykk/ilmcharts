@@ -2,11 +2,12 @@ doctype html
 - min = (dev  ? '' : '.min')
 html(lang=opt.lang)
 	head
-		title= opt.title
+		title= opt.title + (dev  ? ' :: R&D' : '')
 		meta(charset=opt.charset)
 		meta(name="viewport", content="width=device-width")
 		meta(name="description" content=opt.desc)
 		link(rel="stylesheet", href= opt.css + min + '.css', media="screen")
+		link(rel="shortcut icon" type="image/x-icon" href="css/images/favicon.ico")
 		// [if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]
 	body(style='padding-top:25px')
 		#header
