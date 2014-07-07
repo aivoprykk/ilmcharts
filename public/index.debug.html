@@ -44,14 +44,18 @@
     <div id="sisu" class="ilm-sisu">
       <div id="container" class="col-lg-12">
         <div class="float col-lg-6">
-          <div class="title btn-group"><a id="curplace" style="display:none" class="btn btn-default btn-xs navbar-btn"></a><a id="curtime" style="display:none" class="btn btn-default btn-xs navbar-btn"></a></div>
+          <div class="title btn-group"><a id="curplace" style="display:none" class="btn btn-default btn-xs navbar-btn"></a><a id="curtime" style="display:none" class="btn btn-default btn-xs navbar-btn"></a><a id="cursel" style="display:none" data-toggle="dropdown" class="btn btn-default btn-xs navbar-btn dropdown-toggle"><span class="caret"></span></a>
+            <ul id="curmenu" role="menu" class="curmenu dropdown-menu"></ul>
+          </div>
           <input id="datepicker" type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0">
           <div class="meta">
             <div id="curmeta" class="ilm-meta"></div>
           </div>
         </div>
         <div class="float col-lg-6">
-          <div class="title"><a id="fctitle" style="display:none" class="btn btn-default btn-xs navbar-btn"></a></div>
+          <div class="title btn-group"><a id="fctitle" style="display:none" class="btn btn-default btn-xs navbar-btn"></a><a id="fcsel" style="display:none" data-toggle="dropdown" class="btn btn-default btn-xs navbar-btn dropdown-toggle"><span class="caret"></span></a>
+            <ul id="fcmenu" role="menu" class="fcmenu dropdown-menu"></ul>
+          </div>
           <div class="meta">
             <div id="yrmeta" class="ilm-meta"></div>
             <div id="wgmeta" class="ilm-meta"></div>

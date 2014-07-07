@@ -4,6 +4,7 @@ lab=0
 force=0
 test=0
 dry=""
+last=""
 dir=`dirname $0`
 echo "$dir" | grep -q '^/' || dir=`pwd`/$dir
 path=`echo "$dir"|sed -e 's/\/\?bin//'`
@@ -37,18 +38,34 @@ cd $path
 date=`date '+%F'`
 min=`date '+%H:%M'`;
 
+i=0
+cat $path/places.conf|grep -v '^#'|while read j; do
+#for j in "${places[@]}"; do
+
+IFS=:
+set $j
+place=$1
+title=$2
+wg=$3
+yr=$4
+emhi=$5
+IFS=' '
+
 (
 cd public
-[ $test -eq 0 ] || exit;
+#echo $place":"$title;
+[ $test -eq 0 ] || continue;
+[ x"$place" = x"" ] && continue;
+if [ x"$emhi" != x"" ]; then
+emhi_url='http://www.ilmateenistus.ee/meri/vaatlusandmed/'$emhi'/10-minuti-andmed/';
+emhi_out="emhi_data/"$place
+emhi_temp="arc-file-$place.html"
+emhi_file="ARC-"$date".txt"
 
-emu_url="http://energia.emu.ee/weather/Archive/";
-emu_out=emu_data
-emu_file="ARC-"$date".txt"
+[ -d "$emhi_out" ] || mkdir -p "$emhi_out"
 
-[ -d "$emu_out" ] || mkdir "$emu_out"
-
-if [ -f $emu_out/$emu_file ]; then
-last_stamp=`cat $emu_out/$emu_file|tail -1|awk '{ sub("([0-9][0-9][0-9][0-9])","&-",$1);sub("-([0-9][0-9])","&-"); print " " $1 " " $2 }'`
+if [ -f $emhi_out/$emhi_file ]; then
+last_stamp=`cat $emhi_out/$emhi_file|tail -1|awk '{ sub("([0-9][0-9][0-9][0-9])","&-",$1);sub("-([0-9][0-9])","&-"); print " " $1 " " $2 }'`
 last_min=`echo $last_stamp|awk '{sub("[0-9][0-9]:","",$2);sub("^0","",$2);print $2}';`
 last_hour=`echo $last_stamp|awk '{sub(":[0-9][0-9]","",$2);sub("^0","",$2);print $2}';`
 cur_min=`echo $min|sed -e 's/.*://;s/^0//'`
@@ -62,30 +79,35 @@ let 'm=cur_min-last_min';
   [ $m -lt 0 ] && {
     let 'm=cur_min+60-last_min'
   }
-  [ $m -ge 0 -a $m -lt 5 ] && {
+  [ $h -ne 1 -a $m -ge 0 -a $m -lt 11 ] && {
     if [ $lab -gt 0 ]; then
-      echo "minuteid vahem kui viis: $min > $last_stamp";
+      echo "minuteid vahem kui 11: $min > $last_stamp";
     fi
     [ $force -eq 0 ] && exit;
   }
-  [ $m -eq 5 ] && {
+  [ $h -eq 0 -a $m -eq 11 ] && {
     s=`date '+%S'`
     w=8
     if [ $s -lt $w ]; then
       let 's=w-s'
       [ $force -eq 0 ] && sleep $s
     fi 
-  } 
+  }
 }  
+last=$last_stamp
 fi
 
 if [ $lab -gt 0 ]; then
-  echo "wget -U 'WG' -q -O $emu_out/$emu_file $emu_url$emu_file at `date '+%F %T'`"
+  echo "wget -q -O '$emhi_out/$emhi_temp' '$emhi_url' at `date '+%F %T'`"
 fi
 if [ x"$dry" = x"" ]; then
-  wget -U 'Wget for ilm.majasa.ee/' -q -O $emu_out/$emu_file $emu_url$emu_file
+  wget -q -O "$emhi_out/$emhi_temp" "$emhi_url"
+  node $dir"/parse_emhi.js" $emhi_out/$emhi_temp
+  rm -f $emhi_out"/"$emhi_temp
+fi
 fi
 )
+done
 )
 
 exit 0

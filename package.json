@@ -47,6 +47,10 @@
     "jquery-ui": "~1.10.5",
     "bootstrap": "~3.1.1"
   },
+  "dependencies": {
+    "cheerio": "*",
+    "request": "*"
+  },
   "scripts": {
     "build": "npm install && grunt"
   }

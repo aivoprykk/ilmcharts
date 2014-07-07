@@ -299,14 +299,14 @@ module.exports = function (grunt) {
       },
       jade: {
         files: 'src/**/*.jade',
-        tasks: ['jade','validate:pub'],
+        tasks: ['jade','validation:pub'],
         options: {
           livereload: true,
         }
       },
       html: {
         files: 'src/**/*.html',
-        tasks: ['validate:src','concat:html'],
+        tasks: ['validation:src','concat:html'],
         options: {
           livereload: true,
         }

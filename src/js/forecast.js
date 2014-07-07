@@ -242,9 +242,6 @@
                 })((xml.find ? xml.find(name).text() : xml.getAttribute("from")).match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/));
 			};
 			$xml.find('tabular time').each(function (i, times) {
-				//var yrd = (function (d) {
-				//		return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
-				//	})(times.getAttribute("from").match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/));
 				var yrd = yr_get_time(times,"from");
 				d = (yrd.getTime()) + 1800000;
 				//console.log("yr data " + yrd + " " + new Date(d));
@@ -328,6 +325,13 @@
 				$("#fctitle").html(
 					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(wg.update_last,1)
 				).show();
+				var list = _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {return '<li><a href="#" name="'+a.id+'" class="fcplace-select'+(a.id===my.fcplace?' active':'')+'">'+a.name+'</a></li>';}}).join("");
+				$("#fcmenu").html(list);
+				$("#fcsel").show();
+				$(".fcplace-select").on("click",function(){
+					w.ilm.setEstPlace($(this).attr('name'));
+					w.ilm.reloadest();
+				});
 				$('#yrmeta').html(
 					'<a href="' +
 						'http://www.yr.no/place/Estonia/'+my.fcplaces[my.fcplace].yrlink+'/hour_by_hour.html' + 

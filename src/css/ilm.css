@@ -181,3 +181,7 @@ margin-top: 5px;
 margin-bottom: 4px;
 margin-left: 5px;
 }
+.curmenu, .fcmenu {
+top: 80%;
+left: 50%;
+}

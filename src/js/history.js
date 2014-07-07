@@ -9,7 +9,7 @@
 	var normalizeData = function (data, obj) {
         var dataArray = {};
         var d;
-        if(data.data){
+        if(data && data.data){
 			$.each(data.data, function (a, b) {
 				d = parseInt(b.time_stamp, 10) * 1000;
 				//obj.min_ws_series.data.push([d, my.ntof2p(b.min_wind_speed)]);
@@ -29,31 +29,24 @@
 				my.lastdate = parseInt(data.data[data.data.length - 1].time_stamp, 10) * 1000;
 			}
 			//console.log("count rows processed:" + data.data.length);
-		} else {
-			my.datamode = "emu";
+		} else if (data) {
+			//my.datamode = "emu";
 			//emu data
 			var c,e,f;
 			$.each(data.split("\n"),function(a, b) {
-					if (b && !b.match(/^--/)) {
-						c = b.split(/\s+?/);
-						c[9] = (c[9] < 0) ? 0 : c[9];
-						if(c[1].match(/5$/)){
-							e=c;
-							//console.log("viiega:"+c[1]);
-						} else {
-							my.lastdate=d=new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1/$2/$3")+" "+c[1]).getTime();
-							//console.log(my.getTimeStr(my.lastdate) + " " + my.timeframe + " " + (my.start-my.lastdate))
-							if(my.timeframe && (my.start-my.lastdate) <= my.timeframe) {
-								//obj.min_ws_series.data.push([d, my.ntof2p(c[12])]);
-								//console.log("wind_avg("+c[7]+" "+my.conv_knot2ms(my.ntof2p(c[7]))+" "+my.conv_kmh2ms(my.ntof2p(c[7]))+" "+my.conv_mh2ms(my.ntof2p(c[7]))+")");
-								//obj.avg_ws_series.data.push([d, my.ntof2p(c[7])]);
-								//obj.max_ws_series.data.push([d, my.ntof2p(c[8])]);
-								
+				if (b && !b.match(/^--/)) {
+					c = b.split(/\s+?/);
+					c[9] = (!c[9] || c[9] < 0) ? 0 : c[9];
+					if(c[1].match(/5$/)){
+						e=c;
+						//console.log("viiega:"+c[1]); //
+					} else {
+						my.lastdate = d = new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1/$2/$3")+" "+c[1]).getTime();
+						if(my.timeframe && (my.start-my.lastdate) <= my.timeframe) {
+							if(my.curplace==='emu'){
 								obj.avg_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7]))]);
 								obj.max_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8]))]);
-								//obj.min_wd_series.data.push([d, my.ntof2p(c[12])]);
 								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.getavg([c[9], e[9]]) : c[9])]);
-								//obj.max_wd_series.data.push([d, my.ntof2p(b.max_wind_direction)]);
 								obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
 								obj.avg_dp_series.data.push([d, my.ntof2p((e) ? my.getavg([c[6], e[6]]) : c[6])]);
 								obj.avg_wc_series.data.push([d, my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
@@ -61,8 +54,18 @@
 								obj.avg_humid_series.data.push([d, my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5])]);
 								obj.avg_press_series.data.push([d, my.ntof2p((e) ? my.getavg([c[11], e[11]]) : c[11])]);
 							}
+							else if(/emhi/.test(my.curplace)){
+								c[4] = (!c[4] || c[4] < -49) ? null : c[4];
+								obj.avg_ws_series.data.push([d, my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7])]);
+								obj.max_ws_series.data.push([d, my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8])]);
+								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.getavg([c[9], e[9]]) : c[9])]);
+								if(c[4]!==null) obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
+								obj.avg_wc_series.data.push([d,my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
+								obj.avg_wl_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
+							}
 						}
-					}						
+					}
+				}
 			});
 		}
 	};
@@ -254,6 +257,19 @@
 			title: {
 				text: null
 			}
+		}, { // 5. waterlevel
+			gridLineWidth: 0,
+			labels: {
+				formatter: function () {
+					return this.value + 'cm';
+				},
+				style: {
+					color: '#4572A7'
+				}
+			},
+			title: {
+				text: null
+			}
 		}],	
 		tooltip: {
 			shared: true,
@@ -303,6 +319,7 @@
 			s.avg_rain_series = $.extend(true, {}, d_series, {color: '#4572A7', type: 'column', lineWidth: 0, yAxis: 3, name: "Sademed", tooltip: { valueSuffix: ' mm' }});
 			s.avg_dp_series = $.extend(true, {}, d_series, {lineWidth: 1, name: "Kastepunkt", color: "#0d233a"});
 			s.avg_wc_series = $.extend(true, {}, d_series, {lineWidth: 1, name: "Tuuletemp", color: "#8bbc21"});
+			s.avg_wl_series = $.extend(true, {color: "#2f7ed8", name: "Veetase", negativeColor: 'green', tooltip: { valueSuffix: ' cm' }}, d_series);
 
 			normalizeData(json, s);
 			
@@ -326,6 +343,14 @@
 			);*/
 			$("#curplace").html('Andmed <b>'+my.curplaces[my.curplace].name+'</b>').show();
 			$("#curtime").html(my.getTimeStr(d,1,my.historyactive?1:0)).show();
+			var list = _.map(my.curplaces,function(a){if(!my.showgroup||my.curplaces[a.id].group===my.showgroup) {return '<li><a href="#" name="'+a.id+'" class="curplace-select'+(a.id===my.curplace?' active':'')+'">'+a.name+'</a></li>';}}).join("");
+			$("#curmenu").html(list);
+			$("#cursel").show();
+			$(".curplace-select").on("click",function(){
+					w.ilm.setCurPlace($(this).attr('name'));
+					w.ilm.reload();
+					//return false;
+			});
 			
 			if (s.avg_ws_series.data.length) {
 			options.wind_speed.title.text = 
@@ -341,13 +366,15 @@
 			} else {
 			options.wind_dir.title.text = "Tuule suuna andmed puuduvad";
 			}
-			if (s.avg_temp_series.data.length) {
+			if (s.avg_temp_series.data.length||s.avg_wl_series.data.length) {
 			options.temp.title.text =
-				" Temperatuur"+(!my.historyactive? " [ <b>" + s.avg_temp_series.data[s.avg_temp_series.data.length - 1][1] + "</b> °C ]":"")+"," +
-					" Rõhk"+(!my.historyactive? " [ <b>" + s.avg_press_series.data[s.avg_press_series.data.length - 1][1] + "</b> hPa ]":"")+"," +
-					" Niiskus"+(!my.historyactive? " [ <b>" + s.avg_humid_series.data[s.avg_humid_series.data.length - 1][1] + "</b> % ]":"");
+				(s.avg_temp_series.data.length ? " Temperatuur"+(!my.historyactive? " [ <b>" + s.avg_temp_series.data[s.avg_temp_series.data.length - 1][1] + "</b> °C ]":"")+",":"") +
+					(s.avg_press_series.data.length ? " Rõhk"+(!my.historyactive? " [ <b>" + s.avg_press_series.data[s.avg_press_series.data.length - 1][1] + "</b> hPa ]":"")+",":"") +
+					(s.avg_humid_series.data.length ? " Niiskus"+(!my.historyactive? " [ <b>" + s.avg_humid_series.data[s.avg_humid_series.data.length - 1][1] + "</b> % ]":""):"") +
+					(!s.avg_humid_series.data.length && s.avg_wc_series.data ? " Veetemperatuur"+(!my.historyactive? " [ <b>" + s.avg_wc_series.data[s.avg_wc_series.data.length - 1][1] + "</b> °C ]":""):"") +
+					(!s.avg_humid_series.data.length && s.avg_wl_series.data ? " Veetase"+(!my.historyactive? " [ <b>" + s.avg_wl_series.data[s.avg_wl_series.data.length - 1][1] + "</b> cm ]":""):"");
 			} else {
-			options.temp.title.text = "Temperatuuri andmed puuduvad";
+				options.temp.title.text = "Temperatuuri andmed puuduvad";
 			}
 
 			options.wind_dir.series = null;
@@ -364,6 +391,7 @@
 			options.temp.series.push(s.avg_wc_series);
 			options.temp.series.push(s.avg_humid_series);
 			options.temp.series.push(s.avg_press_series);
+			options.temp.series.push(s.avg_wl_series);
 			
 			
 			options.wind_speed.chart.renderTo = 'wind_speed1';
@@ -379,15 +407,21 @@
 					//new Date(my.lastdate).toLocaleString() +
 					my.getTimeStr(my.lastdate) +
 					', Järgmine uuendus: ' +
-					//new Date(my.lastdate + updateinterval).toLocaleString() +
 					my.getTimeStr(my.lastdate + updateinterval)
 			);
     };
     
-    var setEmuFileName = function (d) {
+    var setTxtFileName = function (d) {
     	d = new Date(d);
 		var daystr = d.getFullYear() + "-" + (d.getMonth() < 9 ? "0" : "") + (d.getMonth() + 1) + "-" + (d.getDate() < 10 ? "0" : "") + d.getDate();
-		return "emu_data/ARC-"+daystr+'.txt';
+		return "ARC-"+daystr+'.txt';
+    };
+    var setEmuFileName = function (d) {
+		return "emu_data/"+setTxtFileName(d);
+    };
+    var setEmhiFileName = function (d,place) {
+    	place=place.replace(/emhi_/,'');
+		return "emhi_data/"+place+"/"+setTxtFileName(d);
     };
     
 	my.loadCur = function (url) {
@@ -403,10 +437,16 @@
 				ajaxopt={};
 				my.dataurl = setEmuFileName(d);
 			}
+			else if(/emhi/.test(my.curplace)) {
+				ajaxopt={};
+				my.dataurl = setEmhiFileName(d, my.curplace);
+			}
 			//console.log("Get source: " + my.dataurl);
-			$.ajax({url: my.dataurl, data: ajaxopt}).done(function (json) {
-				json_full += json;
-				if(my.curplace === "emu" && (d-1+(24 * 3600 * 1000)) < now) {
+			$.ajax({url: my.dataurl, data: ajaxopt}).always(function (json,type) {
+				if(!/error|timeout/.test(type)){
+					json_full += json;
+				}
+				if((my.curplace === "emu" || /emhi/.test(my.curplace)) && (d-1+(24 * 3600 * 1000)) < now) {
 					d += (24 * 3600 * 1000);
 					cb(d);
 				} else {

@@ -45,12 +45,18 @@ html(lang=opt.lang)
 					div.title.btn-group
 						a#curplace.btn.btn-default.btn-xs.navbar-btn(style="display:none")
 						a#curtime.btn.btn-default.btn-xs.navbar-btn(style="display:none")
+						a#cursel.btn.btn-default.btn-xs.navbar-btn.dropdown-toggle(style="display:none" data-toggle="dropdown")
+							span.caret
+						ul#curmenu.curmenu.dropdown-menu(role="menu")
 					input#datepicker(type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0")
 					div.meta
 						#curmeta.ilm-meta
 				div.float.col-lg-6
-					div.title
+					div.title.btn-group
 						a#fctitle.btn.btn-default.btn-xs.navbar-btn(style="display:none")
+						a#fcsel.btn.btn-default.btn-xs.navbar-btn.dropdown-toggle(style="display:none" data-toggle="dropdown")
+							span.caret
+						ul#fcmenu.fcmenu.dropdown-menu(role="menu")
 					div.meta
 						#yrmeta.ilm-meta
 						#wgmeta.ilm-meta

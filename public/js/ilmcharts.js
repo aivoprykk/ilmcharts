@@ -16,7 +16,8 @@ var ilm = (function (my) {
 			timeframe :  opt.timeframe||24*3600*1000,
 			fcplace : opt.fcplace||'tabivere',
 			curplace : opt.curplace||'emu',
-			chartorder : ["temp","wind_speed","wind_dir"]
+			chartorder : ["temp","wind_speed","wind_dir"],
+			showgroup : ""
 		};
 		this.id = defaults.id;
 		this.attr = defaults;
@@ -40,7 +41,7 @@ var ilm = (function (my) {
 			var changed = false;
 			for(var a in this.attr) {
 				if(a !== "id" && opt[a] && opt[a] !== this.attr[a]) {
-					this.attr[a] = opt[a];
+					this.attr[a] = (opt[a]==='none')?'':opt[a];
 					changed = true;
 					console.log(a + " " + opt[a]);
 				}
@@ -68,12 +69,32 @@ var ilm = (function (my) {
 		this.placeholder = placeholder || '#container';
 		this.dataurl = "/cgi-bin/cpp/ilm/image.cgi?t=json";
 		this.digits = 1;
-		this.fcplaces = {"tabivere":{id:"tabivere",name:'Saadjärv',wglink:"266923",yrlink:"Jõgevamaa/Tabivere~587488"}, "tamme":{id:"tamme",name:'Võrtsjärv',"wglink":192609,yrlink:"Tartumaa/Tamme"}};
+		this.fcplaces = {
+			"tabivere":{id:"tabivere",name:'Saadjärv',wglink:"266923",yrlink:"Jõgevamaa/Tabivere~587488",group:"jarv"},
+			"tamme":{id:"tamme",name:'Võrtsjärv',"wglink":192609,yrlink:"Tartumaa/Tamme",group:"jarv"},
+			//"nina":{id:"nina",name:'Peipsi Nina',"wglink":20401,yrlink:"Tartumaa/Nina",group:"jarv"},
+			"rapina":{id:"rapina",name:'Peipsi Räpina',"wglink":183648,yrlink:"Põlvamaa/Võõpsu",group:"jarv"},
+			"pirita":{id:"pirita",name:'Pirita',"wglink":125320,yrlink:"Harjumaa/Pirita~798565",group:"meri"},
+			"rohuneeme":{id:"rohuneeme",name:'Püünsi',"wglink":70524,yrlink:"Harjumaa/Rohuneeme",group:"meri"},
+			"topu":{id:"topu",name:'Topu',"wglink":18713,yrlink:"Läänemaa/Topu",group:"meri"},
+			"parnu":{id:"parnu",name:'Pärnu',"wglink":92781,yrlink:"Pärnumaa/Pärnu",group:"meri"},
+			"haademeeste":{id:"haademeeste",name:'Häädemeeste',"wglink":246420,yrlink:"Pärnumaa/Häädemeeste",group:"meri"},
+			"ristna":{id:"ristna",name:'Ristna',"wglink":96592,yrlink:"Hiiumaa/Ristna",group:"meri"}
+		};
 		this.fcplace = this.state.attr.fcplace;
-		this.curplaces = {"emu":{id:"emu",name:"Tartu EMU"}};
+		this.curplaces = {
+			"emu":{id:"emu",name:"Tartu EMU",group:"jarv"},
+			"emhi_pirita":{id:"emhi_pirita",name:"Pirita EMHI",group:"meri"},
+			"emhi_rohuneeme":{id:"emhi_rohuneeme",name:"Püünsi EMHI",group:"meri"},
+			"emhi_topu":{id:"emhi_topu",name:"Haapsalu EMHI",group:"meri"},
+			"emhi_parnu":{id:"emhi_parnu",name:"Pärnu EMHI",group:"meri"},
+			"emhi_haademeeste":{id:"emhi_haademeeste",name:'Häädemeeste EMHI',group:"meri"},
+			"emhi_ristna":{id:"emhi_ristna",name:"Ristna EMHI",group:"meri"}
+		};
 		this.curplace = this.state.attr.curplace;
 		this.datamode = this.state.attr.datamode;
 		this.timeframe = this.state.attr.timeframe;
+		this.showgroup = this.state.attr.showgroup;
 		this.lastdate = new Date().getTime();//-(4*24*3600);
 		this.date = 0;
 		this.start = this.lastdate;
@@ -272,6 +293,16 @@ var ilm = (function (my) {
 			this.state.set(j);
 			return false;
 		},
+		setGroup: function (d, name) {
+			if(d === "" || (/^(jarv|meri)$/.test(d) && this.showgroup !== d)){
+				this.showgroup = d;
+				this.state.set({showgroup:(d?d:'none')});
+				if(!d) return false;
+				if(this.fcplaces[this.fcplace].group!==this.showgroup) this.setEstPlace(this.nextPlace());
+				if(this.curplaces[this.curplace].group!==this.showgroup) this.setCurPlace(this.nextCurPlace());
+			}
+			return false;
+		},
 		nextCurPlace: function() {
 			return this.nextPlace('curplace');
 		},
@@ -280,13 +311,19 @@ var ilm = (function (my) {
 			var places = this[name + 's'] || this.fcplaces,
 			place = this[name] || this.fcplace,
 			p = '', that = false, j = '', i;
+			//console.log(JSON.stringify(places));
 			for(i in places){
-				if (!j) j = i;
-				if (that) p = i;
+				if (!j && (!this.showgroup || (this.showgroup === places[i].group))) j = i;
+				if (that) {
+					if(!this.showgroup || (this.showgroup === places[i].group)) {
+						p = i; that=false;
+					}
+				}
 				if(i === place) that = true;
+				//console.log(name + ' "' + i + '" ' + place +  " " + (that?"ready":"") + " " + p + " " + this.showgroup);
 			}
 			if(!p) p = j;
-			//console.log(name + ' ' + p + ' ' + place);
+			//console.log("got place " + name + ' ' + p + ' from ' + place);
 			return p;
 		},
 		setDate: function(d) {
@@ -337,7 +374,7 @@ var ilm = (function (my) {
 	var normalizeData = function (data, obj) {
         var dataArray = {};
         var d;
-        if(data.data){
+        if(data && data.data){
 			$.each(data.data, function (a, b) {
 				d = parseInt(b.time_stamp, 10) * 1000;
 				//obj.min_ws_series.data.push([d, my.ntof2p(b.min_wind_speed)]);
@@ -357,31 +394,24 @@ var ilm = (function (my) {
 				my.lastdate = parseInt(data.data[data.data.length - 1].time_stamp, 10) * 1000;
 			}
 			//console.log("count rows processed:" + data.data.length);
-		} else {
-			my.datamode = "emu";
+		} else if (data) {
+			//my.datamode = "emu";
 			//emu data
 			var c,e,f;
 			$.each(data.split("\n"),function(a, b) {
-					if (b && !b.match(/^--/)) {
-						c = b.split(/\s+?/);
-						c[9] = (c[9] < 0) ? 0 : c[9];
-						if(c[1].match(/5$/)){
-							e=c;
-							//console.log("viiega:"+c[1]);
-						} else {
-							my.lastdate=d=new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1/$2/$3")+" "+c[1]).getTime();
-							//console.log(my.getTimeStr(my.lastdate) + " " + my.timeframe + " " + (my.start-my.lastdate))
-							if(my.timeframe && (my.start-my.lastdate) <= my.timeframe) {
-								//obj.min_ws_series.data.push([d, my.ntof2p(c[12])]);
-								//console.log("wind_avg("+c[7]+" "+my.conv_knot2ms(my.ntof2p(c[7]))+" "+my.conv_kmh2ms(my.ntof2p(c[7]))+" "+my.conv_mh2ms(my.ntof2p(c[7]))+")");
-								//obj.avg_ws_series.data.push([d, my.ntof2p(c[7])]);
-								//obj.max_ws_series.data.push([d, my.ntof2p(c[8])]);
-								
+				if (b && !b.match(/^--/)) {
+					c = b.split(/\s+?/);
+					c[9] = (!c[9] || c[9] < 0) ? 0 : c[9];
+					if(c[1].match(/5$/)){
+						e=c;
+						//console.log("viiega:"+c[1]); //
+					} else {
+						my.lastdate = d = new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1/$2/$3")+" "+c[1]).getTime();
+						if(my.timeframe && (my.start-my.lastdate) <= my.timeframe) {
+							if(my.curplace==='emu'){
 								obj.avg_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7]))]);
 								obj.max_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8]))]);
-								//obj.min_wd_series.data.push([d, my.ntof2p(c[12])]);
 								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.getavg([c[9], e[9]]) : c[9])]);
-								//obj.max_wd_series.data.push([d, my.ntof2p(b.max_wind_direction)]);
 								obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
 								obj.avg_dp_series.data.push([d, my.ntof2p((e) ? my.getavg([c[6], e[6]]) : c[6])]);
 								obj.avg_wc_series.data.push([d, my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
@@ -389,8 +419,18 @@ var ilm = (function (my) {
 								obj.avg_humid_series.data.push([d, my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5])]);
 								obj.avg_press_series.data.push([d, my.ntof2p((e) ? my.getavg([c[11], e[11]]) : c[11])]);
 							}
+							else if(/emhi/.test(my.curplace)){
+								c[4] = (!c[4] || c[4] < -49) ? null : c[4];
+								obj.avg_ws_series.data.push([d, my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7])]);
+								obj.max_ws_series.data.push([d, my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8])]);
+								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.getavg([c[9], e[9]]) : c[9])]);
+								if(c[4]!==null) obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
+								obj.avg_wc_series.data.push([d,my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
+								obj.avg_wl_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
+							}
 						}
-					}						
+					}
+				}
 			});
 		}
 	};
@@ -582,6 +622,19 @@ var ilm = (function (my) {
 			title: {
 				text: null
 			}
+		}, { // 5. waterlevel
+			gridLineWidth: 0,
+			labels: {
+				formatter: function () {
+					return this.value + 'cm';
+				},
+				style: {
+					color: '#4572A7'
+				}
+			},
+			title: {
+				text: null
+			}
 		}],	
 		tooltip: {
 			shared: true,
@@ -631,6 +684,7 @@ var ilm = (function (my) {
 			s.avg_rain_series = $.extend(true, {}, d_series, {color: '#4572A7', type: 'column', lineWidth: 0, yAxis: 3, name: "Sademed", tooltip: { valueSuffix: ' mm' }});
 			s.avg_dp_series = $.extend(true, {}, d_series, {lineWidth: 1, name: "Kastepunkt", color: "#0d233a"});
 			s.avg_wc_series = $.extend(true, {}, d_series, {lineWidth: 1, name: "Tuuletemp", color: "#8bbc21"});
+			s.avg_wl_series = $.extend(true, {color: "#2f7ed8", name: "Veetase", negativeColor: 'green', tooltip: { valueSuffix: ' cm' }}, d_series);
 
 			normalizeData(json, s);
 			
@@ -654,6 +708,14 @@ var ilm = (function (my) {
 			);*/
 			$("#curplace").html('Andmed <b>'+my.curplaces[my.curplace].name+'</b>').show();
 			$("#curtime").html(my.getTimeStr(d,1,my.historyactive?1:0)).show();
+			var list = _.map(my.curplaces,function(a){if(!my.showgroup||my.curplaces[a.id].group===my.showgroup) {return '<li><a href="#" name="'+a.id+'" class="curplace-select'+(a.id===my.curplace?' active':'')+'">'+a.name+'</a></li>';}}).join("");
+			$("#curmenu").html(list);
+			$("#cursel").show();
+			$(".curplace-select").on("click",function(){
+					w.ilm.setCurPlace($(this).attr('name'));
+					w.ilm.reload();
+					//return false;
+			});
 			
 			if (s.avg_ws_series.data.length) {
 			options.wind_speed.title.text = 
@@ -669,13 +731,15 @@ var ilm = (function (my) {
 			} else {
 			options.wind_dir.title.text = "Tuule suuna andmed puuduvad";
 			}
-			if (s.avg_temp_series.data.length) {
+			if (s.avg_temp_series.data.length||s.avg_wl_series.data.length) {
 			options.temp.title.text =
-				" Temperatuur"+(!my.historyactive? " [ <b>" + s.avg_temp_series.data[s.avg_temp_series.data.length - 1][1] + "</b> °C ]":"")+"," +
-					" Rõhk"+(!my.historyactive? " [ <b>" + s.avg_press_series.data[s.avg_press_series.data.length - 1][1] + "</b> hPa ]":"")+"," +
-					" Niiskus"+(!my.historyactive? " [ <b>" + s.avg_humid_series.data[s.avg_humid_series.data.length - 1][1] + "</b> % ]":"");
+				(s.avg_temp_series.data.length ? " Temperatuur"+(!my.historyactive? " [ <b>" + s.avg_temp_series.data[s.avg_temp_series.data.length - 1][1] + "</b> °C ]":"")+",":"") +
+					(s.avg_press_series.data.length ? " Rõhk"+(!my.historyactive? " [ <b>" + s.avg_press_series.data[s.avg_press_series.data.length - 1][1] + "</b> hPa ]":"")+",":"") +
+					(s.avg_humid_series.data.length ? " Niiskus"+(!my.historyactive? " [ <b>" + s.avg_humid_series.data[s.avg_humid_series.data.length - 1][1] + "</b> % ]":""):"") +
+					(!s.avg_humid_series.data.length && s.avg_wc_series.data ? " Veetemperatuur"+(!my.historyactive? " [ <b>" + s.avg_wc_series.data[s.avg_wc_series.data.length - 1][1] + "</b> °C ]":""):"") +
+					(!s.avg_humid_series.data.length && s.avg_wl_series.data ? " Veetase"+(!my.historyactive? " [ <b>" + s.avg_wl_series.data[s.avg_wl_series.data.length - 1][1] + "</b> cm ]":""):"");
 			} else {
-			options.temp.title.text = "Temperatuuri andmed puuduvad";
+				options.temp.title.text = "Temperatuuri andmed puuduvad";
 			}
 
 			options.wind_dir.series = null;
@@ -692,6 +756,7 @@ var ilm = (function (my) {
 			options.temp.series.push(s.avg_wc_series);
 			options.temp.series.push(s.avg_humid_series);
 			options.temp.series.push(s.avg_press_series);
+			options.temp.series.push(s.avg_wl_series);
 			
 			
 			options.wind_speed.chart.renderTo = 'wind_speed1';
@@ -707,15 +772,21 @@ var ilm = (function (my) {
 					//new Date(my.lastdate).toLocaleString() +
 					my.getTimeStr(my.lastdate) +
 					', Järgmine uuendus: ' +
-					//new Date(my.lastdate + updateinterval).toLocaleString() +
 					my.getTimeStr(my.lastdate + updateinterval)
 			);
     };
     
-    var setEmuFileName = function (d) {
+    var setTxtFileName = function (d) {
     	d = new Date(d);
 		var daystr = d.getFullYear() + "-" + (d.getMonth() < 9 ? "0" : "") + (d.getMonth() + 1) + "-" + (d.getDate() < 10 ? "0" : "") + d.getDate();
-		return "emu_data/ARC-"+daystr+'.txt';
+		return "ARC-"+daystr+'.txt';
+    };
+    var setEmuFileName = function (d) {
+		return "emu_data/"+setTxtFileName(d);
+    };
+    var setEmhiFileName = function (d,place) {
+    	place=place.replace(/emhi_/,'');
+		return "emhi_data/"+place+"/"+setTxtFileName(d);
     };
     
 	my.loadCur = function (url) {
@@ -731,10 +802,16 @@ var ilm = (function (my) {
 				ajaxopt={};
 				my.dataurl = setEmuFileName(d);
 			}
+			else if(/emhi/.test(my.curplace)) {
+				ajaxopt={};
+				my.dataurl = setEmhiFileName(d, my.curplace);
+			}
 			//console.log("Get source: " + my.dataurl);
-			$.ajax({url: my.dataurl, data: ajaxopt}).done(function (json) {
-				json_full += json;
-				if(my.curplace === "emu" && (d-1+(24 * 3600 * 1000)) < now) {
+			$.ajax({url: my.dataurl, data: ajaxopt}).always(function (json,type) {
+				if(!/error|timeout/.test(type)){
+					json_full += json;
+				}
+				if((my.curplace === "emu" || /emhi/.test(my.curplace)) && (d-1+(24 * 3600 * 1000)) < now) {
 					d += (24 * 3600 * 1000);
 					cb(d);
 				} else {
@@ -1017,9 +1094,6 @@ var ilm = (function (my) {
                 })((xml.find ? xml.find(name).text() : xml.getAttribute("from")).match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/));
 			};
 			$xml.find('tabular time').each(function (i, times) {
-				//var yrd = (function (d) {
-				//		return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
-				//	})(times.getAttribute("from").match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/));
 				var yrd = yr_get_time(times,"from");
 				d = (yrd.getTime()) + 1800000;
 				//console.log("yr data " + yrd + " " + new Date(d));
@@ -1103,6 +1177,13 @@ var ilm = (function (my) {
 				$("#fctitle").html(
 					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(wg.update_last,1)
 				).show();
+				var list = _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {return '<li><a href="#" name="'+a.id+'" class="fcplace-select'+(a.id===my.fcplace?' active':'')+'">'+a.name+'</a></li>';}}).join("");
+				$("#fcmenu").html(list);
+				$("#fcsel").show();
+				$(".fcplace-select").on("click",function(){
+					w.ilm.setEstPlace($(this).attr('name'));
+					w.ilm.reloadest();
+				});
 				$('#yrmeta').html(
 					'<a href="' +
 						'http://www.yr.no/place/Estonia/'+my.fcplaces[my.fcplace].yrlink+'/hour_by_hour.html' + 
@@ -1286,8 +1367,14 @@ var ilm = (function (my) {
 			html += '<div><label for="timeframe">Ajaraam</label> <select onchange="ilm.setFrame(this.options[this.selectedIndex].value);ilm.reload();return false;" id="timeframe" name="timeframe">' +
 				'<option value="1d"' + (z==='1d' ? ' selected' : '') + '>1 päev</option><option value="2d"'+(z==='2d'?' selected':'')+'>2 päeva</option><option value="3d"'+(z==='3d'?' selected':'')+'>3 päeva</option>' +
 				'</select></div>';
-			html += '<div><label for="forecast">Ennustus</label> <select onchange="ilm.setEstPlace(this.options[this.selectedIndex].value);ilm.reloadest();return false;" id="forecast" name="forecast">';
-			html += '<option value="tabivere"'+(ilm.fcplace==='tabivere'?' selected':'')+'>Saadjärv</option><option value="tamme"'+(ilm.fcplace==='tamme'?' selected':'')+'>Võrtsjärv Tamme</option>';
+			html += '<div><label for="history">Andmed</label> <select onchange="ilm.setCurPlace(this.options[this.selectedIndex].value);ilm.reload();return false;" id="history-sel" name="history-sel">';
+			html += _.map(w.ilm.curplaces,function(a){return '<option value="'+a.id+'" '+(a.id===w.ilm.curplace?' selected':'')+'>'+a.name+'</option>';}).join("");
+			html += '</select></div>';
+			html += '<div><label for="forecast">Ennustus</label> <select onchange="ilm.setEstPlace(this.options[this.selectedIndex].value);ilm.reloadest();return false;" id="forecast-sel" name="forecast-sel">';
+			html += _.map(w.ilm.fcplaces,function(a){return '<option value="'+a.id+'" '+(a.id===w.ilm.fcplace?' selected':'')+'>'+a.name+'</option>';}).join("");
+			html += '</select></div>';
+			html += '<div><label for="groups">Paikade grupid</label> <select onchange="ilm.setGroup(this.options[this.selectedIndex].value);ilm.reloadest();ilm.reload();return false;" id="groups-sel" name="groups-sel">';
+			html += _.map({none:{id:"",name:"--"},jarv:{id:"jarv",name:"Järved"},meri:{id:"meri",name:"Meri"}},function(a){return '<option value="'+a.id+'" '+(a.id===w.ilm.showgroup?' selected':'')+'>'+a.name+'</option>';}).join("");
 			html += '</select></div>';
 		} else {
 			html = "<div>Siia tulevad seaded</div>";
@@ -1327,11 +1414,11 @@ var ilm = (function (my) {
 		$("#ilm-lingid").click(function(e){
 			//ilm.showLinks();
 			w.ilm.Popup("lingid",w.ilm.Lingid);
-			return false;
+			//return false;
 		});
 		$("#ilm-seaded").click(function(e){
 			w.ilm.Popup("seaded",w.ilm.Options);
-			return false;
+			//return false;
 		});
 		$("#fctitle").on("click",function(){
 			w.ilm.setEstPlace(w.ilm.nextPlace());

@@ -42,8 +42,14 @@
 			html += '<div><label for="timeframe">Ajaraam</label> <select onchange="ilm.setFrame(this.options[this.selectedIndex].value);ilm.reload();return false;" id="timeframe" name="timeframe">' +
 				'<option value="1d"' + (z==='1d' ? ' selected' : '') + '>1 päev</option><option value="2d"'+(z==='2d'?' selected':'')+'>2 päeva</option><option value="3d"'+(z==='3d'?' selected':'')+'>3 päeva</option>' +
 				'</select></div>';
-			html += '<div><label for="forecast">Ennustus</label> <select onchange="ilm.setEstPlace(this.options[this.selectedIndex].value);ilm.reloadest();return false;" id="forecast" name="forecast">';
-			html += '<option value="tabivere"'+(ilm.fcplace==='tabivere'?' selected':'')+'>Saadjärv</option><option value="tamme"'+(ilm.fcplace==='tamme'?' selected':'')+'>Võrtsjärv Tamme</option>';
+			html += '<div><label for="history">Andmed</label> <select onchange="ilm.setCurPlace(this.options[this.selectedIndex].value);ilm.reload();return false;" id="history-sel" name="history-sel">';
+			html += _.map(w.ilm.curplaces,function(a){return '<option value="'+a.id+'" '+(a.id===w.ilm.curplace?' selected':'')+'>'+a.name+'</option>';}).join("");
+			html += '</select></div>';
+			html += '<div><label for="forecast">Ennustus</label> <select onchange="ilm.setEstPlace(this.options[this.selectedIndex].value);ilm.reloadest();return false;" id="forecast-sel" name="forecast-sel">';
+			html += _.map(w.ilm.fcplaces,function(a){return '<option value="'+a.id+'" '+(a.id===w.ilm.fcplace?' selected':'')+'>'+a.name+'</option>';}).join("");
+			html += '</select></div>';
+			html += '<div><label for="groups">Paikade grupid</label> <select onchange="ilm.setGroup(this.options[this.selectedIndex].value);ilm.reloadest();ilm.reload();return false;" id="groups-sel" name="groups-sel">';
+			html += _.map({none:{id:"",name:"--"},jarv:{id:"jarv",name:"Järved"},meri:{id:"meri",name:"Meri"}},function(a){return '<option value="'+a.id+'" '+(a.id===w.ilm.showgroup?' selected':'')+'>'+a.name+'</option>';}).join("");
 			html += '</select></div>';
 		} else {
 			html = "<div>Siia tulevad seaded</div>";
@@ -83,11 +89,11 @@
 		$("#ilm-lingid").click(function(e){
 			//ilm.showLinks();
 			w.ilm.Popup("lingid",w.ilm.Lingid);
-			return false;
+			//return false;
 		});
 		$("#ilm-seaded").click(function(e){
 			w.ilm.Popup("seaded",w.ilm.Options);
-			return false;
+			//return false;
 		});
 		$("#fctitle").on("click",function(){
 			w.ilm.setEstPlace(w.ilm.nextPlace());

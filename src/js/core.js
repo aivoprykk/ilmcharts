@@ -8,7 +8,8 @@ var ilm = (function (my) {
 			timeframe :  opt.timeframe||24*3600*1000,
 			fcplace : opt.fcplace||'tabivere',
 			curplace : opt.curplace||'emu',
-			chartorder : ["temp","wind_speed","wind_dir"]
+			chartorder : ["temp","wind_speed","wind_dir"],
+			showgroup : ""
 		};
 		this.id = defaults.id;
 		this.attr = defaults;
@@ -32,7 +33,7 @@ var ilm = (function (my) {
 			var changed = false;
 			for(var a in this.attr) {
 				if(a !== "id" && opt[a] && opt[a] !== this.attr[a]) {
-					this.attr[a] = opt[a];
+					this.attr[a] = (opt[a]==='none')?'':opt[a];
 					changed = true;
 					console.log(a + " " + opt[a]);
 				}
@@ -60,12 +61,32 @@ var ilm = (function (my) {
 		this.placeholder = placeholder || '#container';
 		this.dataurl = "/cgi-bin/cpp/ilm/image.cgi?t=json";
 		this.digits = 1;
-		this.fcplaces = {"tabivere":{id:"tabivere",name:'Saadjärv',wglink:"266923",yrlink:"Jõgevamaa/Tabivere~587488"}, "tamme":{id:"tamme",name:'Võrtsjärv',"wglink":192609,yrlink:"Tartumaa/Tamme"}};
+		this.fcplaces = {
+			"tabivere":{id:"tabivere",name:'Saadjärv',wglink:"266923",yrlink:"Jõgevamaa/Tabivere~587488",group:"jarv"},
+			"tamme":{id:"tamme",name:'Võrtsjärv',"wglink":192609,yrlink:"Tartumaa/Tamme",group:"jarv"},
+			//"nina":{id:"nina",name:'Peipsi Nina',"wglink":20401,yrlink:"Tartumaa/Nina",group:"jarv"},
+			"rapina":{id:"rapina",name:'Peipsi Räpina',"wglink":183648,yrlink:"Põlvamaa/Võõpsu",group:"jarv"},
+			"pirita":{id:"pirita",name:'Pirita',"wglink":125320,yrlink:"Harjumaa/Pirita~798565",group:"meri"},
+			"rohuneeme":{id:"rohuneeme",name:'Püünsi',"wglink":70524,yrlink:"Harjumaa/Rohuneeme",group:"meri"},
+			"topu":{id:"topu",name:'Topu',"wglink":18713,yrlink:"Läänemaa/Topu",group:"meri"},
+			"parnu":{id:"parnu",name:'Pärnu',"wglink":92781,yrlink:"Pärnumaa/Pärnu",group:"meri"},
+			"haademeeste":{id:"haademeeste",name:'Häädemeeste',"wglink":246420,yrlink:"Pärnumaa/Häädemeeste",group:"meri"},
+			"ristna":{id:"ristna",name:'Ristna',"wglink":96592,yrlink:"Hiiumaa/Ristna",group:"meri"}
+		};
 		this.fcplace = this.state.attr.fcplace;
-		this.curplaces = {"emu":{id:"emu",name:"Tartu EMU"}};
+		this.curplaces = {
+			"emu":{id:"emu",name:"Tartu EMU",group:"jarv"},
+			"emhi_pirita":{id:"emhi_pirita",name:"Pirita EMHI",group:"meri"},
+			"emhi_rohuneeme":{id:"emhi_rohuneeme",name:"Püünsi EMHI",group:"meri"},
+			"emhi_topu":{id:"emhi_topu",name:"Haapsalu EMHI",group:"meri"},
+			"emhi_parnu":{id:"emhi_parnu",name:"Pärnu EMHI",group:"meri"},
+			"emhi_haademeeste":{id:"emhi_haademeeste",name:'Häädemeeste EMHI',group:"meri"},
+			"emhi_ristna":{id:"emhi_ristna",name:"Ristna EMHI",group:"meri"}
+		};
 		this.curplace = this.state.attr.curplace;
 		this.datamode = this.state.attr.datamode;
 		this.timeframe = this.state.attr.timeframe;
+		this.showgroup = this.state.attr.showgroup;
 		this.lastdate = new Date().getTime();//-(4*24*3600);
 		this.date = 0;
 		this.start = this.lastdate;
@@ -264,6 +285,16 @@ var ilm = (function (my) {
 			this.state.set(j);
 			return false;
 		},
+		setGroup: function (d, name) {
+			if(d === "" || (/^(jarv|meri)$/.test(d) && this.showgroup !== d)){
+				this.showgroup = d;
+				this.state.set({showgroup:(d?d:'none')});
+				if(!d) return false;
+				if(this.fcplaces[this.fcplace].group!==this.showgroup) this.setEstPlace(this.nextPlace());
+				if(this.curplaces[this.curplace].group!==this.showgroup) this.setCurPlace(this.nextCurPlace());
+			}
+			return false;
+		},
 		nextCurPlace: function() {
 			return this.nextPlace('curplace');
 		},
@@ -272,13 +303,19 @@ var ilm = (function (my) {
 			var places = this[name + 's'] || this.fcplaces,
 			place = this[name] || this.fcplace,
 			p = '', that = false, j = '', i;
+			//console.log(JSON.stringify(places));
 			for(i in places){
-				if (!j) j = i;
-				if (that) p = i;
+				if (!j && (!this.showgroup || (this.showgroup === places[i].group))) j = i;
+				if (that) {
+					if(!this.showgroup || (this.showgroup === places[i].group)) {
+						p = i; that=false;
+					}
+				}
 				if(i === place) that = true;
+				//console.log(name + ' "' + i + '" ' + place +  " " + (that?"ready":"") + " " + p + " " + this.showgroup);
 			}
 			if(!p) p = j;
-			//console.log(name + ' ' + p + ' ' + place);
+			//console.log("got place " + name + ' ' + p + ' from ' + place);
 			return p;
 		},
 		setDate: function(d) {
