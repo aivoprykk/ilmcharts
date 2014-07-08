@@ -237,6 +237,7 @@ module.exports = function (grunt) {
       css: 'css/<%= pkg.name %>',
       js: 'js/<%= pkg.name %>',
       contrib: 'js/libs',
+      version: '<%= pkg.version %>'
     },
     jade: {
       dist: {

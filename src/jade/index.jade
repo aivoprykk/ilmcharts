@@ -6,7 +6,7 @@ html(lang=opt.lang)
 		meta(charset=opt.charset)
 		meta(name="viewport", content="width=device-width")
 		meta(name="description" content=opt.desc)
-		link(rel="stylesheet", href= opt.css + min + '.css', media="screen")
+		link(rel="stylesheet", href= opt.css + min + '.css?' + opt.version, media="screen")
 		link(rel="shortcut icon" type="image/x-icon" href="css/images/favicon.ico")
 		// [if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]
 	body(style='padding-top:25px')
@@ -66,5 +66,5 @@ html(lang=opt.lang)
 					a#sl.ilm-sl(href="#" onclick="return ilm.Popup();") Sulge
 			#lingid.panel-body
 		script(src= opt.contrib + min + '.js')
-		script(src= opt.js + min + '.js')
+		script(src= opt.js + min + '.js?' + opt.version)
 
