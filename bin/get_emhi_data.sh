@@ -1,5 +1,5 @@
 #!/bin/bash
-
+PATH=$PATH:/usr/local/bin
 lab=0
 force=0
 test=0
@@ -102,7 +102,7 @@ if [ $lab -gt 0 ]; then
 fi
 if [ x"$dry" = x"" ]; then
   wget -q -O "$emhi_out/$emhi_temp" "$emhi_url"
-  /usr/local/bin/node $dir"/parse_emhi.js" $emhi_out/$emhi_temp
+  node $dir"/parse_emhi.js" $emhi_out/$emhi_temp
   rm -f $emhi_out"/"$emhi_temp
 fi
 fi
