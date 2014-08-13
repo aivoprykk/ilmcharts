@@ -6,4 +6,6 @@ wg_data/*
 */wg_data/*
 yr_data/*
 */yr_data/*
+mnt_data/*
+*/mnt_data/*
 node_modules
