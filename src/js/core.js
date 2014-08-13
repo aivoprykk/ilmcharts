@@ -76,6 +76,10 @@ var ilm = (function (my) {
 		this.fcplace = this.state.attr.fcplace;
 		this.curplaces = {
 			"emu":{id:"emu",name:"Tartu EMU",group:"jarv"},
+			"mnt_tamme":{id:"mnt_tamme",name:"V-Rakke MNT",group:"jarv"},
+			"mnt_rapina":{id:"mnt_rapina",name:"Räpina MNT",group:"jarv"},
+			"mnt_uhmardu":{id:"mnt_uhmardu",name:"Uhmardu MNT",group:"jarv"},
+			"mnt_jogeva":{id:"mnt_jogeva",name:"Jõgeva MNT",group:"jarv"},
 			"emhi_pirita":{id:"emhi_pirita",name:"Pirita EMHI",group:"meri"},
 			"emhi_rohuneeme":{id:"emhi_rohuneeme",name:"Püünsi EMHI",group:"meri"},
 			"emhi_topu":{id:"emhi_topu",name:"Haapsalu EMHI",group:"meri"},

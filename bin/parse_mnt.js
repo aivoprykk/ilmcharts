@@ -72,17 +72,17 @@ fs.readFile(path, {encoding:'utf-8'}, function(err, data) {
 		child = a.split('\t');
 		if(b===0) {
 			text = child[1].replace(/^(\d*)\.(\d*)\.(\d*) /,'20$3$2$1 ');
-			ret.push(text);
+			ret[0] = text;
 		}
 		text = (child[1]+"").replace(/ .*$/,'').trim();
-		if(b===1) ret.push(text);
-		if(b===4) ret.push(text==='-'?0:text);
-		if(b===6) ret.push(text);
-		if(b===7) ret.push(text);
-		if(b===8) ret.push(text);
-		if(b===9) ret.push(extractWd(child[1]));
-		if(b===10) ret.push(text);
-		if(b===11) ret.push(text);
+		if(/^Air\stemp/.test(a))     ret[1]=text;
+		if(/^Precip\.\sint/.test(a)) ret[2] = text==='-'?0:text;
+		if(/^Air\shumidity/.test(a)) ret[3] = text;
+		if(/^Dew\spoint/.test(a))    ret[4] = text;
+		if(/^Max\swind\ssp/.test(a)) ret[5] = text;
+		if(/^Wind\sdir./.test(a))    ret[6] = extractWd(child[1]);
+		if(/^Wind\sspeed/.test(a))   ret[7] = text;
+		if(/^Visibility/.test(a))    ret[8] = text;
 	});
 		if (ret.length) {
 			//console.log(ret.join("\t"));
@@ -127,7 +127,7 @@ fs.readFile(path, {encoding:'utf-8'}, function(err, data) {
 });
 
 var extractWd = function(d) {
-	var s = d.match(/arrow_(\d*).gif/);
+	var s = d.match(/arrow_(\d*).gif/) || [];
 	if(s[1]){
 		if(s[1] == 1) return 0;
 		if(s[1] == 2) return 22.5;

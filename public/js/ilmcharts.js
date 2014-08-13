@@ -1,5 +1,5 @@
 /*!
- * Ilmcharts v1.1.1 (http://ilm.majasa.ee)
+ * Ilmcharts v1.1.2 (http://ilm.majasa.ee)
  * Copyright 2012-2014 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
@@ -84,6 +84,10 @@ var ilm = (function (my) {
 		this.fcplace = this.state.attr.fcplace;
 		this.curplaces = {
 			"emu":{id:"emu",name:"Tartu EMU",group:"jarv"},
+			"mnt_tamme":{id:"mnt_tamme",name:"V-Rakke MNT",group:"jarv"},
+			"mnt_rapina":{id:"mnt_rapina",name:"Räpina MNT",group:"jarv"},
+			"mnt_uhmardu":{id:"mnt_uhmardu",name:"Uhmardu MNT",group:"jarv"},
+			"mnt_jogeva":{id:"mnt_jogeva",name:"Jõgeva MNT",group:"jarv"},
 			"emhi_pirita":{id:"emhi_pirita",name:"Pirita EMHI",group:"meri"},
 			"emhi_rohuneeme":{id:"emhi_rohuneeme",name:"Püünsi EMHI",group:"meri"},
 			"emhi_topu":{id:"emhi_topu",name:"Haapsalu EMHI",group:"meri"},
@@ -427,6 +431,16 @@ var ilm = (function (my) {
 								if(c[4]!==null) obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
 								obj.avg_wc_series.data.push([d,my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
 								obj.avg_wl_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
+							}
+							else if(/mnt/.test(my.curplace)){
+								//c[4] = (!c[4] || c[4] < -49) ? null : c[4];
+								obj.avg_ws_series.data.push([d, my.ntof2p((e) ? my.getavg([c[8], e[8]]) : c[8])]);
+								obj.max_ws_series.data.push([d, my.ntof2p((e) ? my.getmax([c[6], e[6]]) : c[6])]);
+								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7])]);
+								if(c[2]!==null) obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
+								obj.avg_rain_series.data.push([d, my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
+								obj.avg_humid_series.data.push([d, my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
+								obj.avg_dp_series.data.push([d, my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5])]);
 							}
 						}
 					}
@@ -788,6 +802,10 @@ var ilm = (function (my) {
     	place=place.replace(/emhi_/,'');
 		return "emhi_data/"+place+"/"+setTxtFileName(d);
     };
+    var setMntFileName = function (d,place) {
+    	place=place.replace(/mnt_/,'');
+		return "mnt_data/"+place+"/"+setTxtFileName(d);
+    };
     
 	my.loadCur = function (url) {
 		var d, now;
@@ -806,12 +824,16 @@ var ilm = (function (my) {
 				ajaxopt={};
 				my.dataurl = setEmhiFileName(d, my.curplace);
 			}
+			else if(/mnt/.test(my.curplace)) {
+				ajaxopt={};
+				my.dataurl = setMntFileName(d, my.curplace);
+			}
 			//console.log("Get source: " + my.dataurl);
 			$.ajax({url: my.dataurl, data: ajaxopt}).always(function (json,type) {
 				if(!/error|timeout/.test(type)){
 					json_full += json;
 				}
-				if((my.curplace === "emu" || /emhi/.test(my.curplace)) && (d-1+(24 * 3600 * 1000)) < now) {
+				if((my.curplace === "emu" || /emhi/.test(my.curplace) || /mnt/.test(my.curplace)) && (d-1+(24 * 3600 * 1000)) < now) {
 					d += (24 * 3600 * 1000);
 					cb(d);
 				} else {
