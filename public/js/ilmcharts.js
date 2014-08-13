@@ -83,17 +83,17 @@ var ilm = (function (my) {
 		};
 		this.fcplace = this.state.attr.fcplace;
 		this.curplaces = {
-			"emu":{id:"emu",name:"Tartu EMU",group:"jarv"},
-			"mnt_tamme":{id:"mnt_tamme",name:"V-Rakke MNT",group:"jarv"},
-			"mnt_rapina":{id:"mnt_rapina",name:"Räpina MNT",group:"jarv"},
-			"mnt_uhmardu":{id:"mnt_uhmardu",name:"Uhmardu MNT",group:"jarv"},
-			"mnt_jogeva":{id:"mnt_jogeva",name:"Jõgeva MNT",group:"jarv"},
-			"emhi_pirita":{id:"emhi_pirita",name:"Pirita EMHI",group:"meri"},
-			"emhi_rohuneeme":{id:"emhi_rohuneeme",name:"Püünsi EMHI",group:"meri"},
-			"emhi_topu":{id:"emhi_topu",name:"Haapsalu EMHI",group:"meri"},
-			"emhi_parnu":{id:"emhi_parnu",name:"Pärnu EMHI",group:"meri"},
-			"emhi_haademeeste":{id:"emhi_haademeeste",name:'Häädemeeste EMHI',group:"meri"},
-			"emhi_ristna":{id:"emhi_ristna",name:"Ristna EMHI",group:"meri"}
+			"emu":{id:"emu",name:"Tartu EMU",group:"jarv",link:'/weather'},
+			"mnt_tamme":{id:"mnt_tamme",name:"V-Rakke MNT",group:"jarv",link:''},
+			"mnt_rapina":{id:"mnt_rapina",name:"Räpina MNT",group:"jarv",link:''},
+			"mnt_uhmardu":{id:"mnt_uhmardu",name:"Uhmardu MNT",group:"jarv",link:''},
+			"mnt_jogeva":{id:"mnt_jogeva",name:"Jõgeva MNT",group:"jarv",link:''},
+			"emhi_pirita":{id:"emhi_pirita",name:"Pirita EMHI",group:"meri",link:'/meri/vaatlusandmed/'},
+			"emhi_rohuneeme":{id:"emhi_rohuneeme",name:"Püünsi EMHI",group:"meri",link:'/meri/vaatlusandmed/'},
+			"emhi_topu":{id:"emhi_topu",name:"Haapsalu EMHI",group:"meri",link:'/meri/vaatlusandmed/'},
+			"emhi_parnu":{id:"emhi_parnu",name:"Pärnu EMHI",group:"meri",link:'/meri/vaatlusandmed/'},
+			"emhi_haademeeste":{id:"emhi_haademeeste",name:'Häädemeeste EMHI',group:"meri",link:'/meri/vaatlusandmed/'},
+			"emhi_ristna":{id:"emhi_ristna",name:"Ristna EMHI",group:"meri",link:'/meri/vaatlusandmed/'}
 		};
 		this.curplace = this.state.attr.curplace;
 		this.datamode = this.state.attr.datamode;
@@ -780,9 +780,12 @@ var ilm = (function (my) {
 			my.charts[0] = new Highcharts.Chart(options.wind_speed);
 			my.charts[1] = new Highcharts.Chart(options.wind_dir);
 			my.charts[2] = new Highcharts.Chart(options.temp);
+			var host = /emhi/.test(my.curplace) ? 'ilmateenistus.ee' : 
+					/emu/.test(my.curplace) ? 'energia.emu.ee' :
+					/mnt/.test(my.curplace) ? 'balticroads.net': '';
 			$('#curmeta').html(
-				'<a href="http://energia.emu.ee/weather/'  +
-					'" onclick="window.open(this.href);return false;">EMU.ee</a>, andmed viimati uuendatud: ' + 
+				'<a href="http://' + host + my.curplaces[my.curplace].link  +
+					'" onclick="window.open(this.href);return false;">'+host.charAt(0).toUpperCase() + host.slice(1)+'</a>, andmed viimati uuendatud: ' + 
 					//new Date(my.lastdate).toLocaleString() +
 					my.getTimeStr(my.lastdate) +
 					', Järgmine uuendus: ' +

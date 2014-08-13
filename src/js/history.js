@@ -411,9 +411,12 @@
 			my.charts[0] = new Highcharts.Chart(options.wind_speed);
 			my.charts[1] = new Highcharts.Chart(options.wind_dir);
 			my.charts[2] = new Highcharts.Chart(options.temp);
+			var host = /emhi/.test(my.curplace) ? 'ilmateenistus.ee' : 
+					/emu/.test(my.curplace) ? 'energia.emu.ee' :
+					/mnt/.test(my.curplace) ? 'balticroads.net': '';
 			$('#curmeta').html(
-				'<a href="http://energia.emu.ee/weather/'  +
-					'" onclick="window.open(this.href);return false;">EMU.ee</a>, andmed viimati uuendatud: ' + 
+				'<a href="http://' + host + my.curplaces[my.curplace].link  +
+					'" onclick="window.open(this.href);return false;">'+host.charAt(0).toUpperCase() + host.slice(1)+'</a>, andmed viimati uuendatud: ' + 
 					//new Date(my.lastdate).toLocaleString() +
 					my.getTimeStr(my.lastdate) +
 					', Järgmine uuendus: ' +
