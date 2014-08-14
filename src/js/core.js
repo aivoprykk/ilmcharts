@@ -198,7 +198,7 @@ var ilm = (function (my) {
 			if ((dir > 326.25 && dir <= 348.75)) { return "NNW"; } 
 		},
 		ntof2p: function (num) {
-			if (num === null || num === undefined) { return null; }
+			if (num  === "-" ||num  === "-" ||  num === null || num === undefined) { return null; }
 			return parseFloat(parseFloat(num).toFixed(1));
 		},	
 		conv_kmh2ms: function (input) {
