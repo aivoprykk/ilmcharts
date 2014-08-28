@@ -1390,7 +1390,7 @@ var ilm = (function (my) {
 				{'name':'Ilmalingid',
 				'list': [ 
 				{ 'name': 'EMHI','url':'http://www.ilmateenistus.ee/','list': [
-				{'href':'ilm/ilmavaatlused/vaatlusandmed/tuul/','title':"Ilmavaatlused - tuul",'id':'emhi_kaart'},
+				{'href':'ilm/ilmavaatlused/vaatlusandmed/?filter%5BmapLayer%5D=wind','title':"Ilmavaatlused - tuul",'id':'emhi_kaart'},
 				{'href':'ilm/prognoosid/mudelprognoosid/eesti/#layers/tuul10ms,tuul10mb','title':"Prognoos - Suur Hirlam",'id':'emhi_hirlam_suur'},
 				]},
 				{'name': "WeatherOnline",'url':'http://www.weatheronline.co.uk/','list': [
