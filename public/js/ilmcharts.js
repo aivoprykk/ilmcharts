@@ -230,23 +230,27 @@ var ilm = (function (my) {
 			if ((dir > 303.75 && dir <= 326.25)) { return "NW"; } 
 			if ((dir > 326.25 && dir <= 348.75)) { return "NNW"; } 
 		},
-		ntof2p: function (num) {
-			if (num  === "-" ||num  === "-" ||  num === null || num === undefined) { return null; }
-			return parseFloat(parseFloat(num).toFixed(1));
+		ntof2p: function (input) {
+			if (input  === "-" || input === "" || input === null || input === undefined) { return null; }
+			return parseFloat(parseFloat(input).toFixed(1));
 		},	
 		conv_kmh2ms: function (input) {
+			if (input  === "-" || input === "" || input === null || input === undefined) { return null; }
 			var t = (parseFloat(input) * 1000) / 3600;
 			return  parseFloat(t.toFixed(1));
 		},	
 		conv_mh2ms: function (input) {
+			if (input  === "-" || input === "" || input === null || input === undefined) { return null; }
 			var t = parseFloat(input) / 2.23693629;
 			return  parseFloat(t.toFixed(1));
 		},	
 		conv_knot2ms: function (input) {
+			if (input  === "-" || input === "" || input === null || input === undefined) { return null; }
 			var t = parseFloat(input) / 1.9426;
 			return  parseFloat((t + (t * 0.000639)).toFixed(1));
 		},	
 		conv_ms2knots: function (input) {
+			if (input  === "-" || input === "" || input === null || input === undefined) { return null; }
 			var t = parseFloat(input) /  0.515;
 			return  parseFloat((t + (t * 0.000639)).toFixed(1));
 		},

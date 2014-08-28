@@ -89,7 +89,6 @@ module.exports = function (grunt) {
 			'node_modules/jquery/dist/jquery.js',
 			'contrib/highcharts/js/highcharts.js',
 			'node_modules/underscore/underscore.js',
-			'node_modules/backbone/backbone.js',
 			'node_modules/jquery-ui/core.js',
 			'node_modules/jquery-ui/datepicker.js',
 			'node_modules/jquery-ui/widget.js',
