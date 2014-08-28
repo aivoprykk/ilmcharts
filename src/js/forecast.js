@@ -2,7 +2,7 @@
 	var w = window,
 		$ = w.$,
 		Highcharts = w.Highcharts,
-		updateinterval = 60000,
+		updateinterval = 600000,
 		options = {};
 	
 	Highcharts.setOptions({
@@ -314,14 +314,19 @@
 				temp_options.series.push(wg_temp_series);
 				temp_options.series.push(wg_press_series);
 				
-				my.charts[3] = new Highcharts.Chart(wind_speed_options);
-				my.charts[4] = new Highcharts.Chart(wind_dir_options);
-				my.charts[5] = new Highcharts.Chart(temp_options);
-				
 				var i1, i2, i3;
-				i1 = intPlotLine(my.charts[3], i1);
-				i2 = intPlotLine(my.charts[4], i2);
-				i3 = intPlotLine(my.charts[5], i3);
+				if(my.chartorder.indexOf("wind_speed")>=0) {
+					my.charts[3] = new Highcharts.Chart(wind_speed_options);
+					i1 = intPlotLine(my.charts[3], i1);
+				}
+				if(my.chartorder.indexOf("wind_dir")>=0) {
+					my.charts[4] = new Highcharts.Chart(wind_dir_options);
+					i2 = intPlotLine(my.charts[4], i2);
+				}
+				if(my.chartorder.indexOf("temp")>=0) {
+					my.charts[5] = new Highcharts.Chart(temp_options);
+					i3 = intPlotLine(my.charts[5], i3);
+				}
 				$("#fctitle").html(
 					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(wg.update_last,1)
 				).show();

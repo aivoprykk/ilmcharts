@@ -22,7 +22,9 @@ html(lang=opt.lang)
 						a#pagelogo.ilm-pagelogo.navbar-brand(href="/") Ilm
 					#ilm-navbar-collapse-1.collapse.navbar-collapse
 						ul.nav.navbar-nav.navbar-right
-							li#ilm-seaded: a(href="#") Seaded
+							li.dropdown
+								a#ilm-seaded.dropdown-toggle(href="#" data-toggle="dropdown") Seaded
+								div#ilm-seaded-dropdown.dropdown-menu(style="padding: 15px")
 							li#ilm-lingid: a(href="#") Lingid
 							li.dropdown
 								a.dropdown-toggle(href="#" data-toggle="dropdown") Info

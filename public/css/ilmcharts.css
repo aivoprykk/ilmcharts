@@ -6618,6 +6618,26 @@ text-decoration:none;
 .title {
 	padding: 0 0.3em;
 }
+.drag-item {
+	padding:3px;
+	margin:3px;
+	border:1px solid #999;
+	border-radius: 3px;
+	background-color: #fff;
+}
+.drag-box {
+	border:1px solid #999;
+	min-height:2em;
+	padding:3px;
+	border-radius: 3px;
+}
+.setting-form div {
+	padding-bottom:3px;
+}
+.setting-form label {
+	color: #999;
+}
+
 /*bootstrap overrides*/
 
 .nav > li > a, .navbar-text {

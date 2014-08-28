@@ -92,6 +92,9 @@ module.exports = function (grunt) {
 			'node_modules/backbone/backbone.js',
 			'node_modules/jquery-ui/core.js',
 			'node_modules/jquery-ui/datepicker.js',
+			'node_modules/jquery-ui/widget.js',
+			'node_modules/jquery-ui/mouse.js',
+			'node_modules/jquery-ui/sortable.js',
 			'node_modules/bootstrap/dist/js/bootstrap.js'
 		],
 		dest: 'public/js/libs.js'

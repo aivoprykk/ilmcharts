@@ -408,9 +408,9 @@
 			options.wind_dir.chart.renderTo = 'wind_dir1';
 			options.temp.chart.renderTo = 'temp1';
 			
-			my.charts[0] = new Highcharts.Chart(options.wind_speed);
-			my.charts[1] = new Highcharts.Chart(options.wind_dir);
-			my.charts[2] = new Highcharts.Chart(options.temp);
+			if(my.chartorder.indexOf("wind_speed") >= 0) my.charts[0] = new Highcharts.Chart(options.wind_speed);
+			if(my.chartorder.indexOf("wind_dir") >= 0)  my.charts[1] = new Highcharts.Chart(options.wind_dir);
+			if(my.chartorder.indexOf("temp") >= 0)  my.charts[2] = new Highcharts.Chart(options.temp);
 			var host = /emhi/.test(my.curplace) ? 'ilmateenistus.ee' : 
 					/emu/.test(my.curplace) ? 'energia.emu.ee' :
 					/mnt/.test(my.curplace) ? 'balticroads.net': '';
@@ -445,11 +445,11 @@
 		var d, now;
 		now = d = (my.date > 0) ? new Date(my.date).getTime() : new Date().getTime();
 		//url = url || my.dataurl + '&hours=7&res=10m&wind_speed=1&dewpoint=1&outdoor_temperature=1&windchill=1&wind_direction=1&absolute_pressure=1';
-		//console.log("Loading all data at " + (now));
 		//fake data...
 		//ajaxopt.delta="2y";
 		var json_full="";
 		var cb = function(d) {
+			//console.log("Loading data at " + (new Date(d)));
 			if(my.curplace === "emu") {
 				ajaxopt={};
 				my.dataurl = setEmuFileName(d);
@@ -467,7 +467,8 @@
 				if(!/error|timeout/.test(type)){
 					json_full += json;
 				}
-				if((my.curplace === "emu" || /emhi/.test(my.curplace) || /mnt/.test(my.curplace)) && (d-1+(24 * 3600 * 1000)) < now) {
+				var x = new Date(now).getDate() !== new Date(d).getDate();
+				if(/(emhi|emu|mnt)/.test(my.curplace) && x) {
 					d += (24 * 3600 * 1000);
 					cb(d);
 				} else {

@@ -16,8 +16,9 @@ var ilm = (function (my) {
 			timeframe :  opt.timeframe||24*3600*1000,
 			fcplace : opt.fcplace||'tabivere',
 			curplace : opt.curplace||'emu',
-			chartorder : ["temp","wind_speed","wind_dir"],
-			showgroup : ""
+			chartorder : opt.chartorder || ["temp","wind_speed","wind_dir"],
+			showgroup : opt.showgroup || "",
+			binded : opt.binded || false
 		};
 		this.id = defaults.id;
 		this.attr = defaults;
@@ -40,7 +41,7 @@ var ilm = (function (my) {
 			if(!opt) return this;
 			var changed = false;
 			for(var a in this.attr) {
-				if(a !== "id" && opt[a] && opt[a] !== this.attr[a]) {
+				if(a !== "id" && (opt[a] || typeof opt[a] === 'boolean') && opt[a] !== this.attr[a]) {
 					this.attr[a] = (opt[a]==='none')?'':opt[a];
 					changed = true;
 					console.log(a + " " + opt[a]);
@@ -69,36 +70,38 @@ var ilm = (function (my) {
 		this.placeholder = placeholder || '#container';
 		this.dataurl = "/cgi-bin/cpp/ilm/image.cgi?t=json";
 		this.digits = 1;
+		this.graphs = ["temp","wind_speed","wind_dir"];
 		this.fcplaces = {
-			"tabivere":{id:"tabivere",name:'Saadjärv',wglink:"266923",yrlink:"Jõgevamaa/Tabivere~587488",group:"jarv"},
-			"tamme":{id:"tamme",name:'Võrtsjärv',"wglink":192609,yrlink:"Tartumaa/Tamme",group:"jarv"},
+			"tabivere":{id:"tabivere",name:'Saadjärv',wglink:"266923",yrlink:"Jõgevamaa/Tabivere~587488",group:"jarv",bind:"emu"},
+			"tamme":{id:"tamme",name:'Võrtsjärv',"wglink":192609,yrlink:"Tartumaa/Tamme",group:"jarv",bind:"mnt_tamme"},
 			//"nina":{id:"nina",name:'Peipsi Nina',"wglink":20401,yrlink:"Tartumaa/Nina",group:"jarv"},
-			"rapina":{id:"rapina",name:'Peipsi Räpina',"wglink":183648,yrlink:"Põlvamaa/Võõpsu",group:"jarv"},
-			"pirita":{id:"pirita",name:'Pirita',"wglink":125320,yrlink:"Harjumaa/Pirita~798565",group:"meri"},
-			"rohuneeme":{id:"rohuneeme",name:'Püünsi',"wglink":70524,yrlink:"Harjumaa/Rohuneeme",group:"meri"},
-			"topu":{id:"topu",name:'Topu',"wglink":18713,yrlink:"Läänemaa/Topu",group:"meri"},
-			"parnu":{id:"parnu",name:'Pärnu',"wglink":92781,yrlink:"Pärnumaa/Pärnu",group:"meri"},
-			"haademeeste":{id:"haademeeste",name:'Häädemeeste',"wglink":246420,yrlink:"Pärnumaa/Häädemeeste",group:"meri"},
-			"ristna":{id:"ristna",name:'Ristna',"wglink":96592,yrlink:"Hiiumaa/Ristna",group:"meri"}
+			"rapina":{id:"rapina",name:'Peipsi Räpina',"wglink":183648,yrlink:"Põlvamaa/Võõpsu",group:"jarv",bind:"mnt_rapina"},
+			"pirita":{id:"pirita",name:'Pirita',"wglink":125320,yrlink:"Harjumaa/Pirita~798565",group:"meri",bind:"emhi_pirita"},
+			"rohuneeme":{id:"rohuneeme",name:'Püünsi',"wglink":70524,yrlink:"Harjumaa/Rohuneeme",group:"meri",bind:"emhi_rohuneeme"},
+			"topu":{id:"topu",name:'Topu',"wglink":18713,yrlink:"Läänemaa/Topu",group:"meri",bind:"emhi_topu"},
+			"parnu":{id:"parnu",name:'Pärnu',"wglink":92781,yrlink:"Pärnumaa/Pärnu",group:"meri",bind:"emhi_parnu"},
+			"haademeeste":{id:"haademeeste",name:'Häädemeeste',"wglink":246420,yrlink:"Pärnumaa/Häädemeeste",group:"meri",bind:"emhi_haademeeste"},
+			"ristna":{id:"ristna",name:'Ristna',"wglink":96592,yrlink:"Hiiumaa/Ristna",group:"meri",bind:"emhi_ristna"}
 		};
 		this.fcplace = this.state.attr.fcplace;
 		this.curplaces = {
-			"emu":{id:"emu",name:"Tartu EMU",group:"jarv",link:'/weather'},
-			"mnt_tamme":{id:"mnt_tamme",name:"V-Rakke MNT",group:"jarv",link:''},
-			"mnt_rapina":{id:"mnt_rapina",name:"Räpina MNT",group:"jarv",link:''},
+			"emu":{id:"emu",name:"Tartu EMU",group:"jarv",link:'/weather',bind:"tabivere"},
+			"mnt_tamme":{id:"mnt_tamme",name:"V-Rakke MNT",group:"jarv",link:'',bind:"tamme"},
+			"mnt_rapina":{id:"mnt_rapina",name:"Räpina MNT",group:"jarv",link:'',bind:"rapina"},
 			"mnt_uhmardu":{id:"mnt_uhmardu",name:"Uhmardu MNT",group:"jarv",link:''},
 			"mnt_jogeva":{id:"mnt_jogeva",name:"Jõgeva MNT",group:"jarv",link:''},
-			"emhi_pirita":{id:"emhi_pirita",name:"Pirita EMHI",group:"meri",link:'/meri/vaatlusandmed/'},
-			"emhi_rohuneeme":{id:"emhi_rohuneeme",name:"Püünsi EMHI",group:"meri",link:'/meri/vaatlusandmed/'},
-			"emhi_topu":{id:"emhi_topu",name:"Haapsalu EMHI",group:"meri",link:'/meri/vaatlusandmed/'},
-			"emhi_parnu":{id:"emhi_parnu",name:"Pärnu EMHI",group:"meri",link:'/meri/vaatlusandmed/'},
-			"emhi_haademeeste":{id:"emhi_haademeeste",name:'Häädemeeste EMHI',group:"meri",link:'/meri/vaatlusandmed/'},
-			"emhi_ristna":{id:"emhi_ristna",name:"Ristna EMHI",group:"meri",link:'/meri/vaatlusandmed/'}
+			"emhi_pirita":{id:"emhi_pirita",name:"Pirita EMHI",group:"meri",link:'/meri/vaatlusandmed/',bind:"pirita"},
+			"emhi_rohuneeme":{id:"emhi_rohuneeme",name:"Püünsi EMHI",group:"meri",link:'/meri/vaatlusandmed/',bind:"rohuneeme"},
+			"emhi_topu":{id:"emhi_topu",name:"Haapsalu EMHI",group:"meri",link:'/meri/vaatlusandmed/',bind:"topu"},
+			"emhi_parnu":{id:"emhi_parnu",name:"Pärnu EMHI",group:"meri",link:'/meri/vaatlusandmed/', bind:"parnu"},
+			"emhi_haademeeste":{id:"emhi_haademeeste",name:'Häädemeeste EMHI',group:"meri",link:'/meri/vaatlusandmed/',bind:"haademeeste"},
+			"emhi_ristna":{id:"emhi_ristna",name:"Ristna EMHI",group:"meri",link:'/meri/vaatlusandmed/',bind:"ristna"}
 		};
 		this.curplace = this.state.attr.curplace;
 		this.datamode = this.state.attr.datamode;
 		this.timeframe = this.state.attr.timeframe;
 		this.showgroup = this.state.attr.showgroup;
+		this.binded = this.state.attr.binded;
 		this.lastdate = new Date().getTime();//-(4*24*3600);
 		this.date = 0;
 		this.start = this.lastdate;
@@ -141,47 +144,69 @@ var ilm = (function (my) {
 			series: []
 		};
 		this.charts = [];
-		this.chartorder = ["temp","wind_speed","wind_dir"];
+		this.chartorder = this.state.attr.chartorder;
 		this.months = ['Jaanuar', 'Veebruar', 'Märts', 'Aprill', 'Mai', 'Juuni',
 			'Juuli', 'August', 'September', 'Octoober', 'November', 'Detsember'];
 		this.weekdays = ['Pühapäev', 'Esmaspäev', 'Teisipäev', 'Kolmapäev', 'Neljapäev', 'Reede', 'Laupäev'];
 	}
 
 	App.prototype = {
+		graph_name : function(name) {
+				return (name==='wind_speed') ? 'Tuule kiirus' : 
+					(name==='wind_dir') ? 'Tuule suund' : 'Temperatuur';
+		},
 		reorder: function (div) {
-			var el = null, i, j, co = this.chartorder;
+			var el = null, id = null, i, j, co = this.chartorder, a;
 			if(!div) { div = this.placeholder; }
-			$(div).children().each(function ( k, l) {
-				for (i = 0, j = l.childNodes.length; i < j; ++i){
-					el = l.childNodes[i];
-					if(el.classname && el.className.match(/title/)) continue;
-					if(el.className && el.className.match(/meta/)) {
-						break;
+			$(div).children().each(function(k, l) {
+				if (l.className && /float/.test(l.className)) {
+					a=[];
+					_.each(l.childNodes, function(i) {
+						if(i && (j = i.className || "")){
+							if(/meta/.test(j)) el = i;
+							if(/movable/.test(j)) a.push(i);
+						}
+					});
+					_.each(a,function(i){
+						//console.log(i);
+						l.removeChild(i);
+						i=null;
+					});
+					for (i = 0, j = co.length; i < j; ++i) {
+						id = doc.getElementById(co[i]+(k+1));
+						//console.log(co[i]+(k+1));
+						if(!id) {
+							id = doc.createElement("div");
+							id.setAttribute("id",co[i] + (k+1));
+							id.className = "movable chart-frame" +((co[i].match(/_dir/))? 2 : 1);
+						}
+						l.insertBefore(id,el);
 					}
-					el = null;
-				}
-				for (i = 0, j = co.length; i < j; ++i) {
-					l.insertBefore(doc.getElementById(co[i]+(k+1)),el);
+					if(k===0) my.reload();
+					else my.reloadest();
 				}
 			});
 		},
 		loadBase: function (div) {
-			var el = null, child = null, newel = null, i, j, co = this.chartorder;
+			var el = null, newel = null, i, j, co = this.chartorder;
 			if(!div) { div = this.placeholder; }
 			$(div).children().each(function ( k, l) {
 				if (l.className && l.className.match(/float/)) {
 					for (i = 0, j = l.childNodes.length; i < j; ++i){
 						el = l.childNodes[i];
-						if(el.classname && el.className.match(/title/)) continue;
+						if(el.classname && /(title|datepicker)/i.test(el.className)) continue;
 						if(el.className && el.className.match(/meta/)) {
 							break;
 						}
 						el = null;
 					}
 					for (i = 0, j = co.length; i < j; ++i) {
-						newel = doc.createElement("div");
-						newel.setAttribute("id",co[i] + (k+1));
-						newel.className = "chart-frame" +((co[i].match(/_dir/))? 2 : 1);
+						newel = doc.getElementById(co[i]+(k+1));
+						if(!newel){
+							newel = doc.createElement("div");
+							newel.setAttribute("id",co[i] + (k+1));
+							newel.className = "movable chart-frame" +((co[i].match(/_dir/))? 2 : 1);
+						}
 						l.insertBefore(newel,el);
 					}
 				}
@@ -288,13 +313,30 @@ var ilm = (function (my) {
 			name = name || 'fcplace';
 			var places=this[name+'s'] || this.fcplaces,
 			place = this[name] || this.fcplace,
-			j = {}, i;
+			j = {}, i,reload="";
 			if(d) {
 				for(i in places){
-					if(i === d) { j[name] = this[name] = d; break; }
+					if(i === d) { 
+						j[name] = this[name] = d;
+						reload = name;
+						if(this.binded && places[i].bind) {
+							var other = /fc/.test(name)?'curplace':'fcplace';
+							j[other] = this[other] = places[i].bind;
+							reload = "both";
+						}
+						break;
+					}
 				}
 			}
 			this.state.set(j);
+			if(reload){
+				if(reload==='both'){
+					w.ilm.reloadest();
+					w.ilm.reload();
+				}
+				else if(/fc/.test(reload)) w.ilm.reloadest();
+				else w.ilm.reload();
+			}
 			return false;
 		},
 		setGroup: function (d, name) {
@@ -304,6 +346,26 @@ var ilm = (function (my) {
 				if(!d) return false;
 				if(this.fcplaces[this.fcplace].group!==this.showgroup) this.setEstPlace(this.nextPlace());
 				if(this.curplaces[this.curplace].group!==this.showgroup) this.setCurPlace(this.nextCurPlace());
+				w.ilm.reloadest();
+				w.ilm.reload();
+			}
+			return false;
+		},
+		setOrder: function(input) {
+			var o = (Object.prototype.toString.call( input ) === '[object String]') ? input.split(/[,:]/) : input, p = this.chartorder;
+			if (Object.prototype.toString.call( o ) !== '[object Array]') return false;
+			if(o.join(":") === p.join(":")) return false;
+			this.chartorder = o;
+			this.state.set({chartorder : this.chartorder});
+			this.reorder();
+			return false;
+		},
+		setBinded: function(value) {
+			if(/(0|false)/.test(value)) value = false;
+			if(/(1|true)/.test(value)) value = true;
+			if(typeof value === 'boolean' && this.binded!==value) {
+				this.binded = value;
+				this.state.set({binded : this.binded});
 			}
 			return false;
 		},
@@ -353,9 +415,72 @@ var ilm = (function (my) {
 			ret = (d.getDate() < 10 ? "0" : "") + d.getDate() + dsep + d.getFullYear();
 			if(!g) ret += " " + (d.getHours()<10?"0":"") + d.getHours() + ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();
 			return ret;
+		},
+		settingTemplate: function(div){
+			var html = '', z = '';
+			if(my.state.attr) {
+				z = my.getFrame();
+				html += '<form class="setting-form" style="width:320px;"><div><label for="timeframe">Ajaraam</label> <select class="form-control input-sm" onchange="ilm.setFrame(this.options[this.selectedIndex].value);ilm.reload();return true;" id="timeframe" name="timeframe">' +
+					'<option value="12h"' + (z==='12h' ? ' selected' : '') + '>12 tundi</option><option value="1d"' + (z==='1d' ? ' selected' : '') + '>1 päev</option><option value="2d"'+(z==='2d'?' selected':'')+'>2 päeva</option><option value="3d"'+(z==='3d'?' selected':'')+'>3 päeva</option>' +
+					'</select></div>';
+				html += '<div><label for="history">Andmed</label> <select class="form-control input-sm" onchange="ilm.setCurPlace(this.options[this.selectedIndex].value);ilm.settingTemplate(\'#ilm-seaded-dropdown\');return false;" id="history-sel" name="history-sel">';
+				html += _.map(my.curplaces,function(a){if(!my.showgroup||my.curplaces[a.id].group===my.showgroup) {return '<option value="'+a.id+'" '+(a.id===my.curplace?' selected':'')+'>'+a.name+'</option>';}}).join("");
+				html += '</select></div>';
+				html += '<div><label for="forecast">Ennustus</label> <select class="form-control input-sm" onchange="ilm.setEstPlace(this.options[this.selectedIndex].value);ilm.settingTemplate(\'#ilm-seaded-dropdown\');return false;" id="forecast-sel" name="forecast-sel">';
+				html += _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {return '<option value="'+a.id+'" '+(a.id===my.fcplace?' selected':'')+'>'+a.name+'</option>';}}).join("");
+				html += '</select></div>';
+				html += '<div><label for="groups">Ennustuse ja andmete seos</label> <select class="form-control input-sm" onchange="ilm.setBinded(this.options[this.selectedIndex].value);return false;" id="binding-sel" name="binding-sel">';
+				html += _.map({ei:{id:false,name:"Ei ole seotud"},jah:{id:true,name:"On seotud"}},function(a){return '<option value="'+a.id+'" '+(a.id===my.binded?' selected':'')+'>'+a.name+'</option>';}).join("");
+				html += '</select></div>';
+				html += '<div><label for="groups">Paikade grupid</label> <select class="form-control input-sm" onchange="ilm.setGroup(this.options[this.selectedIndex].value);ilm.settingTemplate(\'#ilm-seaded-dropdown\');return false;" id="groups-sel" name="groups-sel">';
+				html += _.map({none:{id:"",name:"--"},jarv:{id:"jarv",name:"Järved"},meri:{id:"meri",name:"Meri"}},function(a){return '<option value="'+a.id+'" '+(a.id===my.showgroup?' selected':'')+'>'+a.name+'</option>';}).join("");
+				html += '</select></div>';
+				html += '<div><label for="groups">Paigutus</label><div><div style="padding-bottom:3px;"><ul id="order-sel1" class="order itemlist drag-box">';
+				html += _.map(my.chartorder,function(a,i){return '<li class="drag-item"name="'+a+'">'+ my.graph_name(a)+'</li>';}).join("");
+				html += '</ul></div><div><ul id="order-sel2" class="order itemlist drag-box">';
+				html += _.map(my.graphs,function(a,i){return (my.chartorder.indexOf(a)<0) ? '<li class="drag-item" name="'+a+'">'+my.graph_name(a)+'</li>' : "";}).join("");
+				html += '</ul></div></div></form>';
+			}
+			if(div){
+				if( Object.prototype.toString.call( div ) === '[object String]' ) {
+					div = $(div);
+				}
+				div.html(html);
+				var swp = $(".itemlist");
+				if(swp.sortable) {
+					swp.each(function(i,a){focusEvent(a);});
+					$(".itemlist").sortable({connectWith:".itemlist",stop: function(event,ui){
+						var nl = $( "#order-sel1" ).sortable( "toArray", {attribute:"name"});
+						if(nl.join(":")!==w.ilm.chartorder.join(":")){
+							//console.log(nl);
+							w.ilm.setOrder(nl);
+						}
+					}}).disableSelection();
+				}
+			}
+			return html;
 		}
-    
 	};
+	function touchHandler(event) {
+		var touch = event.changedTouches[0];
+		var simulatedEvent = document.createEvent("MouseEvent");
+		simulatedEvent.initMouseEvent({
+			touchstart: "mousedown",
+			touchmove: "mousemove",
+			touchend: "mouseup"
+		}[event.type], true, true, window, 1,
+			touch.screenX, touch.screenY,
+			touch.clientX, touch.clientY, false,
+			false, false, false, 0, null);	
+		touch.target.dispatchEvent(simulatedEvent);
+		event.preventDefault();
+	}
+	function focusEvent(div){
+		div.addEventListener("touchstart", touchHandler, true);
+		div.addEventListener("touchmove", touchHandler, true);
+		div.addEventListener("touchend", touchHandler, true);
+		div.addEventListener("touchcancel", touchHandler, true);
+	}
 	
 	if (w.ilm === undefined) {
 		my = new App();
@@ -777,9 +902,9 @@ var ilm = (function (my) {
 			options.wind_dir.chart.renderTo = 'wind_dir1';
 			options.temp.chart.renderTo = 'temp1';
 			
-			my.charts[0] = new Highcharts.Chart(options.wind_speed);
-			my.charts[1] = new Highcharts.Chart(options.wind_dir);
-			my.charts[2] = new Highcharts.Chart(options.temp);
+			if(my.chartorder.indexOf("wind_speed") >= 0) my.charts[0] = new Highcharts.Chart(options.wind_speed);
+			if(my.chartorder.indexOf("wind_dir") >= 0)  my.charts[1] = new Highcharts.Chart(options.wind_dir);
+			if(my.chartorder.indexOf("temp") >= 0)  my.charts[2] = new Highcharts.Chart(options.temp);
 			var host = /emhi/.test(my.curplace) ? 'ilmateenistus.ee' : 
 					/emu/.test(my.curplace) ? 'energia.emu.ee' :
 					/mnt/.test(my.curplace) ? 'balticroads.net': '';
@@ -814,11 +939,11 @@ var ilm = (function (my) {
 		var d, now;
 		now = d = (my.date > 0) ? new Date(my.date).getTime() : new Date().getTime();
 		//url = url || my.dataurl + '&hours=7&res=10m&wind_speed=1&dewpoint=1&outdoor_temperature=1&windchill=1&wind_direction=1&absolute_pressure=1';
-		//console.log("Loading all data at " + (now));
 		//fake data...
 		//ajaxopt.delta="2y";
 		var json_full="";
 		var cb = function(d) {
+			//console.log("Loading data at " + (new Date(d)));
 			if(my.curplace === "emu") {
 				ajaxopt={};
 				my.dataurl = setEmuFileName(d);
@@ -836,7 +961,8 @@ var ilm = (function (my) {
 				if(!/error|timeout/.test(type)){
 					json_full += json;
 				}
-				if((my.curplace === "emu" || /emhi/.test(my.curplace) || /mnt/.test(my.curplace)) && (d-1+(24 * 3600 * 1000)) < now) {
+				var x = new Date(now).getDate() !== new Date(d).getDate();
+				if(/(emhi|emu|mnt)/.test(my.curplace) && x) {
 					d += (24 * 3600 * 1000);
 					cb(d);
 				} else {
@@ -879,7 +1005,7 @@ var ilm = (function (my) {
 	var w = window,
 		$ = w.$,
 		Highcharts = w.Highcharts,
-		updateinterval = 60000,
+		updateinterval = 600000,
 		options = {};
 	
 	Highcharts.setOptions({
@@ -1191,14 +1317,19 @@ var ilm = (function (my) {
 				temp_options.series.push(wg_temp_series);
 				temp_options.series.push(wg_press_series);
 				
-				my.charts[3] = new Highcharts.Chart(wind_speed_options);
-				my.charts[4] = new Highcharts.Chart(wind_dir_options);
-				my.charts[5] = new Highcharts.Chart(temp_options);
-				
 				var i1, i2, i3;
-				i1 = intPlotLine(my.charts[3], i1);
-				i2 = intPlotLine(my.charts[4], i2);
-				i3 = intPlotLine(my.charts[5], i3);
+				if(my.chartorder.indexOf("wind_speed")>=0) {
+					my.charts[3] = new Highcharts.Chart(wind_speed_options);
+					i1 = intPlotLine(my.charts[3], i1);
+				}
+				if(my.chartorder.indexOf("wind_dir")>=0) {
+					my.charts[4] = new Highcharts.Chart(wind_dir_options);
+					i2 = intPlotLine(my.charts[4], i2);
+				}
+				if(my.chartorder.indexOf("temp")>=0) {
+					my.charts[5] = new Highcharts.Chart(temp_options);
+					i3 = intPlotLine(my.charts[5], i3);
+				}
 				$("#fctitle").html(
 					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(wg.update_last,1)
 				).show();
@@ -1353,6 +1484,7 @@ var ilm = (function (my) {
     d = document,
     e = d.documentElement,
     g = d.getElementsByTagName('body')[0],
+    my = w.ilm,
 	contid = 0;
 	function fixCharts(width, fn) {
 		$(fn).css("width", width);
@@ -1374,39 +1506,12 @@ var ilm = (function (my) {
 	}
 	w.ilm.popup="";
 	w.ilm.Options = function(state){
-		var t = this, f = $("#lingid"), g = $("#sl"), html = '', z = '';
-		g.html("Seaded (klikk varjamiseks)");
-		var getattr = function (base) {
-			html = '';
-			if (base) {
-				for(var i in base) {
-					if(typeof base[i] === 'object') html += '<div>'+i + " " + getattr(base[i]) + '</div>';
-					else html = '<div>'+i+" "+base[i]+"</div>";
-				}
-			}
-			return html;
-		};
-		if(w.ilm.state.attr) {
-			z = w.ilm.getFrame();
-			//html = getattr(w.ilm.state.attr);
-			html += '<div><label for="timeframe">Ajaraam</label> <select onchange="ilm.setFrame(this.options[this.selectedIndex].value);ilm.reload();return false;" id="timeframe" name="timeframe">' +
-				'<option value="1d"' + (z==='1d' ? ' selected' : '') + '>1 päev</option><option value="2d"'+(z==='2d'?' selected':'')+'>2 päeva</option><option value="3d"'+(z==='3d'?' selected':'')+'>3 päeva</option>' +
-				'</select></div>';
-			html += '<div><label for="history">Andmed</label> <select onchange="ilm.setCurPlace(this.options[this.selectedIndex].value);ilm.reload();return false;" id="history-sel" name="history-sel">';
-			html += _.map(w.ilm.curplaces,function(a){return '<option value="'+a.id+'" '+(a.id===w.ilm.curplace?' selected':'')+'>'+a.name+'</option>';}).join("");
-			html += '</select></div>';
-			html += '<div><label for="forecast">Ennustus</label> <select onchange="ilm.setEstPlace(this.options[this.selectedIndex].value);ilm.reloadest();return false;" id="forecast-sel" name="forecast-sel">';
-			html += _.map(w.ilm.fcplaces,function(a){return '<option value="'+a.id+'" '+(a.id===w.ilm.fcplace?' selected':'')+'>'+a.name+'</option>';}).join("");
-			html += '</select></div>';
-			html += '<div><label for="groups">Paikade grupid</label> <select onchange="ilm.setGroup(this.options[this.selectedIndex].value);ilm.reloadest();ilm.reload();return false;" id="groups-sel" name="groups-sel">';
-			html += _.map({none:{id:"",name:"--"},jarv:{id:"jarv",name:"Järved"},meri:{id:"meri",name:"Meri"}},function(a){return '<option value="'+a.id+'" '+(a.id===w.ilm.showgroup?' selected':'')+'>'+a.name+'</option>';}).join("");
-			html += '</select></div>';
-		} else {
-			html = "<div>Siia tulevad seaded</div>";
-		}
-		f.html(html);
+		var t = this, f = $("#lingid"), g = $("#sl");
+		g.html("Seaded (klikk varjamiseks)");				
+		my.settingTemplate(f);
 		return false;
 	};
+
 	w.ilm.Lingid = function (state) {
 		var t = this, f = $("#lingid"), g = $("#sl");
 		g.html("Lingid (klikk varjamiseks)");
@@ -1416,15 +1521,16 @@ var ilm = (function (my) {
 	w.ilm.Popup = function(name, cb) {
 		var v = $("#popup");
 		if(!v) return false;
-		var b = $("#bghide"), y = w.innerHeight || e.clientHeight || g.clientHeight,
-		act = v.attr("name");
+		var b = $("#bghide"), hh = $('.navbar').height(), y = w.innerHeight || e.clientHeight || g.clientHeight,
+		act = v.attr("name"),swp = 0;
 		if (act) $("#ilm-" + act).removeClass("active");
 		if(name && (!act || (act && act !== name))) {
 			b.css({height : $(d).height(), position : 'absolute', left : 0, top : 0}).show();
 			v.attr("name", name);
 			$("#ilm-" + name).addClass("active");
 			if(cb) cb.call(this, name);
-			v.css({top : ((y/2) - (v.height()/2)) + $(w).scrollTop()}).show();
+			swp = ((y/2) - (v.height()/2)) + $(w).scrollTop();
+			v.css({top : (swp > 0 ? swp : hh)}).show();
 		}
 		else if(v.is(":visible")) {
 			v.hide();
@@ -1442,7 +1548,8 @@ var ilm = (function (my) {
 			//return false;
 		});
 		$("#ilm-seaded").click(function(e){
-			w.ilm.Popup("seaded",w.ilm.Options);
+			my.settingTemplate("#ilm-seaded-dropdown");
+			//w.ilm.Popup("seaded",w.ilm.Options);
 			//return false;
 		});
 		$("#fctitle").on("click",function(){
