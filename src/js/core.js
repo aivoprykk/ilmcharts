@@ -78,6 +78,9 @@ var ilm = (function (my) {
 		this.fcplace = this.state.attr.fcplace;
 		this.curplaces = {
 			"emu":{id:"emu",name:"Tartu EMU",group:"jarv",link:'/weather',bind:"tabivere"},
+			/*"zoig_vortsjarv":{id:"zoig_vortsjarv",name:"Tamme Zoig",group:"jarv",link:'/vortsjarv',bind:"tamme"},*/
+			/*"zoig_topu":{id:"zoig_topu",name:"Topu Zoig",group:"meri",link:'/topu',bind:"topu"},*/
+			/*"zoig_rapina":{id:"zoig_rapina",name:"Räpina Zoig",group:"jarv",link:'/rapina',bind:"rapina"},*/
 			"mnt_tamme":{id:"mnt_tamme",name:"V-Rakke MNT",group:"jarv",link:'',bind:"tamme"},
 			"mnt_rapina":{id:"mnt_rapina",name:"Räpina MNT",group:"jarv",link:'',bind:"rapina"},
 			"mnt_uhmardu":{id:"mnt_uhmardu",name:"Uhmardu MNT",group:"jarv",link:''},

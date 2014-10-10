@@ -43,7 +43,7 @@
 					} else {
 						my.lastdate = d = new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1/$2/$3")+" "+c[1]).getTime();
 						if(my.timeframe && (my.start-my.lastdate) <= my.timeframe) {
-							if(my.curplace==='emu'){
+							if(/(emu|zoig)/.test(my.curplace)){
 								obj.avg_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7]))]);
 								obj.max_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8]))]);
 								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.wdavg([c[9], e[9]]) : c[9])]);
@@ -413,6 +413,7 @@
 			if(my.chartorder.indexOf("temp") >= 0)  my.charts[2] = new Highcharts.Chart(options.temp);
 			var host = /emhi/.test(my.curplace) ? 'ilmateenistus.ee' : 
 					/emu/.test(my.curplace) ? 'energia.emu.ee' :
+					/zoig/.test(my.curplace) ? 'ilm.zoig.ee' :
 					/mnt/.test(my.curplace) ? 'balticroads.net': '';
 			$('#curmeta').html(
 				'<a href="http://' + host + my.curplaces[my.curplace].link  +
@@ -432,6 +433,10 @@
     var setEmuFileName = function (d) {
 		return "emu_data/"+setTxtFileName(d);
     };
+    var setZoigFileName = function (d,place) {
+    	place=place.replace(/zoig_/,'');
+		return "zoig_data/"+place+"/"+setTxtFileName(d);
+    };
     var setEmhiFileName = function (d,place) {
     	place=place.replace(/emhi_/,'');
 		return "emhi_data/"+place+"/"+setTxtFileName(d);
@@ -450,9 +455,13 @@
 		var json_full="";
 		var cb = function(d) {
 			//console.log("Loading data at " + (new Date(d)));
-			if(my.curplace === "emu") {
+			if(/emu/.test(my.curplace)) {
 				ajaxopt={};
 				my.dataurl = setEmuFileName(d);
+			}
+			if(/zoig/.test(my.curplace)) {
+				ajaxopt={};
+				my.dataurl = setZoigFileName(d, my.curplace);
 			}
 			else if(/emhi/.test(my.curplace)) {
 				ajaxopt={};
@@ -468,7 +477,7 @@
 					json_full += json;
 				}
 				var x = new Date(now).getDate() !== new Date(d).getDate();
-				if(/(emhi|emu|mnt)/.test(my.curplace) && x) {
+				if(/(emhi|emu|mnt|zoig)/.test(my.curplace) && x) {
 					d += (24 * 3600 * 1000);
 					cb(d);
 				} else {
