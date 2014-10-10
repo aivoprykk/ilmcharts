@@ -252,6 +252,20 @@ var ilm = (function (my) {
 				(doc.documentElement && doc.documentElement.clientWidth) ? doc.documentElement.clientWidth :
 					(doc.body && doc.body.clientWidth) ? doc.body.clientWidth : i;
 		},
+		wdavg: function (wd, ws){
+			if( Object.prototype.toString.call( wd ) !== '[object Array]' ) {
+				return 0;
+			}
+			ws = ws || [];
+			var i = 0, sins = 0, coss = 0, count = wd.length, $c = 0;
+			for(;i<count;++i) {
+				sins += (ws[i] ? ws[i] : 1) * Math.sin(wd[i]*(Math.PI/180));
+				coss += (ws[i] ? ws[i] : 1) * Math.cos(wd[i]*(Math.PI/180));
+			}
+			c = (Math.atan((-(1/count)*sins)/(-(1/count)*coss))*(180/Math.PI));
+			c = (c<180) ? (c+180) : (c-180);
+			return c ? parseFloat(c.toFixed(1)) : 0;
+		},
 		getavg: function (input) {
 			if( Object.prototype.toString.call( input ) !== '[object Array]' ) {
 				return 0;

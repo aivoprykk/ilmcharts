@@ -260,6 +260,20 @@ var ilm = (function (my) {
 				(doc.documentElement && doc.documentElement.clientWidth) ? doc.documentElement.clientWidth :
 					(doc.body && doc.body.clientWidth) ? doc.body.clientWidth : i;
 		},
+		wdavg: function (wd, ws){
+			if( Object.prototype.toString.call( wd ) !== '[object Array]' ) {
+				return 0;
+			}
+			ws = ws || [];
+			var i = 0, sins = 0, coss = 0, count = wd.length, $c = 0;
+			for(;i<count;++i) {
+				sins += (ws[i] ? ws[i] : 1) * Math.sin(wd[i]*(Math.PI/180));
+				coss += (ws[i] ? ws[i] : 1) * Math.cos(wd[i]*(Math.PI/180));
+			}
+			c = (Math.atan((-(1/count)*sins)/(-(1/count)*coss))*(180/Math.PI));
+			c = (c<180) ? (c+180) : (c-180);
+			return c ? parseFloat(c.toFixed(1)) : 0;
+		},
 		getavg: function (input) {
 			if( Object.prototype.toString.call( input ) !== '[object Array]' ) {
 				return 0;
@@ -544,7 +558,7 @@ var ilm = (function (my) {
 							if(my.curplace==='emu'){
 								obj.avg_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7]))]);
 								obj.max_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8]))]);
-								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.getavg([c[9], e[9]]) : c[9])]);
+								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.wdavg([c[9], e[9]]) : c[9])]);
 								obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
 								obj.avg_dp_series.data.push([d, my.ntof2p((e) ? my.getavg([c[6], e[6]]) : c[6])]);
 								obj.avg_wc_series.data.push([d, my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
@@ -556,7 +570,7 @@ var ilm = (function (my) {
 								c[4] = (!c[4] || c[4] < -49) ? null : c[4];
 								obj.avg_ws_series.data.push([d, my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7])]);
 								obj.max_ws_series.data.push([d, my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8])]);
-								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.getavg([c[9], e[9]]) : c[9])]);
+								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.wdavg([c[9], e[9]]) : c[9])]);
 								if(c[4]!==null) obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
 								obj.avg_wc_series.data.push([d,my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
 								obj.avg_wl_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
@@ -565,7 +579,7 @@ var ilm = (function (my) {
 								//c[4] = (!c[4] || c[4] < -49) ? null : c[4];
 								obj.avg_ws_series.data.push([d, my.ntof2p((e) ? my.getavg([c[8], e[8]]) : c[8])]);
 								obj.max_ws_series.data.push([d, my.ntof2p((e) ? my.getmax([c[6], e[6]]) : c[6])]);
-								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7])]);
+								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.wdavg([c[7], e[7]]) : c[7])]);
 								if(c[2]!=="") obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
 								if(c[3]!=="") obj.avg_rain_series.data.push([d, my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
 								if(c[4]!=="") obj.avg_humid_series.data.push([d, my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
