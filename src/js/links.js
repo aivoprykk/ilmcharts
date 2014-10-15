@@ -59,7 +59,7 @@
 				'list':[
 				{'name':'Eesti','url':'http://','list': [ 
 				{'href':'www.surf.ee/chat/','title':"Surf.ee chat",'id':'surfichat'},
-				{'href':'www.surf.ee/turg/','title':"Surf.ee turg",'id':'surfiturg'},
+				{'href':'http://www.lesurf.ee/index.php?ID=33','title':"Surfiturg",'id':'surfiturg'},
 				{'href':'www.lesurf.ee/','title':"L&otilde;una surfarid",'id':'lesurf'},
 				{'href':'www.purjelaualiit.ee/','title':"Eesti Purjelaualiit",'id':'purjelaualiit'},
 				{'href':'www.gps-speedsurfing.com/','title':"GPS Speedsurfing",'id':'gps-speedsurfing'},

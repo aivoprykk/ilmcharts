@@ -164,7 +164,11 @@ text-decoration:none;
 .setting-form label {
 	color: #999;
 }
-
+.ilm-viited-dropdown {
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 15px;
+}
 /*bootstrap overrides*/
 
 .nav > li > a, .navbar-text {

@@ -10,7 +10,8 @@ var ilm = (function (my) {
 			curplace : opt.curplace||'emu',
 			chartorder : opt.chartorder || ["temp","wind_speed","wind_dir"],
 			showgroup : opt.showgroup || "",
-			binded : opt.binded || false
+			binded : opt.binded || false,
+			linksasmenu : opt.linksasmenu || false
 		};
 		this.id = defaults.id;
 		this.attr = defaults;
@@ -97,6 +98,7 @@ var ilm = (function (my) {
 		this.timeframe = this.state.attr.timeframe;
 		this.showgroup = this.state.attr.showgroup;
 		this.binded = this.state.attr.binded;
+		this.linksasmenu = this.state.attr.linksasmenu;
 		this.lastdate = new Date().getTime();//-(4*24*3600);
 		this.date = 0;
 		this.start = this.lastdate;
@@ -382,6 +384,15 @@ var ilm = (function (my) {
 			}
 			return false;
 		},
+		setLinksAsMenu: function(value) {
+			if(/(0|false)/.test(value)) value = false;
+			if(/(1|true)/.test(value)) value = true;
+			if(typeof value === 'boolean' && this.linksasmenu!==value) {
+				this.linksasmenu = value;
+				this.state.set({linksasmenu : this.linksasmenu});
+			}
+			return false;
+		},
 		nextCurPlace: function() {
 			return this.nextPlace('curplace');
 		},
@@ -429,6 +440,16 @@ var ilm = (function (my) {
 			if(!g) ret += " " + (d.getHours()<10?"0":"") + d.getHours() + ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();
 			return ret;
 		},
+		viitedTemplate: function(div){
+			var html = '', z = '';
+			if(div){
+				if( Object.prototype.toString.call( div ) === '[object String]' ) {
+					div = $(div);
+				}
+				div.html(html);
+			}
+			return html;
+		},
 		settingTemplate: function(div){
 			var html = '', z = '';
 			if(my.state.attr) {
@@ -452,7 +473,8 @@ var ilm = (function (my) {
 				html += _.map(my.chartorder,function(a,i){return '<li class="drag-item"name="'+a+'">'+ my.graph_name(a)+'</li>';}).join("");
 				html += '</ul></div><div><ul id="order-sel2" class="order itemlist drag-box">';
 				html += _.map(my.graphs,function(a,i){return (my.chartorder.indexOf(a)<0) ? '<li class="drag-item" name="'+a+'">'+my.graph_name(a)+'</li>' : "";}).join("");
-				html += '</ul></div></div></form>';
+				html += '</ul></div><div class="checkbox"><label>Näita viiteid menüüs <input type="checkbox" onclick="ilm.setLinksAsMenu(this.checked);return true;" id="linksasmenu" name="linksasmenu"></label></div>';
+				html += '</form>';
 			}
 			if(div){
 				if( Object.prototype.toString.call( div ) === '[object String]' ) {
@@ -470,6 +492,7 @@ var ilm = (function (my) {
 						}
 					}}).disableSelection();
 				}
+				if(w.ilm.linksasmenu) $("#linksasmenu").attr({"checked":"checked"});
 			}
 			return html;
 		}

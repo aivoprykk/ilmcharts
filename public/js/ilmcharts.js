@@ -1,5 +1,5 @@
 /*!
- * Ilmcharts v1.1.4 (http://ilm.majasa.ee)
+ * Ilmcharts v1.1.5 (http://ilm.majasa.ee)
  * Copyright 2012-2014 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
@@ -18,7 +18,8 @@ var ilm = (function (my) {
 			curplace : opt.curplace||'emu',
 			chartorder : opt.chartorder || ["temp","wind_speed","wind_dir"],
 			showgroup : opt.showgroup || "",
-			binded : opt.binded || false
+			binded : opt.binded || false,
+			linksasmenu : opt.linksasmenu || false
 		};
 		this.id = defaults.id;
 		this.attr = defaults;
@@ -105,6 +106,7 @@ var ilm = (function (my) {
 		this.timeframe = this.state.attr.timeframe;
 		this.showgroup = this.state.attr.showgroup;
 		this.binded = this.state.attr.binded;
+		this.linksasmenu = this.state.attr.linksasmenu;
 		this.lastdate = new Date().getTime();//-(4*24*3600);
 		this.date = 0;
 		this.start = this.lastdate;
@@ -390,6 +392,15 @@ var ilm = (function (my) {
 			}
 			return false;
 		},
+		setLinksAsMenu: function(value) {
+			if(/(0|false)/.test(value)) value = false;
+			if(/(1|true)/.test(value)) value = true;
+			if(typeof value === 'boolean' && this.linksasmenu!==value) {
+				this.linksasmenu = value;
+				this.state.set({linksasmenu : this.linksasmenu});
+			}
+			return false;
+		},
 		nextCurPlace: function() {
 			return this.nextPlace('curplace');
 		},
@@ -437,6 +448,16 @@ var ilm = (function (my) {
 			if(!g) ret += " " + (d.getHours()<10?"0":"") + d.getHours() + ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();
 			return ret;
 		},
+		viitedTemplate: function(div){
+			var html = '', z = '';
+			if(div){
+				if( Object.prototype.toString.call( div ) === '[object String]' ) {
+					div = $(div);
+				}
+				div.html(html);
+			}
+			return html;
+		},
 		settingTemplate: function(div){
 			var html = '', z = '';
 			if(my.state.attr) {
@@ -460,7 +481,8 @@ var ilm = (function (my) {
 				html += _.map(my.chartorder,function(a,i){return '<li class="drag-item"name="'+a+'">'+ my.graph_name(a)+'</li>';}).join("");
 				html += '</ul></div><div><ul id="order-sel2" class="order itemlist drag-box">';
 				html += _.map(my.graphs,function(a,i){return (my.chartorder.indexOf(a)<0) ? '<li class="drag-item" name="'+a+'">'+my.graph_name(a)+'</li>' : "";}).join("");
-				html += '</ul></div></div></form>';
+				html += '</ul></div><div class="checkbox"><label>Näita viiteid menüüs <input type="checkbox" onclick="ilm.setLinksAsMenu(this.checked);return true;" id="linksasmenu" name="linksasmenu"></label></div>';
+				html += '</form>';
 			}
 			if(div){
 				if( Object.prototype.toString.call( div ) === '[object String]' ) {
@@ -478,6 +500,7 @@ var ilm = (function (my) {
 						}
 					}}).disableSelection();
 				}
+				if(w.ilm.linksasmenu) $("#linksasmenu").attr({"checked":"checked"});
 			}
 			return html;
 		}
@@ -1469,7 +1492,7 @@ var ilm = (function (my) {
 				'list':[
 				{'name':'Eesti','url':'http://','list': [ 
 				{'href':'www.surf.ee/chat/','title':"Surf.ee chat",'id':'surfichat'},
-				{'href':'www.surf.ee/turg/','title':"Surf.ee turg",'id':'surfiturg'},
+				{'href':'http://www.lesurf.ee/index.php?ID=33','title':"Surfiturg",'id':'surfiturg'},
 				{'href':'www.lesurf.ee/','title':"L&otilde;una surfarid",'id':'lesurf'},
 				{'href':'www.purjelaualiit.ee/','title':"Eesti Purjelaualiit",'id':'purjelaualiit'},
 				{'href':'www.gps-speedsurfing.com/','title':"GPS Speedsurfing",'id':'gps-speedsurfing'},
@@ -1553,11 +1576,11 @@ var ilm = (function (my) {
 		if(!v) return false;
 		var b = $("#bghide"), hh = $('.navbar').height(), y = w.innerHeight || e.clientHeight || g.clientHeight,
 		act = v.attr("name"),swp = 0;
-		if (act) $("#ilm-" + act).removeClass("active");
+		if (act) $("#ilm-" + act).parent().removeClass("active");
 		if(name && (!act || (act && act !== name))) {
 			b.css({height : $(d).height(), position : 'absolute', left : 0, top : 0}).show();
 			v.attr("name", name);
-			$("#ilm-" + name).addClass("active");
+			$("#ilm-" + name).parent().addClass("active");
 			if(cb) cb.call(this, name);
 			swp = ((y/2) - (v.height()/2)) + $(w).scrollTop();
 			v.css({top : (swp > 0 ? swp : hh)}).show();
@@ -1572,9 +1595,20 @@ var ilm = (function (my) {
 	$(d).ready(function () {
 		$("#pagelogo").html(ilm.logo);
 		//setWidth();
-		$("#ilm-lingid").click(function(e){
+		$("#ilm-viited").click(function(e){
 			//ilm.showLinks();
-			w.ilm.Popup("lingid",w.ilm.Lingid);
+			var b = $(e.target);
+			if(w.ilm.linksasmenu) {
+				b.attr({"data-toggle":"dropdown"});
+				b.addClass("dropdown-toggle");
+				var a = $(".ilm-viited-dropdown");
+				a.html(w.ilm.lingid.process(w.ilm.lingid.JSON));
+				a.height(w.innerHeight-(w.innerHeight/3));
+			} else {
+				b.removeClass("dropdown-toggle");
+				b.removeAttr("data-toggle");
+				w.ilm.Popup("viited",w.ilm.Lingid);
+			}
 			//return false;
 		});
 		$("#ilm-seaded").click(function(e){
