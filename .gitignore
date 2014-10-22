@@ -13,3 +13,5 @@ zoig_data/*
 arhiiv/*
 */arhiiv/*
 node_modules
+bin/jaamconf.php
+validation-*.json
