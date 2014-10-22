@@ -64,13 +64,17 @@ Sunset 21:01 black white
 
 fs.readFile(path, {encoding:'utf-8'}, function(err, data) {
 	if(err) throw err;
-	var child,
+	var child = [],
 	text = "", trs, ret=[], test, d=0, m=0, wd=[], wdata=[];
 	wd = data.split(/\n/);
 	//console.log(JSON.stringify(wd));
-	wd.forEach(function(a,b){
+	var i=0,len=wd.length,a="";
+	for(;i<len;++i){
+		a=wd[i];
+	//wd.forEach(function(a,b){
 		child = a.split('\t');
-		if(b===0) {
+		if(child.length<1) continue;
+		if(i===0) {
 			text = child[1].replace(/^(\d*)\.(\d*)\.(\d*) /,'20$3$2$1 ');
 			ret[0] = text;
 		}
@@ -83,7 +87,8 @@ fs.readFile(path, {encoding:'utf-8'}, function(err, data) {
 		if(/^Wind\sdir./.test(a))    ret[6] = extractWd(child[1]);
 		if(/^Wind\sspeed/.test(a))   ret[7] = text;
 		if(/^Visibility/.test(a))    ret[8] = text;
-	});
+	//});
+	}
 		if (ret.length) {
 			//console.log(ret.join("\t"));
 			wdata.push(ret.join("\t"));

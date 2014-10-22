@@ -43,7 +43,6 @@ cd $path
 
 date=`date '+%F'`
 min=`date '+%H:%M'`;
-minutes=5
 i=0
 cat $path/places.conf|grep -v '^#'|while read j; do
 
@@ -60,7 +59,8 @@ cd public
 for x in $names; do
 name=${x/:*/};
 value=${x/*:/};
-
+temp=""
+minutes=5
 #echo "$place $name $value";
 [ x"$value" = x"" ] && continue;
 #continue;
@@ -80,14 +80,14 @@ emhi)
 	out="emhi_data/"$place
 	temp="arc-file-$place.html"
 	minutes=11
-	continue;
+	#continue;
 	;;
 mnt)
 	url='http://www.balticroads.net/?getstationdata=1&mapstation='$value
 	out="mnt_data/"$place
 	temp="arc-file-$place.html"
 	minutes=11
-	continue;
+	#continue;
 	;;
 *)
 	continue;
@@ -136,7 +136,7 @@ fi
 if [ x"$dry" = x"" ]; then
 	if [ x"$temp" != x"" ]; then
 	  wget -U 'Wget for ilm.majasa.ee/' -q -O $out/$temp $url$file
-	  node $dir"/parse_$name.js" $out/$temp
+	  [ -e $dir"/parse_$name.js" ] && node $dir"/parse_$name.js" $out/$temp
 	  rm -f $out"/"$temp
 	else
 	  wget -U 'Wget for ilm.majasa.ee/' -q -O $out/$file $url$file		

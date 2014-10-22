@@ -14,6 +14,7 @@ process.argv.forEach(function (val, index, array) {
   	  input=val;
   }
 });
+if (!fs.existsSync(input)) throw "Could not find input file:" + input;
 path = fs.realpathSync(input) || '';
 if(!path) throw "Could not resolve input file path:" + input;
 dir=path.match(/.*\//);
