@@ -1,5 +1,5 @@
 /*!
- * Ilmcharts v1.1.5 (http://ilm.majasa.ee)
+ * Ilmcharts v1.1.6 (http://ilm.majasa.ee)
  * Copyright 2012-2014 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
