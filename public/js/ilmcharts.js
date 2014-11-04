@@ -7,7 +7,7 @@
 if (typeof jQuery === 'undefined') { throw new Error('Ilmcharts\'s JavaScript requires jQuery') }
 
 var ilm = (function (my) {
-	var w = window, doc = document;
+	var w = window, doc = document, loc = w.location;
 	function State(opt) {
 		opt = opt || {};
 		var defaults = {
@@ -151,12 +151,43 @@ var ilm = (function (my) {
 		this.charts = [];
 		this.chartorder = this.state.attr.chartorder;
 		this.months = ['Jaanuar', 'Veebruar', 'Märts', 'Aprill', 'Mai', 'Juuni',
-			'Juuli', 'August', 'September', 'Octoober', 'November', 'Detsember'];
+			'Juuli', 'August', 'September', 'Oktoober', 'November', 'Detsember'];
 		this.weekdays = ['Pühapäev', 'Esmaspäev', 'Teisipäev', 'Kolmapäev', 'Neljapäev', 'Reede', 'Laupäev'];
+		if(loc.hash) this.hash_data();
 	}
 
 	App.prototype = {
-		graph_name : function(name) {
+		hash_data: function(){
+			var changed={};
+			//if(!loc.hash) return false;
+			if(loc.hash){
+				var a = loc.hash.substring(1).split(/[\&|\/]/);
+				var i=0;
+				var j=a.length;
+				var places=Object.keys(this.fcplaces);
+				if(j){
+					for(;i<j;++i){
+						var b = a[i].split("=");
+						if(b[0]){
+							if((/aeg/.test(b[0]) && b[1]) || /\d*-\d*-\d/.test(b[0])){
+								changed.aeg = b[1]||b[0];
+							} else if((/koht/.test(b[0]) && b[1]) || places.indexOf(b[0])>=0){
+								this.setEstPlace(b[1]||b[0], "ei");
+								changed.place = b[1]||b[0];
+							} else if((/raam/.test(b[0]) && b[1]) || /\d*[dh]/.test(b[0])){
+								changed.raam = b[1]||b[0];
+							}
+						}
+					}
+					//console.log(this.date);
+				}
+			}
+			this.setFrame(changed.raam,"ei","ei");
+			this.setDate(changed.aeg,"ei");
+			this.setEstPlace(changed.place,"ei");
+			return false;
+		},
+		graph_name: function(name) {
 				return (name==='wind_speed') ? 'Tuule kiirus' : 
 					(name==='wind_dir') ? 'Tuule suund' : 'Temperatuur';
 		},
@@ -298,8 +329,10 @@ var ilm = (function (my) {
 			}
 			return max;
 		},
-		setFrame: function(d) {
+		setFrame: function(d, persist, load) {
 			var x = '';
+			persist=persist||"ja";
+			load=load||'ja';
 			if(d && /^\d*d/.test(d)) {
 				x  = d.replace(/d*$/,"");
 				this.timeframe = x*24*3600*1000;
@@ -309,7 +342,9 @@ var ilm = (function (my) {
 			} else if (d && /^\d+$/.test(d)) {
 				this.timeframe = d;
 			}
-			this.state.set({'timeframe':this.timeframe});
+			if(persist==="ja") this.state.set({'timeframe':this.timeframe});
+			else if(!d) this.timeframe = this.state.attr.timeframe;
+			if(load==='ja') this.doReload("curplace");
 			return false;
 		},
 		getFrame: function (d) {
@@ -324,42 +359,81 @@ var ilm = (function (my) {
 			}
 			return f;
 		},
-		setCurPlace: function(d) {
-			this.setPlace(d, 'curplace');
+		setCurPlace: function(d, persist, load) {
+			this.setPlace(d, 'curplace', persist, load);
 			return false;
 		},
-		setEstPlace: function(d) {
-			this.setPlace(d);
+		setEstPlace: function(d, persist, load) {
+			this.setPlace(d, 'fcplace', persist, load);
 			return false;
 		},
-		setPlace: function(d, name) {
+		setPlace: function(d, name, persist, load) {
 			name = name || 'fcplace';
+			persist=persist||"ja";
+			load=load||'ja';
 			var places=this[name+'s'] || this.fcplaces,
 			place = this[name] || this.fcplace,
 			j = {}, i,reload="";
+			if(name==='fcplace' && d){
+				if(d==='tartu'||d==='saadjarv') d='tabivere';
+				else if(d==='vortsjarv') d='tamme';
+				else if(d==='haapsalu') d='topu';
+				else if(d==='tallinn') d='pirita';
+			}
+			if(!d) d = this.state.attr[name];
 			if(d) {
 				for(i in places){
 					if(i === d) { 
-						j[name] = this[name] = d;
+						this[name] = d;
+						if(this.state.attr[name] !== d) j[name] = d;
 						reload = name;
 						if(this.binded && places[i].bind) {
 							var other = /fc/.test(name)?'curplace':'fcplace';
-							j[other] = this[other] = places[i].bind;
+							this[other] = places[i].bind;
+							if(this.state.attr[other] !== places[i].bind) j[other] = places[i].bind;
 							reload = "both";
 						}
 						break;
 					}
 				}
 			}
-			this.state.set(j);
 			if(reload){
-				if(reload==='both'){
-					w.ilm.reloadest();
-					w.ilm.reload();
-				}
-				else if(/fc/.test(reload)) w.ilm.reloadest();
-				else w.ilm.reload();
+				if(persist==="ja") this.state.set(j);
+				if(load==="ja") this.doReload(reload);
 			}
+			return false;
+		},
+		nextCurPlace: function() {
+			return this.nextPlace('curplace');
+		},
+		nextPlace: function(name) {
+			name = name || 'fcplace';
+			var places = this[name + 's'] || this.fcplaces,
+			place = this[name] || this.fcplace,
+			p = '', that = false, j = '', i;
+			//console.log(JSON.stringify(places));
+			for(i in places){
+				if (!j && (!this.showgroup || (this.showgroup === places[i].group))) j = i;
+				if (that) {
+					if(!this.showgroup || (this.showgroup === places[i].group)) {
+						p = i; that=false;
+					}
+				}
+				if(i === place) that = true;
+				//console.log(name + ' "' + i + '" ' + place +  " " + (that?"ready":"") + " " + p + " " + this.showgroup);
+			}
+			if(!p) p = j;
+			//console.log("got place " + name + ' ' + p + ' from ' + place);
+			return p;
+		},
+		doReload: function (reload){
+			if(!w.ilm||!w.ilm.reload) return false;
+			if(reload==='both'){
+				w.ilm.reloadest();
+				w.ilm.reload();
+			}
+			else if(/fc/.test(reload)) w.ilm.reloadest();
+			else w.ilm.reload();
 			return false;
 		},
 		setGroup: function (d, name) {
@@ -369,8 +443,7 @@ var ilm = (function (my) {
 				if(!d) return false;
 				if(this.fcplaces[this.fcplace].group!==this.showgroup) this.setEstPlace(this.nextPlace());
 				if(this.curplaces[this.curplace].group!==this.showgroup) this.setCurPlace(this.nextCurPlace());
-				w.ilm.reloadest();
-				w.ilm.reload();
+				//this.doReload("both");
 			}
 			return false;
 		},
@@ -401,50 +474,34 @@ var ilm = (function (my) {
 			}
 			return false;
 		},
-		nextCurPlace: function() {
-			return this.nextPlace('curplace');
-		},
-		nextPlace: function(name) {
-			name = name || 'fcplace';
-			var places = this[name + 's'] || this.fcplaces,
-			place = this[name] || this.fcplace,
-			p = '', that = false, j = '', i;
-			//console.log(JSON.stringify(places));
-			for(i in places){
-				if (!j && (!this.showgroup || (this.showgroup === places[i].group))) j = i;
-				if (that) {
-					if(!this.showgroup || (this.showgroup === places[i].group)) {
-						p = i; that=false;
-					}
-				}
-				if(i === place) that = true;
-				//console.log(name + ' "' + i + '" ' + place +  " " + (that?"ready":"") + " " + p + " " + this.showgroup);
-			}
-			if(!p) p = j;
-			//console.log("got place " + name + ' ' + p + ' from ' + place);
-			return p;
-		},
-		setDate: function(d) {
+		setDate: function(d,load) {
+			load=load||'ja';
 			var ret = 0,cur = new Date().getTime();
 			if(d && /^\d*-\d*-\d*/.test(d)) {
+				d = d.split(/[\sT]/)[0]+" 23:59:59";
 				ret = new Date(d).getTime();
 			} else if(d && /^\d+$/.test(d)) {
-				ret = new Date().getTime() - d;
+				ret = new Date().getTime() - (Number(d)*1000);
+			} else if (d && /^\d*h/.test(d)) {
+				ret = new Date().getTime() - (Number(d.replace(/h*$/,""))*3600*1000);
+			} else if (d && /^\d*d/.test(d)) {
+				ret = new Date().getTime() - (Number(d.replace(/d*$/,""))*24*3600*1000);
 			}
-			if(ret && ret > cur){
+			if(!d || (ret && ret > cur)){
 				ret = cur;
 			}
 			if (ret) {
 				this.historyactive=(cur-(3600*1000)>ret) ? true : false;
-				this.start = this.lastdate = this.date = ret;
+				this.start = this.date = ret;
+				if(load==='ja') this.doReload("curplace");
 			}
 		},
 		getTimeStr: function (d, f, g) {
 			d = new Date(d);
 			//console.log(d);
-			var ret ='', dsep = "." + (d.getMonth() < 10 ? "0" : "") + (d.getMonth()+1) + ".";
+			var ret ='', dsep = "." + (d.getMonth() < 9 ? "0" : "") + (d.getMonth()+1) + ".";
 			if (f) { dsep = ". " + my.months[(d.getMonth())].toLowerCase() + " "; }
-			ret = (d.getDate() < 10 ? "0" : "") + d.getDate() + dsep + d.getFullYear();
+			ret = (d.getDate() < 9 ? "0" : "") + d.getDate() + dsep + d.getFullYear();
 			if(!g) ret += " " + (d.getHours()<10?"0":"") + d.getHours() + ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();
 			return ret;
 		},
@@ -570,7 +627,7 @@ var ilm = (function (my) {
 		} else if (data) {
 			//my.datamode = "emu";
 			//emu data
-			var c,e,f;
+			var c,e,f,g;
 			$.each(data.split("\n"),function(a, b) {
 				if (b && !b.match(/^--/)) {
 					c = b.split(/\s+?/);
@@ -580,7 +637,8 @@ var ilm = (function (my) {
 						//console.log("viiega:"+c[1]); //
 					} else {
 						my.lastdate = d = new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1/$2/$3")+" "+c[1]).getTime();
-						if(my.timeframe && (my.start-my.lastdate) <= my.timeframe) {
+						g = my.start-my.lastdate;
+						if(my.timeframe && g > 0 && g <= my.timeframe) {
 							if(/(emu|zoig)/.test(my.curplace)){
 								obj.avg_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7]))]);
 								obj.max_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8]))]);
@@ -598,7 +656,7 @@ var ilm = (function (my) {
 								obj.max_ws_series.data.push([d, my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8])]);
 								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.wdavg([c[9], e[9]]) : c[9])]);
 								if(c[4]!==null) obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
-								obj.avg_wc_series.data.push([d,my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
+								obj.avg_wtemp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
 								obj.avg_wl_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
 							}
 							else if(/mnt/.test(my.curplace)){
@@ -636,10 +694,11 @@ var ilm = (function (my) {
 			title: {
 				text: null
 			},
-			min: 0,
+			tickInterval: 5,
 			minorGridLineWidth: 1,
 			gridLineWidth: 1,
 			alternateGridColor: null,
+			min:0,
 			labels: {
 				formatter: function () {
 					return this.value + 'm/s';
@@ -751,20 +810,22 @@ var ilm = (function (my) {
 		title: {
 			text: 'Temperatuur, õhurõhk ja -niiskus'
 		},
-		yAxis: [{ //1.temp
+		yAxis: [{ //0.temp
+			tickInterval: 5,
 			labels: {
 				formatter: function () {
 					return this.value + '°C';
 				}
 			},
 			style: {
-				color: "#2f7ed8"
+				color: "#7cb5ec"
 			},
 			title: {
 				text: null
 			}
-		}, {//2.press
+		},{//1.press
 			gridLineWidth: 0,
+			tickInterval: 10,
 			labels: {
 				formatter: function () {
 					return this.value + 'hPa';
@@ -777,23 +838,24 @@ var ilm = (function (my) {
 				text: null
 			},
 			opposite: true
-		}, {//3.humid
+		},{//2.humid
 			gridLineWidth: 0,
-			max: 100,
+			tickInterval: 10,
 			labels: {
 				formatter: function () {
 					return this.value + '%';
 				},
 				style: {
-					color: 'rgb(159,176,189)'
+					color: '#C7C8CA'
 				}
 			},
 			title: {
 				text: null
 			},
 			opposite: true
-		}, { // 4. rain
+		},{ //3.rain
 			gridLineWidth: 0,
+			tickInterval: 2,
 			labels: {
 				formatter: function () {
 					return this.value + 'mm';
@@ -805,20 +867,22 @@ var ilm = (function (my) {
 			title: {
 				text: null
 			}
-		}, { // 5. waterlevel
+		},{ //4.waterlevel
 			gridLineWidth: 0,
+			tickInterval: 10,
 			labels: {
 				formatter: function () {
 					return this.value + 'cm';
 				},
 				style: {
-					color: '#4572A7'
+					color: '#8085e9'
 				}
 			},
 			title: {
 				text: null
-			}
-		}],	
+			},
+			opposite: true
+		}],
 		tooltip: {
 			shared: true,
 			valueSuffix: '°C',
@@ -854,28 +918,48 @@ var ilm = (function (my) {
 				type: 'spline',
 				lineWidth: 2
 			};
+			/*colors:
+			#7cb5ec - sini,
+			#434348 - must,
+			#90ed7d -rohe,
+			#f7a35c - oranz, //rõhk
+			#8085e9 - lilla,
+			#f15c80 - tumeoranz, //rõhk2
+			#e4d354 - kuldne,
+			#8085e8 - lilla2,
+			#8d4653 - pruun,
+			#91e8e1 - sinine2(hele)
+			*/
 			var d, s = {};			
-			s.min_ws_series = $.extend(true, {}, d_series, {name: "Min"});
-			s.avg_ws_series = $.extend(true, {}, d_series, {name: "Keskmine"});
-			s.max_ws_series = $.extend(true, {}, d_series, {name: "Max", color: "#910000", dashStyle: 'shortdot'});
-			s.min_wd_series = $.extend(true, {}, d_series, {type: "scatter", name: "Min", lineWidth: 0});
-			s.avg_wd_series = $.extend(true, {name: "Keskmine"}, d_series);
-			s.max_wd_series = $.extend(true, {}, d_series,  {type: "scatter", name: "Max", lineWidth: 0});
-			s.avg_temp_series = $.extend(true, {color: "#2f7ed8", name: "Temperatuur", negativeColor: 'red'}, d_series);
-			s.avg_press_series = $.extend(true, {}, d_series, {color: '#AA4643', type: 'spline', lineWidth: 2, dashStyle: 'shortdot', yAxis: 1, name: "Õhurõhk", tooltip: { valueSuffix: ' hPa' }});
-			s.avg_humid_series = $.extend(true, {}, d_series, {color: 'rgb(159,176,189)', type: 'spline', lineWidth: 2, dashStyle: 'longdash', yAxis: 2, name: "Õhuniiskus", tooltip: { valueSuffix: ' %' }});
-			s.avg_rain_series = $.extend(true, {}, d_series, {color: '#4572A7', type: 'column', lineWidth: 0, yAxis: 3, name: "Sademed", tooltip: { valueSuffix: ' mm' }});
-			s.avg_dp_series = $.extend(true, {}, d_series, {lineWidth: 1, name: "Kastepunkt", color: "#0d233a"});
-			s.avg_wc_series = $.extend(true, {}, d_series, {lineWidth: 1, name: "Tuuletemp", color: "#8bbc21"});
-			s.avg_wl_series = $.extend(true, {color: "#2f7ed8", name: "Veetase", negativeColor: 'green', tooltip: { valueSuffix: ' cm' }}, d_series);
+			//windspeed
+			s.avg_ws_series = $.extend(true, {}, d_series, {name: "Keskmine",color:"#7cb5ec", lineWidth: 2});//1
+			s.max_ws_series = $.extend(true, {}, d_series, {name: "Max", color: "#910000", lineWidth: 2, dashStyle: 'shortdot'});//2
+			s.min_ws_series = $.extend(true, {}, d_series, {name: "Min",color:"#90ed7d", lineWidth: 2});//3
+			//winddir
+			s.min_wd_series = $.extend(true, {}, d_series, {type: "scatter", name: "Min", color:"#90ed7d", lineWidth: 0});//3
+			s.avg_wd_series = $.extend(true, {}, d_series, {name: "Keskmine", color:"#7cb5ec", lineWidth: 2});//1
+			s.max_wd_series = $.extend(true, {}, d_series,  {type: "scatter", name: "Max", color:"#434348", lineWidth: 0});//2
+			//temp
+			s.avg_temp_series = $.extend(true, {}, d_series, {name: "Temperatuur", color: "#7cb5ec", negativeColor: 'red', lineWidth: 2});//1
+			s.avg_dp_series = $.extend(true, {}, d_series, {name: "Kastepunkt", color: "#0d233a", lineWidth: 1});
+			s.avg_wc_series = $.extend(true, {}, d_series, {name: "Tuuletemp", color: "#8bbc21", lineWidth: 1});
+			s.avg_press_series = $.extend(true, {}, d_series, {name: "Õhurõhk", color: '#AA4643', lineWidth: 2, type: 'spline', dashStyle: 'shortdot', yAxis: 1, tooltip: { valueSuffix: ' hPa' }});
+			s.avg_humid_series = $.extend(true, {}, d_series, {name: "Õhuniiskus", color: '#C7C8CA', lineWidth: 1, type: 'spline', dashStyle: 'longdash', yAxis: 2, tooltip: { valueSuffix: ' %' }});
+			s.avg_rain_series = $.extend(true, {}, d_series, {name: "Sademed", color: '#4572A7', lineWidth: 0, type: 'column', yAxis: 3, tooltip: { valueSuffix: ' mm' }});
+			s.avg_wtemp_series = $.extend(true, {}, d_series, {name: "Veetemp", color: "#8d4653", lineWidth: 2});
+			s.avg_wl_series = $.extend(true, {}, d_series, {name: "Veetase", color: "#8085e9", negativeColor: '#e4d354', lineWidth: 2, type: 'spline', yAxis: 4, tooltip: { valueSuffix: ' cm' }});
 
 			normalizeData(json, s);
 			
 			options.wind_speed.series = null;
 			options.wind_speed.series = [];
-			options.wind_speed.series.push(s.avg_ws_series);
 			options.wind_speed.series.push(s.min_ws_series);
 			options.wind_speed.series.push(s.max_ws_series);
+			options.wind_speed.series.push(s.avg_ws_series);
+			/*if(s.avg_ws_series.data.reduce(function(a,b){var c=a.concat(b);return c;}).reduce(function(a,b){return a<b?a:b;})<1) {
+				options.wind_speed.yAxis[0].min=0;
+			}
+			else delete options.wind_speed.yAxis[0].min;*/
 			
 			d = new Date(my.lastdate);
 			/*$("#ajaraam").html(
@@ -891,12 +975,14 @@ var ilm = (function (my) {
 			);*/
 			$("#curplace").html('Andmed <b>'+my.curplaces[my.curplace].name+'</b>').show();
 			$("#curtime").html(my.getTimeStr(d,1,my.historyactive?1:0)).show();
-			var list = _.map(my.curplaces,function(a){if(!my.showgroup||my.curplaces[a.id].group===my.showgroup) {return '<li><a href="#" name="'+a.id+'" class="curplace-select'+(a.id===my.curplace?' active':'')+'">'+a.name+'</a></li>';}}).join("");
+			var list = _.map(my.curplaces,function(a){if(!my.showgroup||my.curplaces[a.id].group===my.showgroup) {
+				return '<li><a href="#" name="'+a.id+'" class="curplace-select'+(a.id===my.curplace?' active':'')+'">'+a.name+'</a></li>';
+			}}).join("");
 			$("#curmenu").html(list);
 			$("#cursel").show();
 			$(".curplace-select").on("click",function(){
 					w.ilm.setCurPlace($(this).attr('name'));
-					w.ilm.reload();
+					//w.ilm.reload();
 					//return false;
 			});
 			
@@ -919,7 +1005,7 @@ var ilm = (function (my) {
 				(s.avg_temp_series.data.length ? " Temperatuur"+(!my.historyactive? " [ <b>" + s.avg_temp_series.data[s.avg_temp_series.data.length - 1][1] + "</b> °C ]":"")+",":"") +
 					(s.avg_press_series.data.length ? " Rõhk"+(!my.historyactive? " [ <b>" + s.avg_press_series.data[s.avg_press_series.data.length - 1][1] + "</b> hPa ]":"")+",":"") +
 					(s.avg_humid_series.data.length ? " Niiskus"+(!my.historyactive? " [ <b>" + s.avg_humid_series.data[s.avg_humid_series.data.length - 1][1] + "</b> % ]":""):"") +
-					(!s.avg_humid_series.data.length && s.avg_wc_series.data ? " Veetemperatuur"+(!my.historyactive? " [ <b>" + s.avg_wc_series.data[s.avg_wc_series.data.length - 1][1] + "</b> °C ]":""):"") +
+					(!s.avg_humid_series.data.length && s.avg_wtemp_series.data ? " Veetemperatuur"+(!my.historyactive? " [ <b>" + s.avg_wtemp_series.data[s.avg_wtemp_series.data.length - 1][1] + "</b> °C ]":""):"") +
 					(!s.avg_humid_series.data.length && s.avg_wl_series.data ? " Veetase"+(!my.historyactive? " [ <b>" + s.avg_wl_series.data[s.avg_wl_series.data.length - 1][1] + "</b> cm ]":""):"");
 			} else {
 				options.temp.title.text = "Temperatuuri andmed puuduvad";
@@ -927,19 +1013,23 @@ var ilm = (function (my) {
 
 			options.wind_dir.series = null;
 			options.wind_dir.series = [];
-			options.wind_dir.series.push(s.avg_wd_series);					
-			options.wind_dir.series.push(s.min_wd_series);					
-			options.wind_dir.series.push(s.max_wd_series);					
+			
+			options.wind_dir.series.push(s.min_wd_series);
+			options.wind_dir.series.push(s.max_wd_series);
+			options.wind_dir.series.push(s.avg_wd_series);
 
 			options.temp.series = null;
 			options.temp.series = [];
-			options.temp.series.push(s.avg_rain_series);
 			options.temp.series.push(s.avg_temp_series);
-			options.temp.series.push(s.avg_dp_series);
 			options.temp.series.push(s.avg_wc_series);
+			options.temp.series.push(s.avg_rain_series);
+			options.temp.series.push(s.avg_dp_series);
 			options.temp.series.push(s.avg_humid_series);
 			options.temp.series.push(s.avg_press_series);
 			options.temp.series.push(s.avg_wl_series);
+			options.temp.series.push(s.avg_wtemp_series);
+			
+			//console.log(JSON.stringify(options));
 			
 			
 			options.wind_speed.chart.renderTo = 'wind_speed1';
@@ -1079,8 +1169,9 @@ var ilm = (function (my) {
 			title: {
 				text: 'Tuule kiirus (m/s)'
 			},
-			min: 0,
-			gridLineWidth: 1
+			tickInterval: 5,
+			gridLineWidth: 1,
+			min:0
 		}],
 		tooltip: {
 			shared: true,
@@ -1127,7 +1218,8 @@ var ilm = (function (my) {
 		title: {
 			text: 'Temperatuuri, rõhu, niiskuse prognoos'
 		},
-		yAxis: [{
+		yAxis: [{//0 temp
+			tickInterval: 5,
 			labels: {
 				formatter: function () {
 					return this.value + '°C';
@@ -1136,37 +1228,39 @@ var ilm = (function (my) {
 			title: {
 				text: null
 			}
-		}, {
+		}, {//1 press
 			gridLineWidth: 0,
+			tickInterval: 10,
 			labels: {
 				formatter: function () {
 					return this.value + 'hPa';
 				},
 				style: {
-					color: '#89A54E'
+					color: '#AA4643'
 				}
 			},
 			title: {
 				text: null
 			},
 			opposite: true
-		}, {
+		}, {//2 humid
 			gridLineWidth: 0,
-			max: 100,
+			tickInterval: 10,
 			labels: {
 				formatter: function () {
 					return this.value + '%';
 				},
 				style: {
-					color: "#4572a7"
+					color: "#C7C8CA"
 				}
 			},
 			title: {
 				text: null
 			},
 			opposite: true
-		}, {
+		}, {//3 rain
 			gridLineWidth: 0,
+			tickInterval: 2,
 			labels: {
 				formatter: function () {
 					return this.value + 'mm';
@@ -1241,7 +1335,7 @@ var ilm = (function (my) {
 				lineWidth: 2,
 				labels: {
 					style: {
-						color: "#8bbc21"
+						color: "#7cb5ec"
 					}
 				},
 				negativeColor: 'red'
@@ -1268,7 +1362,7 @@ var ilm = (function (my) {
 				tooltip: {valueSuffix: '%'},
 				labels: {
 					style: {
-						color: 'rgb(159,176,189)'
+						color: '#C7C8CA'
 					}
 				}
 			};
@@ -1286,11 +1380,11 @@ var ilm = (function (my) {
 			};
 			
 			var d;			
-			var yr_ws_series = $.extend(true, {}, d_series, {name: "Yr wind"});
-			var yr_wd_series = $.extend(true, {}, d_series, {name: "Yr dir"});
-			var yr_temp_series = $.extend(true, {}, temp_series, {color: "#2f7ed8", name: "Yr temperatuur"});
-			var yr_press_series = $.extend(true, {}, press_series, {color: '#AA4643', name: "Yr rõhk"});
-			var yr_rain_series = $.extend(true, {}, rain_series, {color: '#4572A7', type: 'column', name: "Yr sademed", lineWidth: 0});
+			var yr_ws_series = $.extend(true, {}, d_series, {name: "Yr wind",color:"#7cb5ec", lineWidth: 2});
+			var yr_wd_series = $.extend(true, {}, d_series, {name: "Yr dir",color:"#7cb5ec", lineWidth: 2});
+			var yr_temp_series = $.extend(true, {}, temp_series, {name: "Yr temperatuur", color: "#7cb5ec", lineWidth: 2});
+			var yr_press_series = $.extend(true, {}, press_series, {name: "Yr rõhk", color: '#AA4643', lineWidth: 1});
+			var yr_rain_series = $.extend(true, {}, rain_series, {name: "Yr sademed", color: '#4572A7', type: 'column', lineWidth: 0});
 			
 			var yr_get_time = function(xml,name) {
 				return (function (d) {
@@ -1321,16 +1415,16 @@ var ilm = (function (my) {
 			temp_options.series = null;
 			temp_options.series = [];
 			temp_options.series.push(yr_rain_series);
-			temp_options.series.push(yr_temp_series);
 			temp_options.series.push(yr_press_series);
+			temp_options.series.push(yr_temp_series);
 			temp_options.chart.renderTo = 'temp2';
 
-			var wg_ws_series = $.extend(true, {}, d_series, {name: "WindGuru tuul"});
-			var wg_wg_series = $.extend(true, {}, d_series, {name: "WindGuru gust", dashStyle: 'shortdot'});
-			var wg_wd_series = $.extend(true, {}, d_series, {name: "WindGuru dir"});
-			var wg_temp_series = $.extend(true, {}, temp_series, {color: "#8bbc21", name: "WindGuru temperatuur"});
-			var wg_press_series = $.extend(true, {}, press_series, {name: "WindGuru rõhk"});
-			var wg_humid_series = $.extend(true, {}, humid_series, {name: "WindGuru niiskus", color: 'rgb(159,176,189)'});
+			var wg_ws_series = $.extend(true, {}, d_series, {name: "WindGuru tuul",color:"#90ed7d", lineWidth: 2});
+			var wg_wg_series = $.extend(true, {}, d_series, {name: "WindGuru gust",color:"#910000", lineWidth: 2, dashStyle: 'shortdot'});
+			var wg_wd_series = $.extend(true, {}, d_series, {name: "WindGuru dir",color:"#434348", lineWidth: 2});
+			var wg_temp_series = $.extend(true, {}, temp_series, {name: "WindGuru temperatuur", color: "#8bbc21", lineWidth: 2});
+			var wg_press_series = $.extend(true, {}, press_series, {name: "WindGuru rõhk", color: '#f15c80', lineWidth: 1});
+			var wg_humid_series = $.extend(true, {}, humid_series, {name: "WindGuru niiskus", color: '#C7C8CA', lineWidth: 1});
 			//var wg_rain_series = $.extend(true, {}, rain_series, {name: "WindGuru sademed", type: 'column', lineWidth: 0});
 			
 			$.ajax({
@@ -1356,7 +1450,7 @@ var ilm = (function (my) {
 					wg_wd_series.data.push([t, my.ntof2p(wg.WINDDIR[i])]);
 					wg_temp_series.data.push([t, my.ntof2p(wg.TMP[i])]);
 					wg_press_series.data.push([t, my.ntof2p(wg.SLP[i])]);
-					//wg_humid_series.data.push([t, my.ntof2p(wg.RH[i])]);
+					wg_humid_series.data.push([t, my.ntof2p(wg.RH[i])]);
 					//wg_rain_series.data.push([t, my.ntof2p(wg.APCP[i])]);
 				}
 				// windguru series: 6 for now
@@ -1365,10 +1459,10 @@ var ilm = (function (my) {
 				
 				wind_dir_options.series.push(wg_wd_series);
 				
-				//temp_options.series.push(wg_humid_series);
+				temp_options.series.push(wg_humid_series);
 				//temp_options.series.push(wg_rain_series);
-				temp_options.series.push(wg_temp_series);
 				temp_options.series.push(wg_press_series);
+				temp_options.series.push(wg_temp_series);
 				
 				var i1, i2, i3;
 				if(my.chartorder.indexOf("wind_speed")>=0) {
@@ -1386,12 +1480,14 @@ var ilm = (function (my) {
 				$("#fctitle").html(
 					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(wg.update_last,1)
 				).show();
-				var list = _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {return '<li><a href="#" name="'+a.id+'" class="fcplace-select'+(a.id===my.fcplace?' active':'')+'">'+a.name+'</a></li>';}}).join("");
+				var list = _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {
+					return '<li><a href="#" name="'+a.id+'" class="fcplace-select'+(a.id===my.fcplace?' active':'')+'">'+a.name+'</a></li>';
+				}}).join("");
 				$("#fcmenu").html(list);
 				$("#fcsel").show();
 				$(".fcplace-select").on("click",function(){
 					w.ilm.setEstPlace($(this).attr('name'));
-					w.ilm.reloadest();
+					//w.ilm.reloadest();
 				});
 				$('#yrmeta').html(
 					'<a href="' +
@@ -1444,7 +1540,7 @@ var ilm = (function (my) {
 				'list': [ 
 				{ 'name': 'EMHI','url':'http://www.ilmateenistus.ee/','list': [
 				{'href':'ilm/ilmavaatlused/vaatlusandmed/?filter%5BmapLayer%5D=wind','title':"Ilmavaatlused - tuul",'id':'emhi_kaart'},
-				{'href':'ilm/prognoosid/mudelprognoosid/eesti/#layers/tuul10ms,tuul10mb','title':"Prognoos - Suur Hirlam",'id':'emhi_hirlam_suur'},
+				{'href':'ilm/prognoosid/mudelprognoosid/eesti/#layers/tuul10ms,tuul10mb','title':"Prognoos - Suur Hirlam",'id':'emhi_hirlam_suur'}
 				]},
 				{'name': "WeatherOnline",'url':'http://www.weatheronline.co.uk/','list': [
 				{'href':'marine/weather?LEVEL=3&LANG=en&MENU=0&TIME=18&MN=gfs&WIND=g005','title':"Soome Laht",'id':'weatheronline_sl'},
@@ -1454,28 +1550,33 @@ var ilm = (function (my) {
 				{'href':'int/?go=1&amp;lang=ee&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180&amp;vp=1&amp;pi=1&amp;pu=413733','title':"Sisej&auml;rved",'id':'windguru_jarved'},
 				{'href':'int/?go=1&amp;lang=ee&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"Saadj&auml;rv",'id':'windguru_saadjarv'},
 				{'href':'int/?go=1&amp;lang=ee&amp;sc=192609&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"V&otilde;rtsj&auml;rv",'id':'windguru_vortsjarv'},
-				{'href':'int/?go=1&amp;lang=ee&amp;sc=365700&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"Tartu",'id':'windguru_tartu'},
+				{'href':'int/?go=1&amp;lang=ee&amp;sc=365700&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"Tartu",'id':'windguru_tartu'}
 				]},
 				{'name': "YR.no",'url':'http://www.yr.no/place/Estonia/','list': [
 				{'href':'Tartumaa/Tartu/hour_by_hour.html','title':"Tartu",'id':'yr_tartu'},
-				{'href':'Tartumaa/Tamme/hour_by_hour.html','title':"Tamme",'id':'yr_tamme'},
-				{'href':'Jõgevamaa/Tabivere~793956/hour_by_hour.html','title':"Tabivere",'id':'yr_tabivere'},
+				{'href':'Tartumaa/Tamme/hour_by_hour.html','title':"Võrtsjärv Tamme",'id':'yr_tamme'},
+				{'href':'Jõgevamaa/Tabivere~793956/hour_by_hour.html','title':"Saadjärv",'id':'yr_tabivere'},
 				{'href':'Harjumaa/Tallinn/hour_by_hour.html','title':"Tallinn",'id':'yr_tallinn'},
+				{'href':'Pärnumaa/Pärnu/hour_by_hour.html','title':"Pärnu",'id':'yr_parnu'},
+				{'href':'Pärnumaa/Häädemeeste/hour_by_hour.html','title':"Häädemeeste",'id':'yr_parnu'}
 				]},
 				{'name': 'GisMeteo.ru','url':'http://www.gismeteo.ru/towns/','list': [
 				{'href':'26231.htm','title':"P&auml;rnu",'id':'gismeteo_parnu'},
 				{'href':'26038.htm','title':"Tallinn",'id':'gismeteo_tallinn'},
-				{'href':'26242.htm','title':"Tartu",'id':'gismeteo_tartu'},
+				{'href':'26242.htm','title':"Tartu",'id':'gismeteo_tartu'}
 				]},
 				{'name': 'Meteo.pl','url':'http://new.meteo.pl/um/php/meteorogram_map_um.php?lang=en&ntype=0u','list': [
 				{'href':'&row=227&col=325','title':"Saadj&auml;rv",'id':'meteopl_saadjarv'},
 				{'href':'&row=234&col=318','title':"Võrtsj&auml;rv",'id':'meteopl_vortsjarv'},
-				{'href':'&row=213&col=332','title':"Peipsi Mustvee",'id':'meteopl_peipsi'},
+				{'href':'&row=234&col=339','title':"Peipsi Räpina",'id':'meteopl_rapina'},
+				{'href':'&row=199&col=297','title':"Tallinn",'id':'meteopl_pirita'},
+				{'href':'&row=234&col=297','title':"Pärnu",'id':'meteopl_parnu'},
+				{'href':'&row=241&col=297','title':"Häädemeeste",'id':'meteopl_haademeeste'}
 				]},
 				{'name': 'Windfinder.com','url':'http://www.windfinder.com/forecast/','list': [
 				{'href':'aeksi_saadjaerv','title':"Saadj&auml;rv",'id':'windfinder_saadjarv'},
 				{'href':'tartu_airport','title':"Tartu",'id':'windfinder_tartu'},
-				{'href':'mustvee_peipus&wf_cmp=2','title':"Mustvee Peipsi",'id':'windfinder_mustvee'},
+				{'href':'mustvee_peipus&wf_cmp=2','title':"Mustvee Peipsi",'id':'windfinder_mustvee'}
 				]},
 				{'name': 'Muud','url':'http://','list':[
 				{'href':'d.naerata.eu/','title':"Naerata.eu",'id':'naerata'},
@@ -1485,7 +1586,7 @@ var ilm = (function (my) {
 				{'href':'ilm.zoig.ee/','title':"Zoig.EE",'id':'zoig','app':'?k=516'},
 				{'href':'http://www.kalastusinfo.ee/sisu/ilm/ilm-peipsi-jarvel.php','title':"Peipsi Ilmajaamad",'id':'kalastusinfo'},
 				{'href':'www.wunderground.com/global/stations/26242.html','title':"WUnderground Tartu",'id':'wground'},
-				{'href':'http://www.timeanddate.com/worldclock/astronomy.html?n=242','title':"Päikesetõus/loojang",'id':'sunclock'},
+				{'href':'http://www.timeanddate.com/worldclock/astronomy.html?n=242','title':"Päikesetõus/loojang",'id':'sunclock'}
 				]},
 				]},
 				{'name':'Surfilingid',
@@ -1495,7 +1596,7 @@ var ilm = (function (my) {
 				{'href':'http://www.lesurf.ee/index.php?ID=33','title':"Surfiturg",'id':'surfiturg'},
 				{'href':'www.lesurf.ee/','title':"L&otilde;una surfarid",'id':'lesurf'},
 				{'href':'www.purjelaualiit.ee/','title':"Eesti Purjelaualiit",'id':'purjelaualiit'},
-				{'href':'www.gps-speedsurfing.com/','title':"GPS Speedsurfing",'id':'gps-speedsurfing'},
+				{'href':'www.gps-speedsurfing.com/','title':"GPS Speedsurfing",'id':'gps-speedsurfing'}
 				]},
 				]}
 			]
@@ -1618,14 +1719,14 @@ var ilm = (function (my) {
 		});
 		$("#fctitle").on("click",function(){
 			w.ilm.setEstPlace(w.ilm.nextPlace());
-			w.ilm.reloadest();
+			//w.ilm.reloadest();
 			return false;
 		});
 		$("#datepicker").datepicker({
 			dateFormat: 'yy-mm-dd',
 			onSelect: function(dateText, inst) {
-				w.ilm.setDate(dateText+"T00:00:00");
-				w.ilm.reload();
+				w.ilm.setDate(dateText);
+				//w.ilm.reload();
 			}
 		});
 		$("#curtime").on("click",function(){
@@ -1633,7 +1734,7 @@ var ilm = (function (my) {
 		});
 		$("#curplace").on("click",function(){
 			w.ilm.setCurPlace(w.ilm.nextCurPlace());
-			w.ilm.reload();
+			//w.ilm.reload();
 			return false;
 		});
 		w.ilm.loadBase();
@@ -1653,6 +1754,10 @@ var ilm = (function (my) {
 			else if (e.keyCode === 13 && obj.style.display === "none") {
 				w.ilm.showLinks();
 			}*/
+		});
+		$(w).on('hashchange', function() {
+				console.log("hash changed " + w.location.hash);
+				w.ilm.hash_data();
 		});
 	});
 })(window);

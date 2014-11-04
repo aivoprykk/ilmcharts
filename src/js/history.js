@@ -32,7 +32,7 @@
 		} else if (data) {
 			//my.datamode = "emu";
 			//emu data
-			var c,e,f;
+			var c,e,f,g;
 			$.each(data.split("\n"),function(a, b) {
 				if (b && !b.match(/^--/)) {
 					c = b.split(/\s+?/);
@@ -42,7 +42,8 @@
 						//console.log("viiega:"+c[1]); //
 					} else {
 						my.lastdate = d = new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1/$2/$3")+" "+c[1]).getTime();
-						if(my.timeframe && (my.start-my.lastdate) <= my.timeframe) {
+						g = my.start-my.lastdate;
+						if(my.timeframe && g > 0 && g <= my.timeframe) {
 							if(/(emu|zoig)/.test(my.curplace)){
 								obj.avg_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7]))]);
 								obj.max_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8]))]);
@@ -60,7 +61,7 @@
 								obj.max_ws_series.data.push([d, my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8])]);
 								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.wdavg([c[9], e[9]]) : c[9])]);
 								if(c[4]!==null) obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
-								obj.avg_wc_series.data.push([d,my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
+								obj.avg_wtemp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
 								obj.avg_wl_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
 							}
 							else if(/mnt/.test(my.curplace)){
@@ -98,10 +99,11 @@
 			title: {
 				text: null
 			},
-			min: 0,
+			tickInterval: 5,
 			minorGridLineWidth: 1,
 			gridLineWidth: 1,
 			alternateGridColor: null,
+			min:0,
 			labels: {
 				formatter: function () {
 					return this.value + 'm/s';
@@ -213,20 +215,22 @@
 		title: {
 			text: 'Temperatuur, õhurõhk ja -niiskus'
 		},
-		yAxis: [{ //1.temp
+		yAxis: [{ //0.temp
+			tickInterval: 5,
 			labels: {
 				formatter: function () {
 					return this.value + '°C';
 				}
 			},
 			style: {
-				color: "#2f7ed8"
+				color: "#7cb5ec"
 			},
 			title: {
 				text: null
 			}
-		}, {//2.press
+		},{//1.press
 			gridLineWidth: 0,
+			tickInterval: 10,
 			labels: {
 				formatter: function () {
 					return this.value + 'hPa';
@@ -239,23 +243,24 @@
 				text: null
 			},
 			opposite: true
-		}, {//3.humid
+		},{//2.humid
 			gridLineWidth: 0,
-			max: 100,
+			tickInterval: 10,
 			labels: {
 				formatter: function () {
 					return this.value + '%';
 				},
 				style: {
-					color: 'rgb(159,176,189)'
+					color: '#C7C8CA'
 				}
 			},
 			title: {
 				text: null
 			},
 			opposite: true
-		}, { // 4. rain
+		},{ //3.rain
 			gridLineWidth: 0,
+			tickInterval: 2,
 			labels: {
 				formatter: function () {
 					return this.value + 'mm';
@@ -267,20 +272,22 @@
 			title: {
 				text: null
 			}
-		}, { // 5. waterlevel
+		},{ //4.waterlevel
 			gridLineWidth: 0,
+			tickInterval: 10,
 			labels: {
 				formatter: function () {
 					return this.value + 'cm';
 				},
 				style: {
-					color: '#4572A7'
+					color: '#8085e9'
 				}
 			},
 			title: {
 				text: null
-			}
-		}],	
+			},
+			opposite: true
+		}],
 		tooltip: {
 			shared: true,
 			valueSuffix: '°C',
@@ -316,28 +323,48 @@
 				type: 'spline',
 				lineWidth: 2
 			};
+			/*colors:
+			#7cb5ec - sini,
+			#434348 - must,
+			#90ed7d -rohe,
+			#f7a35c - oranz, //rõhk
+			#8085e9 - lilla,
+			#f15c80 - tumeoranz, //rõhk2
+			#e4d354 - kuldne,
+			#8085e8 - lilla2,
+			#8d4653 - pruun,
+			#91e8e1 - sinine2(hele)
+			*/
 			var d, s = {};			
-			s.min_ws_series = $.extend(true, {}, d_series, {name: "Min"});
-			s.avg_ws_series = $.extend(true, {}, d_series, {name: "Keskmine"});
-			s.max_ws_series = $.extend(true, {}, d_series, {name: "Max", color: "#910000", dashStyle: 'shortdot'});
-			s.min_wd_series = $.extend(true, {}, d_series, {type: "scatter", name: "Min", lineWidth: 0});
-			s.avg_wd_series = $.extend(true, {name: "Keskmine"}, d_series);
-			s.max_wd_series = $.extend(true, {}, d_series,  {type: "scatter", name: "Max", lineWidth: 0});
-			s.avg_temp_series = $.extend(true, {color: "#2f7ed8", name: "Temperatuur", negativeColor: 'red'}, d_series);
-			s.avg_press_series = $.extend(true, {}, d_series, {color: '#AA4643', type: 'spline', lineWidth: 2, dashStyle: 'shortdot', yAxis: 1, name: "Õhurõhk", tooltip: { valueSuffix: ' hPa' }});
-			s.avg_humid_series = $.extend(true, {}, d_series, {color: 'rgb(159,176,189)', type: 'spline', lineWidth: 2, dashStyle: 'longdash', yAxis: 2, name: "Õhuniiskus", tooltip: { valueSuffix: ' %' }});
-			s.avg_rain_series = $.extend(true, {}, d_series, {color: '#4572A7', type: 'column', lineWidth: 0, yAxis: 3, name: "Sademed", tooltip: { valueSuffix: ' mm' }});
-			s.avg_dp_series = $.extend(true, {}, d_series, {lineWidth: 1, name: "Kastepunkt", color: "#0d233a"});
-			s.avg_wc_series = $.extend(true, {}, d_series, {lineWidth: 1, name: "Tuuletemp", color: "#8bbc21"});
-			s.avg_wl_series = $.extend(true, {color: "#2f7ed8", name: "Veetase", negativeColor: 'green', tooltip: { valueSuffix: ' cm' }}, d_series);
+			//windspeed
+			s.avg_ws_series = $.extend(true, {}, d_series, {name: "Keskmine",color:"#7cb5ec", lineWidth: 2});//1
+			s.max_ws_series = $.extend(true, {}, d_series, {name: "Max", color: "#910000", lineWidth: 2, dashStyle: 'shortdot'});//2
+			s.min_ws_series = $.extend(true, {}, d_series, {name: "Min",color:"#90ed7d", lineWidth: 2});//3
+			//winddir
+			s.min_wd_series = $.extend(true, {}, d_series, {type: "scatter", name: "Min", color:"#90ed7d", lineWidth: 0});//3
+			s.avg_wd_series = $.extend(true, {}, d_series, {name: "Keskmine", color:"#7cb5ec", lineWidth: 2});//1
+			s.max_wd_series = $.extend(true, {}, d_series,  {type: "scatter", name: "Max", color:"#434348", lineWidth: 0});//2
+			//temp
+			s.avg_temp_series = $.extend(true, {}, d_series, {name: "Temperatuur", color: "#7cb5ec", negativeColor: 'red', lineWidth: 2});//1
+			s.avg_dp_series = $.extend(true, {}, d_series, {name: "Kastepunkt", color: "#0d233a", lineWidth: 1});
+			s.avg_wc_series = $.extend(true, {}, d_series, {name: "Tuuletemp", color: "#8bbc21", lineWidth: 1});
+			s.avg_press_series = $.extend(true, {}, d_series, {name: "Õhurõhk", color: '#AA4643', lineWidth: 2, type: 'spline', dashStyle: 'shortdot', yAxis: 1, tooltip: { valueSuffix: ' hPa' }});
+			s.avg_humid_series = $.extend(true, {}, d_series, {name: "Õhuniiskus", color: '#C7C8CA', lineWidth: 1, type: 'spline', dashStyle: 'longdash', yAxis: 2, tooltip: { valueSuffix: ' %' }});
+			s.avg_rain_series = $.extend(true, {}, d_series, {name: "Sademed", color: '#4572A7', lineWidth: 0, type: 'column', yAxis: 3, tooltip: { valueSuffix: ' mm' }});
+			s.avg_wtemp_series = $.extend(true, {}, d_series, {name: "Veetemp", color: "#8d4653", lineWidth: 2});
+			s.avg_wl_series = $.extend(true, {}, d_series, {name: "Veetase", color: "#8085e9", negativeColor: '#e4d354', lineWidth: 2, type: 'spline', yAxis: 4, tooltip: { valueSuffix: ' cm' }});
 
 			normalizeData(json, s);
 			
 			options.wind_speed.series = null;
 			options.wind_speed.series = [];
-			options.wind_speed.series.push(s.avg_ws_series);
 			options.wind_speed.series.push(s.min_ws_series);
 			options.wind_speed.series.push(s.max_ws_series);
+			options.wind_speed.series.push(s.avg_ws_series);
+			/*if(s.avg_ws_series.data.reduce(function(a,b){var c=a.concat(b);return c;}).reduce(function(a,b){return a<b?a:b;})<1) {
+				options.wind_speed.yAxis[0].min=0;
+			}
+			else delete options.wind_speed.yAxis[0].min;*/
 			
 			d = new Date(my.lastdate);
 			/*$("#ajaraam").html(
@@ -353,12 +380,14 @@
 			);*/
 			$("#curplace").html('Andmed <b>'+my.curplaces[my.curplace].name+'</b>').show();
 			$("#curtime").html(my.getTimeStr(d,1,my.historyactive?1:0)).show();
-			var list = _.map(my.curplaces,function(a){if(!my.showgroup||my.curplaces[a.id].group===my.showgroup) {return '<li><a href="#" name="'+a.id+'" class="curplace-select'+(a.id===my.curplace?' active':'')+'">'+a.name+'</a></li>';}}).join("");
+			var list = _.map(my.curplaces,function(a){if(!my.showgroup||my.curplaces[a.id].group===my.showgroup) {
+				return '<li><a href="#" name="'+a.id+'" class="curplace-select'+(a.id===my.curplace?' active':'')+'">'+a.name+'</a></li>';
+			}}).join("");
 			$("#curmenu").html(list);
 			$("#cursel").show();
 			$(".curplace-select").on("click",function(){
 					w.ilm.setCurPlace($(this).attr('name'));
-					w.ilm.reload();
+					//w.ilm.reload();
 					//return false;
 			});
 			
@@ -381,7 +410,7 @@
 				(s.avg_temp_series.data.length ? " Temperatuur"+(!my.historyactive? " [ <b>" + s.avg_temp_series.data[s.avg_temp_series.data.length - 1][1] + "</b> °C ]":"")+",":"") +
 					(s.avg_press_series.data.length ? " Rõhk"+(!my.historyactive? " [ <b>" + s.avg_press_series.data[s.avg_press_series.data.length - 1][1] + "</b> hPa ]":"")+",":"") +
 					(s.avg_humid_series.data.length ? " Niiskus"+(!my.historyactive? " [ <b>" + s.avg_humid_series.data[s.avg_humid_series.data.length - 1][1] + "</b> % ]":""):"") +
-					(!s.avg_humid_series.data.length && s.avg_wc_series.data ? " Veetemperatuur"+(!my.historyactive? " [ <b>" + s.avg_wc_series.data[s.avg_wc_series.data.length - 1][1] + "</b> °C ]":""):"") +
+					(!s.avg_humid_series.data.length && s.avg_wtemp_series.data ? " Veetemperatuur"+(!my.historyactive? " [ <b>" + s.avg_wtemp_series.data[s.avg_wtemp_series.data.length - 1][1] + "</b> °C ]":""):"") +
 					(!s.avg_humid_series.data.length && s.avg_wl_series.data ? " Veetase"+(!my.historyactive? " [ <b>" + s.avg_wl_series.data[s.avg_wl_series.data.length - 1][1] + "</b> cm ]":""):"");
 			} else {
 				options.temp.title.text = "Temperatuuri andmed puuduvad";
@@ -389,19 +418,23 @@
 
 			options.wind_dir.series = null;
 			options.wind_dir.series = [];
-			options.wind_dir.series.push(s.avg_wd_series);					
-			options.wind_dir.series.push(s.min_wd_series);					
-			options.wind_dir.series.push(s.max_wd_series);					
+			
+			options.wind_dir.series.push(s.min_wd_series);
+			options.wind_dir.series.push(s.max_wd_series);
+			options.wind_dir.series.push(s.avg_wd_series);
 
 			options.temp.series = null;
 			options.temp.series = [];
-			options.temp.series.push(s.avg_rain_series);
 			options.temp.series.push(s.avg_temp_series);
-			options.temp.series.push(s.avg_dp_series);
 			options.temp.series.push(s.avg_wc_series);
+			options.temp.series.push(s.avg_rain_series);
+			options.temp.series.push(s.avg_dp_series);
 			options.temp.series.push(s.avg_humid_series);
 			options.temp.series.push(s.avg_press_series);
 			options.temp.series.push(s.avg_wl_series);
+			options.temp.series.push(s.avg_wtemp_series);
+			
+			//console.log(JSON.stringify(options));
 			
 			
 			options.wind_speed.chart.renderTo = 'wind_speed1';

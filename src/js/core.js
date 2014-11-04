@@ -1,5 +1,5 @@
 var ilm = (function (my) {
-	var w = window, doc = document;
+	var w = window, doc = document, loc = w.location;
 	function State(opt) {
 		opt = opt || {};
 		var defaults = {
@@ -143,12 +143,43 @@ var ilm = (function (my) {
 		this.charts = [];
 		this.chartorder = this.state.attr.chartorder;
 		this.months = ['Jaanuar', 'Veebruar', 'Märts', 'Aprill', 'Mai', 'Juuni',
-			'Juuli', 'August', 'September', 'Octoober', 'November', 'Detsember'];
+			'Juuli', 'August', 'September', 'Oktoober', 'November', 'Detsember'];
 		this.weekdays = ['Pühapäev', 'Esmaspäev', 'Teisipäev', 'Kolmapäev', 'Neljapäev', 'Reede', 'Laupäev'];
+		if(loc.hash) this.hash_data();
 	}
 
 	App.prototype = {
-		graph_name : function(name) {
+		hash_data: function(){
+			var changed={};
+			//if(!loc.hash) return false;
+			if(loc.hash){
+				var a = loc.hash.substring(1).split(/[\&|\/]/);
+				var i=0;
+				var j=a.length;
+				var places=Object.keys(this.fcplaces);
+				if(j){
+					for(;i<j;++i){
+						var b = a[i].split("=");
+						if(b[0]){
+							if((/aeg/.test(b[0]) && b[1]) || /\d*-\d*-\d/.test(b[0])){
+								changed.aeg = b[1]||b[0];
+							} else if((/koht/.test(b[0]) && b[1]) || places.indexOf(b[0])>=0){
+								this.setEstPlace(b[1]||b[0], "ei");
+								changed.place = b[1]||b[0];
+							} else if((/raam/.test(b[0]) && b[1]) || /\d*[dh]/.test(b[0])){
+								changed.raam = b[1]||b[0];
+							}
+						}
+					}
+					//console.log(this.date);
+				}
+			}
+			this.setFrame(changed.raam,"ei","ei");
+			this.setDate(changed.aeg,"ei");
+			this.setEstPlace(changed.place,"ei");
+			return false;
+		},
+		graph_name: function(name) {
 				return (name==='wind_speed') ? 'Tuule kiirus' : 
 					(name==='wind_dir') ? 'Tuule suund' : 'Temperatuur';
 		},
@@ -290,8 +321,10 @@ var ilm = (function (my) {
 			}
 			return max;
 		},
-		setFrame: function(d) {
+		setFrame: function(d, persist, load) {
 			var x = '';
+			persist=persist||"ja";
+			load=load||'ja';
 			if(d && /^\d*d/.test(d)) {
 				x  = d.replace(/d*$/,"");
 				this.timeframe = x*24*3600*1000;
@@ -301,7 +334,9 @@ var ilm = (function (my) {
 			} else if (d && /^\d+$/.test(d)) {
 				this.timeframe = d;
 			}
-			this.state.set({'timeframe':this.timeframe});
+			if(persist==="ja") this.state.set({'timeframe':this.timeframe});
+			else if(!d) this.timeframe = this.state.attr.timeframe;
+			if(load==='ja') this.doReload("curplace");
 			return false;
 		},
 		getFrame: function (d) {
@@ -316,42 +351,81 @@ var ilm = (function (my) {
 			}
 			return f;
 		},
-		setCurPlace: function(d) {
-			this.setPlace(d, 'curplace');
+		setCurPlace: function(d, persist, load) {
+			this.setPlace(d, 'curplace', persist, load);
 			return false;
 		},
-		setEstPlace: function(d) {
-			this.setPlace(d);
+		setEstPlace: function(d, persist, load) {
+			this.setPlace(d, 'fcplace', persist, load);
 			return false;
 		},
-		setPlace: function(d, name) {
+		setPlace: function(d, name, persist, load) {
 			name = name || 'fcplace';
+			persist=persist||"ja";
+			load=load||'ja';
 			var places=this[name+'s'] || this.fcplaces,
 			place = this[name] || this.fcplace,
 			j = {}, i,reload="";
+			if(name==='fcplace' && d){
+				if(d==='tartu'||d==='saadjarv') d='tabivere';
+				else if(d==='vortsjarv') d='tamme';
+				else if(d==='haapsalu') d='topu';
+				else if(d==='tallinn') d='pirita';
+			}
+			if(!d) d = this.state.attr[name];
 			if(d) {
 				for(i in places){
 					if(i === d) { 
-						j[name] = this[name] = d;
+						this[name] = d;
+						if(this.state.attr[name] !== d) j[name] = d;
 						reload = name;
 						if(this.binded && places[i].bind) {
 							var other = /fc/.test(name)?'curplace':'fcplace';
-							j[other] = this[other] = places[i].bind;
+							this[other] = places[i].bind;
+							if(this.state.attr[other] !== places[i].bind) j[other] = places[i].bind;
 							reload = "both";
 						}
 						break;
 					}
 				}
 			}
-			this.state.set(j);
 			if(reload){
-				if(reload==='both'){
-					w.ilm.reloadest();
-					w.ilm.reload();
-				}
-				else if(/fc/.test(reload)) w.ilm.reloadest();
-				else w.ilm.reload();
+				if(persist==="ja") this.state.set(j);
+				if(load==="ja") this.doReload(reload);
 			}
+			return false;
+		},
+		nextCurPlace: function() {
+			return this.nextPlace('curplace');
+		},
+		nextPlace: function(name) {
+			name = name || 'fcplace';
+			var places = this[name + 's'] || this.fcplaces,
+			place = this[name] || this.fcplace,
+			p = '', that = false, j = '', i;
+			//console.log(JSON.stringify(places));
+			for(i in places){
+				if (!j && (!this.showgroup || (this.showgroup === places[i].group))) j = i;
+				if (that) {
+					if(!this.showgroup || (this.showgroup === places[i].group)) {
+						p = i; that=false;
+					}
+				}
+				if(i === place) that = true;
+				//console.log(name + ' "' + i + '" ' + place +  " " + (that?"ready":"") + " " + p + " " + this.showgroup);
+			}
+			if(!p) p = j;
+			//console.log("got place " + name + ' ' + p + ' from ' + place);
+			return p;
+		},
+		doReload: function (reload){
+			if(!w.ilm||!w.ilm.reload) return false;
+			if(reload==='both'){
+				w.ilm.reloadest();
+				w.ilm.reload();
+			}
+			else if(/fc/.test(reload)) w.ilm.reloadest();
+			else w.ilm.reload();
 			return false;
 		},
 		setGroup: function (d, name) {
@@ -361,8 +435,7 @@ var ilm = (function (my) {
 				if(!d) return false;
 				if(this.fcplaces[this.fcplace].group!==this.showgroup) this.setEstPlace(this.nextPlace());
 				if(this.curplaces[this.curplace].group!==this.showgroup) this.setCurPlace(this.nextCurPlace());
-				w.ilm.reloadest();
-				w.ilm.reload();
+				//this.doReload("both");
 			}
 			return false;
 		},
@@ -393,50 +466,34 @@ var ilm = (function (my) {
 			}
 			return false;
 		},
-		nextCurPlace: function() {
-			return this.nextPlace('curplace');
-		},
-		nextPlace: function(name) {
-			name = name || 'fcplace';
-			var places = this[name + 's'] || this.fcplaces,
-			place = this[name] || this.fcplace,
-			p = '', that = false, j = '', i;
-			//console.log(JSON.stringify(places));
-			for(i in places){
-				if (!j && (!this.showgroup || (this.showgroup === places[i].group))) j = i;
-				if (that) {
-					if(!this.showgroup || (this.showgroup === places[i].group)) {
-						p = i; that=false;
-					}
-				}
-				if(i === place) that = true;
-				//console.log(name + ' "' + i + '" ' + place +  " " + (that?"ready":"") + " " + p + " " + this.showgroup);
-			}
-			if(!p) p = j;
-			//console.log("got place " + name + ' ' + p + ' from ' + place);
-			return p;
-		},
-		setDate: function(d) {
+		setDate: function(d,load) {
+			load=load||'ja';
 			var ret = 0,cur = new Date().getTime();
 			if(d && /^\d*-\d*-\d*/.test(d)) {
+				d = d.split(/[\sT]/)[0]+" 23:59:59";
 				ret = new Date(d).getTime();
 			} else if(d && /^\d+$/.test(d)) {
-				ret = new Date().getTime() - d;
+				ret = new Date().getTime() - (Number(d)*1000);
+			} else if (d && /^\d*h/.test(d)) {
+				ret = new Date().getTime() - (Number(d.replace(/h*$/,""))*3600*1000);
+			} else if (d && /^\d*d/.test(d)) {
+				ret = new Date().getTime() - (Number(d.replace(/d*$/,""))*24*3600*1000);
 			}
-			if(ret && ret > cur){
+			if(!d || (ret && ret > cur)){
 				ret = cur;
 			}
 			if (ret) {
 				this.historyactive=(cur-(3600*1000)>ret) ? true : false;
-				this.start = this.lastdate = this.date = ret;
+				this.start = this.date = ret;
+				if(load==='ja') this.doReload("curplace");
 			}
 		},
 		getTimeStr: function (d, f, g) {
 			d = new Date(d);
 			//console.log(d);
-			var ret ='', dsep = "." + (d.getMonth() < 10 ? "0" : "") + (d.getMonth()+1) + ".";
+			var ret ='', dsep = "." + (d.getMonth() < 9 ? "0" : "") + (d.getMonth()+1) + ".";
 			if (f) { dsep = ". " + my.months[(d.getMonth())].toLowerCase() + " "; }
-			ret = (d.getDate() < 10 ? "0" : "") + d.getDate() + dsep + d.getFullYear();
+			ret = (d.getDate() < 9 ? "0" : "") + d.getDate() + dsep + d.getFullYear();
 			if(!g) ret += " " + (d.getHours()<10?"0":"") + d.getHours() + ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();
 			return ret;
 		},
