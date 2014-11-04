@@ -23,8 +23,9 @@
 			title: {
 				text: 'Tuule kiirus (m/s)'
 			},
-			min: 0,
-			gridLineWidth: 1
+			tickInterval: 5,
+			gridLineWidth: 1,
+			min:0
 		}],
 		tooltip: {
 			shared: true,
@@ -71,7 +72,8 @@
 		title: {
 			text: 'Temperatuuri, rõhu, niiskuse prognoos'
 		},
-		yAxis: [{
+		yAxis: [{//0 temp
+			tickInterval: 5,
 			labels: {
 				formatter: function () {
 					return this.value + '°C';
@@ -80,37 +82,39 @@
 			title: {
 				text: null
 			}
-		}, {
+		}, {//1 press
 			gridLineWidth: 0,
+			tickInterval: 10,
 			labels: {
 				formatter: function () {
 					return this.value + 'hPa';
 				},
 				style: {
-					color: '#89A54E'
+					color: '#AA4643'
 				}
 			},
 			title: {
 				text: null
 			},
 			opposite: true
-		}, {
+		}, {//2 humid
 			gridLineWidth: 0,
-			max: 100,
+			tickInterval: 10,
 			labels: {
 				formatter: function () {
 					return this.value + '%';
 				},
 				style: {
-					color: "#4572a7"
+					color: "#C7C8CA"
 				}
 			},
 			title: {
 				text: null
 			},
 			opposite: true
-		}, {
+		}, {//3 rain
 			gridLineWidth: 0,
+			tickInterval: 2,
 			labels: {
 				formatter: function () {
 					return this.value + 'mm';
@@ -185,7 +189,7 @@
 				lineWidth: 2,
 				labels: {
 					style: {
-						color: "#8bbc21"
+						color: "#7cb5ec"
 					}
 				},
 				negativeColor: 'red'
@@ -212,7 +216,7 @@
 				tooltip: {valueSuffix: '%'},
 				labels: {
 					style: {
-						color: 'rgb(159,176,189)'
+						color: '#C7C8CA'
 					}
 				}
 			};
@@ -230,11 +234,11 @@
 			};
 			
 			var d;			
-			var yr_ws_series = $.extend(true, {}, d_series, {name: "Yr wind"});
-			var yr_wd_series = $.extend(true, {}, d_series, {name: "Yr dir"});
-			var yr_temp_series = $.extend(true, {}, temp_series, {color: "#2f7ed8", name: "Yr temperatuur"});
-			var yr_press_series = $.extend(true, {}, press_series, {color: '#AA4643', name: "Yr rõhk"});
-			var yr_rain_series = $.extend(true, {}, rain_series, {color: '#4572A7', type: 'column', name: "Yr sademed", lineWidth: 0});
+			var yr_ws_series = $.extend(true, {}, d_series, {name: "Yr wind",color:"#7cb5ec", lineWidth: 2});
+			var yr_wd_series = $.extend(true, {}, d_series, {name: "Yr dir",color:"#7cb5ec", lineWidth: 2});
+			var yr_temp_series = $.extend(true, {}, temp_series, {name: "Yr temperatuur", color: "#7cb5ec", lineWidth: 2});
+			var yr_press_series = $.extend(true, {}, press_series, {name: "Yr rõhk", color: '#AA4643', lineWidth: 1});
+			var yr_rain_series = $.extend(true, {}, rain_series, {name: "Yr sademed", color: '#4572A7', type: 'column', lineWidth: 0});
 			
 			var yr_get_time = function(xml,name) {
 				return (function (d) {
@@ -265,16 +269,16 @@
 			temp_options.series = null;
 			temp_options.series = [];
 			temp_options.series.push(yr_rain_series);
-			temp_options.series.push(yr_temp_series);
 			temp_options.series.push(yr_press_series);
+			temp_options.series.push(yr_temp_series);
 			temp_options.chart.renderTo = 'temp2';
 
-			var wg_ws_series = $.extend(true, {}, d_series, {name: "WindGuru tuul"});
-			var wg_wg_series = $.extend(true, {}, d_series, {name: "WindGuru gust", dashStyle: 'shortdot'});
-			var wg_wd_series = $.extend(true, {}, d_series, {name: "WindGuru dir"});
-			var wg_temp_series = $.extend(true, {}, temp_series, {color: "#8bbc21", name: "WindGuru temperatuur"});
-			var wg_press_series = $.extend(true, {}, press_series, {name: "WindGuru rõhk"});
-			var wg_humid_series = $.extend(true, {}, humid_series, {name: "WindGuru niiskus", color: 'rgb(159,176,189)'});
+			var wg_ws_series = $.extend(true, {}, d_series, {name: "WindGuru tuul",color:"#90ed7d", lineWidth: 2});
+			var wg_wg_series = $.extend(true, {}, d_series, {name: "WindGuru gust",color:"#910000", lineWidth: 2, dashStyle: 'shortdot'});
+			var wg_wd_series = $.extend(true, {}, d_series, {name: "WindGuru dir",color:"#434348", lineWidth: 2});
+			var wg_temp_series = $.extend(true, {}, temp_series, {name: "WindGuru temperatuur", color: "#8bbc21", lineWidth: 2});
+			var wg_press_series = $.extend(true, {}, press_series, {name: "WindGuru rõhk", color: '#f15c80', lineWidth: 1});
+			var wg_humid_series = $.extend(true, {}, humid_series, {name: "WindGuru niiskus", color: '#C7C8CA', lineWidth: 1});
 			//var wg_rain_series = $.extend(true, {}, rain_series, {name: "WindGuru sademed", type: 'column', lineWidth: 0});
 			
 			$.ajax({
@@ -300,7 +304,7 @@
 					wg_wd_series.data.push([t, my.ntof2p(wg.WINDDIR[i])]);
 					wg_temp_series.data.push([t, my.ntof2p(wg.TMP[i])]);
 					wg_press_series.data.push([t, my.ntof2p(wg.SLP[i])]);
-					//wg_humid_series.data.push([t, my.ntof2p(wg.RH[i])]);
+					wg_humid_series.data.push([t, my.ntof2p(wg.RH[i])]);
 					//wg_rain_series.data.push([t, my.ntof2p(wg.APCP[i])]);
 				}
 				// windguru series: 6 for now
@@ -309,10 +313,10 @@
 				
 				wind_dir_options.series.push(wg_wd_series);
 				
-				//temp_options.series.push(wg_humid_series);
+				temp_options.series.push(wg_humid_series);
 				//temp_options.series.push(wg_rain_series);
-				temp_options.series.push(wg_temp_series);
 				temp_options.series.push(wg_press_series);
+				temp_options.series.push(wg_temp_series);
 				
 				var i1, i2, i3;
 				if(my.chartorder.indexOf("wind_speed")>=0) {
@@ -330,12 +334,14 @@
 				$("#fctitle").html(
 					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(wg.update_last,1)
 				).show();
-				var list = _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {return '<li><a href="#" name="'+a.id+'" class="fcplace-select'+(a.id===my.fcplace?' active':'')+'">'+a.name+'</a></li>';}}).join("");
+				var list = _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {
+					return '<li><a href="#" name="'+a.id+'" class="fcplace-select'+(a.id===my.fcplace?' active':'')+'">'+a.name+'</a></li>';
+				}}).join("");
 				$("#fcmenu").html(list);
 				$("#fcsel").show();
 				$(".fcplace-select").on("click",function(){
 					w.ilm.setEstPlace($(this).attr('name'));
-					w.ilm.reloadest();
+					//w.ilm.reloadest();
 				});
 				$('#yrmeta').html(
 					'<a href="' +

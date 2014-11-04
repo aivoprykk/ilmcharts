@@ -84,14 +84,14 @@
 		});
 		$("#fctitle").on("click",function(){
 			w.ilm.setEstPlace(w.ilm.nextPlace());
-			w.ilm.reloadest();
+			//w.ilm.reloadest();
 			return false;
 		});
 		$("#datepicker").datepicker({
 			dateFormat: 'yy-mm-dd',
 			onSelect: function(dateText, inst) {
-				w.ilm.setDate(dateText+"T00:00:00");
-				w.ilm.reload();
+				w.ilm.setDate(dateText);
+				//w.ilm.reload();
 			}
 		});
 		$("#curtime").on("click",function(){
@@ -99,7 +99,7 @@
 		});
 		$("#curplace").on("click",function(){
 			w.ilm.setCurPlace(w.ilm.nextCurPlace());
-			w.ilm.reload();
+			//w.ilm.reload();
 			return false;
 		});
 		w.ilm.loadBase();
@@ -119,6 +119,10 @@
 			else if (e.keyCode === 13 && obj.style.display === "none") {
 				w.ilm.showLinks();
 			}*/
+		});
+		$(w).on('hashchange', function() {
+				console.log("hash changed " + w.location.hash);
+				w.ilm.hash_data();
 		});
 	});
 })(window);
