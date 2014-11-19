@@ -260,6 +260,7 @@ var ilm = (function (my) {
 		},
 		ntof2p: function (input) {
 			if (input  === "-" || input === "" || input === null || input === undefined) { return null; }
+			if(Object.prototype.toString.call(input) === '[object String]'&& /^0(\d+\.)/.test(input)) input=input.replace(/^0(\d+\.)/,"-$1");
 			return parseFloat(parseFloat(input).toFixed(1));
 		},	
 		conv_kmh2ms: function (input) {
@@ -307,7 +308,10 @@ var ilm = (function (my) {
 				return 0;
 			}
 			var i = 0, j = input.length, sum = 0;
-			for(;i<j;i++) sum += parseFloat(input[i]);
+			for(;i<j;i++) {
+				if(Object.prototype.toString.call(input[i]) === '[object String]'&& /^0(\d+\.)/.test(input[i])) input[i]=input[i].replace(/^0(\d+\.)/,"-$1");
+				sum += parseFloat(input[i]);
+			}
 			return parseFloat((sum/j).toFixed(1));
 		},
 		getmax: function(input) {
