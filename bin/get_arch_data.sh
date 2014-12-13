@@ -65,10 +65,11 @@ minutes=5
 [ x"$value" = x"" ] && continue;
 #continue;
 [ x"$station" != x"" -a "$name" != "$station" ] && continue;
+file="ARC-"$date".txt"
 
 case "$name" in
 emu)
-	url="http://energia.emu.ee/weather/Archive/";
+	url="http://energia.emu.ee/weather/Archive/"$file;
 	out=emu_data/$place
 	;;
 zoig)
@@ -93,7 +94,6 @@ mnt)
 	continue;
 	;;
 esac
-file="ARC-"$date".txt"
 
 [ -d "$out" ] || mkdir -p "$out"
 
@@ -135,11 +135,11 @@ if [ $lab -gt 0 ]; then
 fi
 if [ x"$dry" = x"" ]; then
 	if [ x"$temp" != x"" ]; then
-	  wget -U 'Wget for ilm.majasa.ee/' -q -O $out/$temp $url$file
+	  wget -U 'Wget for ilm.majasa.ee/' -q -O $out/$temp $url
 	  [ -e $dir"/parse_$name.js" ] && node $dir"/parse_$name.js" $out/$temp
 	  rm -f $out"/"$temp
 	else
-	  wget -U 'Wget for ilm.majasa.ee/' -q -O $out/$file $url$file		
+	  wget -T40 -U 'Wget for ilm.majasa.ee/' -q -O $out/$file $url		
 	fi
 fi
 done

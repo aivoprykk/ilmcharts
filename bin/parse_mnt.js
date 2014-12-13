@@ -73,13 +73,13 @@ fs.readFile(path, {encoding:'utf-8'}, function(err, data) {
 		a=wd[i];
 	//wd.forEach(function(a,b){
 		child = a.split('\t');
-		if(child.length<1) continue;
+		if(child.length<2) continue;
 		if(i===0) {
 			text = child[1].replace(/^(\d*)\.(\d*)\.(\d*) /,'20$3$2$1 ');
 			ret[0] = text;
 		}
 		text = (child[1]+"").replace(/\s.*$/,"").replace(/\-/g,"0").trim();
-		if(/^Air\stemp/.test(a))     ret[1]=text;
+		if(/^Air\stemp/.test(a))     ret[1] = text;
 		if(/^Precip\.\sint/.test(a)) ret[2] = text==='-'?0:text;
 		if(/^Air\shumidity/.test(a)) ret[3] = text;
 		if(/^Dew\spoint/.test(a))    ret[4] = text;
