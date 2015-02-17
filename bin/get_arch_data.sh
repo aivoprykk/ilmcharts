@@ -60,7 +60,7 @@ for x in $names; do
 name=${x/:*/};
 value=${x/*:/};
 temp=""
-minutes=5
+minutes=6
 #echo "$place $name $value";
 [ x"$value" = x"" ] && continue;
 #continue;
