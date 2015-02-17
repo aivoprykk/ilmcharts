@@ -1,5 +1,5 @@
 #!/bin/bash
-
+PATH=$PATH:/usr/local/bin
 lab=0
 force=0
 test=0
