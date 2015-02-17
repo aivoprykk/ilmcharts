@@ -1,6 +1,6 @@
 /*!
- * Ilmcharts v1.1.6 (http://ilm.majasa.ee)
- * Copyright 2012-2014 Aivo Pruekk
+ * Ilmcharts v1.1.7 (http://ilm.majasa.ee)
+ * Copyright 2012-2015 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
 
@@ -73,6 +73,7 @@ var ilm = (function (my) {
 		this.digits = 1;
 		this.graphs = ["temp","wind_speed","wind_dir"];
 		this.fcplaces = {
+			//"tartu":{id:"tartu",name:'Tartu',wglink:"266923",yrlink:"Tartu",group:"jarv",bind:"tartu"},
 			"tabivere":{id:"tabivere",name:'Saadjärv',wglink:"266923",yrlink:"Jõgevamaa/Tabivere~587488",group:"jarv",bind:"emu"},
 			"tamme":{id:"tamme",name:'Võrtsjärv',"wglink":192609,yrlink:"Tartumaa/Tamme",group:"jarv",bind:"mnt_tamme"},
 			//"nina":{id:"nina",name:'Peipsi Nina',"wglink":20401,yrlink:"Tartumaa/Nina",group:"jarv"},
@@ -87,6 +88,7 @@ var ilm = (function (my) {
 		this.fcplace = this.state.attr.fcplace;
 		this.curplaces = {
 			"emu":{id:"emu",name:"Tartu EMU",group:"jarv",link:'/weather',bind:"tabivere"},
+			"ut_tartu":{id:"ut_tartu",name:"Tartu UT",group:"jarv",link:'',bind:"tartu"},
 			/*"zoig_vortsjarv":{id:"zoig_vortsjarv",name:"Tamme Zoig",group:"jarv",link:'/vortsjarv',bind:"tamme"},*/
 			/*"zoig_topu":{id:"zoig_topu",name:"Topu Zoig",group:"meri",link:'/topu',bind:"topu"},*/
 			/*"zoig_rapina":{id:"zoig_rapina",name:"Räpina Zoig",group:"jarv",link:'/rapina',bind:"rapina"},*/
@@ -504,8 +506,10 @@ var ilm = (function (my) {
 		getTimeStr: function (d, f, g) {
 			d = new Date(d);
 			//console.log(d);
-			var ret ='', dsep = "." + (d.getMonth() < 9 ? "0" : "") + (d.getMonth()+1) + ".";
-			if (f) { dsep = ". " + my.months[(d.getMonth())].toLowerCase() + " "; }
+			var month = d.getMonth();
+			if(!/\d/.test(month)) return ret;
+			var ret ='', dsep = "." + (month < 9 ? "0" : "") + (month+1) + ".";
+			if (f) { dsep = ". " + my.months[month].toLowerCase() + " "; }
 			ret = (d.getDate() < 9 ? "0" : "") + d.getDate() + dsep + d.getFullYear();
 			if(!g) ret += " " + (d.getHours()<10?"0":"") + d.getHours() + ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();
 			return ret;
@@ -632,16 +636,20 @@ var ilm = (function (my) {
 		} else if (data) {
 			//my.datamode = "emu";
 			//emu data
-			var c,e,f,g;
+			var c,e,f,g,h=/^ut/.test(my.curplace);
+			var reg= new RegExp(h?",\\s*":"\\s+?");
 			$.each(data.split("\n"),function(a, b) {
-				if (b && !b.match(/^--/)) {
-					c = b.split(/\s+?/);
+				if (b && !/^(--|Aeg)/.test(b)) {
+					//b = b.replace(/,\s*/,"\t");
+					c = b.split(reg);
 					c[9] = (!c[9] || c[9] < 0) ? 0 : c[9];
-					if(c[1].match(/5$/)){
+					//console.log(c[0]+" "+ c[1]);
+					if((h && /5:00$/.test(c[0])) || (!h && /5$/.test(c[1]))){
 						e=c;
 						//console.log("viiega:"+c[1]); //
 					} else {
-						my.lastdate = d = new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1/$2/$3")+" "+c[1]).getTime();
+						if(h) my.lastdate = d = new Date(c[0].replace(/(\d\d\d\d)-?(\d\d)-?(\d\d)/,"$1/$2/$3")).getTime();
+						else my.lastdate = d = new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1/$2/$3")+" "+c[1]).getTime();
 						g = my.start-my.lastdate;
 						if(my.timeframe && g > 0 && g <= my.timeframe) {
 							if(/(emu|zoig)/.test(my.curplace)){
@@ -654,6 +662,17 @@ var ilm = (function (my) {
 								obj.avg_rain_series.data.push([d, my.ntof2p((e) ? my.getavg([c[10], e[10]]) : c[10])]);
 								obj.avg_humid_series.data.push([d, my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5])]);
 								obj.avg_press_series.data.push([d, my.ntof2p((e) ? my.getavg([c[11], e[11]]) : c[11])]);
+							}
+							else if(h){
+								//Aeg, 1Temperatuur, 2Niiskus, 3&Otilde;hur&otilde;hk, 4Tuule kiirus, 5Tuule suund, 6Sademed, 7UV indeks, Valgustatus, Kiirgusvoog, Radioaktiivsus
+								c[4] = (!c[4] || c[4] < -49) ? null : c[4];
+								obj.avg_ws_series.data.push([d, my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
+								//obj.max_ws_series.data.push([d, my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8])]);
+								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.wdavg([c[5], e[5]]) : c[5])]);
+								if(c[1]!==null) obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[1], e[1]]) : c[1])]);
+								obj.avg_rain_series.data.push([d, my.ntof2p((e) ? my.getavg([c[6], e[6]]) : c[6])]);
+								obj.avg_humid_series.data.push([d, my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
+								obj.avg_press_series.data.push([d, my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3])]);
 							}
 							else if(/emhi/.test(my.curplace)){
 								c[4] = (!c[4] || c[4] < -49) ? null : c[4];
@@ -994,7 +1013,7 @@ var ilm = (function (my) {
 			if (s.avg_ws_series.data.length) {
 			options.wind_speed.title.text = 
 				" Tuule kiirus"+(!my.historyactive? " [ <b>" + s.avg_ws_series.data[s.avg_ws_series.data.length - 1][1] + "</b> m/s" +
-					" (pagid: <b>" + s.max_ws_series.data[s.max_ws_series.data.length - 1][1] + "</b> m/s) ]":'');
+					" (pagid: <b>" + (s.max_ws_series.data[s.max_ws_series.data.length - 1]||["","-"])[1] + "</b> m/s) ]":'');
 			} else {
 			options.wind_speed.title.text = "Tuule kiiruse andmed puuduvad";
 			}
@@ -1046,6 +1065,7 @@ var ilm = (function (my) {
 			if(my.chartorder.indexOf("temp") >= 0)  my.charts[2] = new Highcharts.Chart(options.temp);
 			var host = /emhi/.test(my.curplace) ? 'ilmateenistus.ee' : 
 					/emu/.test(my.curplace) ? 'energia.emu.ee' :
+					/^ut/.test(my.curplace) ? 'meteo.physic.ut.ee' :
 					/zoig/.test(my.curplace) ? 'ilm.zoig.ee' :
 					/mnt/.test(my.curplace) ? 'balticroads.net': '';
 			$('#curmeta').html(
@@ -1065,6 +1085,10 @@ var ilm = (function (my) {
     };
     var setEmuFileName = function (d) {
 		return "emu_data/"+setTxtFileName(d);
+    };
+    var setUtFileName = function (d,place) {
+    	place=place.replace(/ut_/,'');
+		return "ut_data/"+place+"/"+setTxtFileName(d);
     };
     var setZoigFileName = function (d,place) {
     	place=place.replace(/zoig_/,'');
@@ -1092,7 +1116,11 @@ var ilm = (function (my) {
 				ajaxopt={};
 				my.dataurl = setEmuFileName(d);
 			}
-			if(/zoig/.test(my.curplace)) {
+			else if(/^ut/.test(my.curplace)) {
+				ajaxopt={};
+				my.dataurl = setUtFileName(d, my.curplace);
+			}
+			else if(/zoig/.test(my.curplace)) {
 				ajaxopt={};
 				my.dataurl = setZoigFileName(d, my.curplace);
 			}
@@ -1110,7 +1138,7 @@ var ilm = (function (my) {
 					json_full += json;
 				}
 				var x = new Date(now).getDate() !== new Date(d).getDate();
-				if(/(emhi|emu|mnt|zoig)/.test(my.curplace) && x) {
+				if(/(emhi|emu|mnt|zoig|ut_)/.test(my.curplace) && x) {
 					d += (24 * 3600 * 1000);
 					cb(d);
 				} else {

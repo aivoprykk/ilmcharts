@@ -94,7 +94,7 @@ fs.readFile(path, {encoding:'utf-8'}, function(err, data) {
 			wdata.push(ret.join("\t"));
 		}
 	if(wdata){
-		var j = wdata.length-1, t = 0, val;
+		var j = wdata.length-1, t = 0, val, mc;
 		d = time.getTime();
 		wd = timestr(d);
 		test = false;
@@ -103,7 +103,8 @@ fs.readFile(path, {encoding:'utf-8'}, function(err, data) {
 		last=getLast(dir+"ARC-"+wd[0]+".txt");
 		//console.log("last in input file: " + wdata[j].match(/\d+:\d+/));
 		for(; j >= 0; --j){
-			m = wdata[j].match(/^(\d*) (\d+):/)[2];
+			mc = wdata[j].match(/^(\d*) (\d+):/);
+			m = mc && mc[2] ? mc[2] : 0;
 			if(test && /^(1|2)\d/.test(m)) {
 				test=false;
 				d = d-(24*3600*1000);
@@ -112,7 +113,8 @@ fs.readFile(path, {encoding:'utf-8'}, function(err, data) {
 				last=getLast(dir+"ARC-"+wd[0]+".txt");
 			}
 			if(/00/.test(m)) test = true;
-			t = new Date(wd[0] + " " + wdata[j].match(/^\d* (\d+:\d+)/)[1]).getTime()||0;
+			mc = wdata[j].match(/^\d* (\d+:\d+)/);
+			t = new Date(wd[0] + " " + (mc && mc[1] ? mc[1] : "00:00")).getTime()||0;
 			//console.log(t + " "+ last);
 			//console.log(wdata[j].split(/\s+?/));
 			if(!last||(t&&t>last)) {

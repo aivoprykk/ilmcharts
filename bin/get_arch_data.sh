@@ -50,7 +50,7 @@ IFS=:
 set $j
 place=$1
 title=$2
-names="wg:$3 yr:$4 emhi:$5 mnt:$6 zoig:$7 emu:$8";
+names="wg:$3 yr:$4 emhi:$5 mnt:$6 zoig:$7 emu:$8 ut:$9";
 IFS=' '
 (
 cd public
@@ -71,6 +71,14 @@ case "$name" in
 emu)
 	url="http://energia.emu.ee/weather/Archive/"$file;
 	out=emu_data/$place
+	;;
+ut)
+	url='http://meteo.physic.ut.ee/et/archive.php?do=data';
+	url="$url&`date '+begin[year]=%Y&begin[mon]=%m&begin[mday]=%d'`"
+	url="$url&`date --date='tomorrow' '+end[year]=%Y&end[mon]=%m&end[mday]=%d'`"
+	url="$url&9=1&12=1&10=1&15=1&16=1"
+	out=ut_data/$place
+	#continue;
 	;;
 zoig)
 	url="http://ilm.zoig.ee/arhiiv/"$value"/";
@@ -98,7 +106,7 @@ esac
 [ -d "$out" ] || mkdir -p "$out"
 
 if [ -f $out/$file ]; then
-last_stamp=`cat $out/$file|tail -1|awk '{ sub("([0-9][0-9][0-9][0-9])","&-",$1);sub("-([0-9][0-9])","&-"); print " " $1 " " $2 }'`
+last_stamp=`cat $out/$file|tail -1|awk 'match($1, /[0-9][0-9][0-9][0-9][0-9]/){ sub("([0-9][0-9][0-9][0-9])","&-",$1);sub("-([0-9][0-9])","&-") }match($2,/[0-9][0-9]:[0-9][0-9]:[0-9]/){$2=substr($2,1,5)}{ sub(",","",$2); print " " $1 " " $2 }'`
 last_min=`echo $last_stamp|awk '{sub("[0-9][0-9]:","",$2);sub("^0","",$2);print $2}';`
 last_hour=`echo $last_stamp|awk '{sub(":[0-9][0-9]","",$2);sub("^0","",$2);print $2}';`
 cur_min=`echo $min|sed -e 's/.*://;s/^0//'`
@@ -114,7 +122,7 @@ let 'm=cur_min-last_min';
   }
   [ $h -ne 1 -a $m -ge 0 -a $m -lt $minutes ] && {
     if [ $lab -gt 0 ]; then
-      echo "minuteid vahem kui $minutes: $min > $last_stamp";
+      echo $place":$name: minuteid vahem kui $minutes: $min > $last_stamp";
     fi
     [ $force -eq 0 ] && continue;
   }
@@ -131,7 +139,7 @@ last=$last_stamp
 fi
 
 if [ $lab -gt 0 ]; then
-  echo "wget -U 'WG' -q -O $out/$file $url$file at `date '+%F %T'`"
+  echo "$place:$name: wget -U 'WG' -q -O $out/$file $url at `date '+%F %T'` last:$last_stamp"
 fi
 if [ x"$dry" = x"" ]; then
 	if [ x"$temp" != x"" ]; then

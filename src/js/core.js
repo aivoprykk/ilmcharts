@@ -65,6 +65,7 @@ var ilm = (function (my) {
 		this.digits = 1;
 		this.graphs = ["temp","wind_speed","wind_dir"];
 		this.fcplaces = {
+			//"tartu":{id:"tartu",name:'Tartu',wglink:"266923",yrlink:"Tartu",group:"jarv",bind:"tartu"},
 			"tabivere":{id:"tabivere",name:'Saadjärv',wglink:"266923",yrlink:"Jõgevamaa/Tabivere~587488",group:"jarv",bind:"emu"},
 			"tamme":{id:"tamme",name:'Võrtsjärv',"wglink":192609,yrlink:"Tartumaa/Tamme",group:"jarv",bind:"mnt_tamme"},
 			//"nina":{id:"nina",name:'Peipsi Nina',"wglink":20401,yrlink:"Tartumaa/Nina",group:"jarv"},
@@ -79,6 +80,7 @@ var ilm = (function (my) {
 		this.fcplace = this.state.attr.fcplace;
 		this.curplaces = {
 			"emu":{id:"emu",name:"Tartu EMU",group:"jarv",link:'/weather',bind:"tabivere"},
+			"ut_tartu":{id:"ut_tartu",name:"Tartu UT",group:"jarv",link:'',bind:"tartu"},
 			/*"zoig_vortsjarv":{id:"zoig_vortsjarv",name:"Tamme Zoig",group:"jarv",link:'/vortsjarv',bind:"tamme"},*/
 			/*"zoig_topu":{id:"zoig_topu",name:"Topu Zoig",group:"meri",link:'/topu',bind:"topu"},*/
 			/*"zoig_rapina":{id:"zoig_rapina",name:"Räpina Zoig",group:"jarv",link:'/rapina',bind:"rapina"},*/
@@ -496,8 +498,10 @@ var ilm = (function (my) {
 		getTimeStr: function (d, f, g) {
 			d = new Date(d);
 			//console.log(d);
-			var ret ='', dsep = "." + (d.getMonth() < 9 ? "0" : "") + (d.getMonth()+1) + ".";
-			if (f) { dsep = ". " + my.months[(d.getMonth())].toLowerCase() + " "; }
+			var month = d.getMonth();
+			if(!/\d/.test(month)) return ret;
+			var ret ='', dsep = "." + (month < 9 ? "0" : "") + (month+1) + ".";
+			if (f) { dsep = ". " + my.months[month].toLowerCase() + " "; }
 			ret = (d.getDate() < 9 ? "0" : "") + d.getDate() + dsep + d.getFullYear();
 			if(!g) ret += " " + (d.getHours()<10?"0":"") + d.getHours() + ":" +  (d.getMinutes()<10?"0":"") + d.getMinutes();
 			return ret;
