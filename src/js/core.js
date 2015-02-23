@@ -297,12 +297,13 @@ var ilm = (function (my) {
 				return 0;
 			}
 			ws = ws || [];
-			var i = 0, sins = 0, coss = 0, count = wd.length, $c = 0;
+			var i = 0, sins = 0, coss = 0, count = wd.length, num =count, $c = 0;
 			for(;i<count;++i) {
+				if (wd[i]  === "-" || wd[i] === "" || wd[i] === null || wd[i] === undefined) { --num; continue; }
 				sins += (ws[i] ? ws[i] : 1) * Math.sin(wd[i]*(Math.PI/180));
 				coss += (ws[i] ? ws[i] : 1) * Math.cos(wd[i]*(Math.PI/180));
 			}
-			c = (Math.atan((-(1/count)*sins)/(-(1/count)*coss))*(180/Math.PI));
+			c = (Math.atan((-(1/num)*sins)/(-(1/num)*coss))*(180/Math.PI));
 			c = (c<180) ? (c+180) : (c-180);
 			return c ? parseFloat(c.toFixed(1)) : 0;
 		},
@@ -310,22 +311,26 @@ var ilm = (function (my) {
 			if( Object.prototype.toString.call( input ) !== '[object Array]' ) {
 				return 0;
 			}
-			var i = 0, j = input.length, sum = 0;
+			var i = 0, j = input.length, num=j, sum = 0;
 			for(;i<j;i++) {
+				if (input[i]  === "-" || input[i] === "" || input[i] === null || input[i] === undefined) { --num; continue; }
 				if(Object.prototype.toString.call(input[i]) === '[object String]'&& /^0(\d+\.)/.test(input[i])) input[i]=input[i].replace(/^0(\d+\.)/,"-$1");
 				sum += parseFloat(input[i]);
 			}
-			return parseFloat((sum/j).toFixed(1));
+			if(!num) return null;
+			return parseFloat((sum/num).toFixed(1));
 		},
 		getmax: function(input) {
 			if( Object.prototype.toString.call( input ) !== '[object Array]' ) {
 				return 0;
 			}
-			var i = 0, j = input.length, k = 0, max = 0;
+			var i = 0, j = input.length, num = j, k = 0, max = 0;
 			for(;i<j;i++) {
+				if (input[i]  === "-" || input[i] === "" || input[i] === null || input[i] === undefined) { --num; continue; }
 				k = parseFloat(input[i]);
 				if (max < k) max = k;
 			}
+			if(!num) return null;
 			return max;
 		},
 		setFrame: function(d, persist, load) {

@@ -52,6 +52,7 @@
 								c[i]=c[i]||null;
 								if(e){e[i]=e[i]||null;}
 							}
+							//console.log(c);
 							if(/(emu|zoig)/.test(my.curplace)){
 								obj.avg_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7]))]);
 								obj.max_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8]))]);
