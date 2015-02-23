@@ -48,6 +48,10 @@
 						else my.lastdate = d = new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1/$2/$3")+" "+c[1]).getTime();
 						g = my.start-my.lastdate;
 						if(my.timeframe && g > 0 && g <= my.timeframe) {
+							for(var i=0,j=c.length;i<j;++i) {
+								c[i]=c[i]||null;
+								if(e){e[i]=e[i]||null;}
+							}
 							if(/(emu|zoig)/.test(my.curplace)){
 								obj.avg_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7]))]);
 								obj.max_ws_series.data.push([d, my.conv_kmh2ms(my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8]))]);
