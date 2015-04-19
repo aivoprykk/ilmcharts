@@ -297,14 +297,22 @@ var ilm = (function (my) {
 				return 0;
 			}
 			ws = ws || [];
-			var i = 0, sins = 0, coss = 0, count = wd.length, num =count, $c = 0;
+			var i = 0, sins = 0, coss = 0, count = wd.length, num =count, c = 0, ac=0, as=0;
 			for(;i<count;++i) {
 				if (wd[i]  === "-" || wd[i] === "" || wd[i] === null || wd[i] === undefined) { --num; continue; }
-				sins += (ws[i] ? ws[i] : 1) * Math.sin(wd[i]*(Math.PI/180));
-				coss += (ws[i] ? ws[i] : 1) * Math.cos(wd[i]*(Math.PI/180));
+				sins += (ws[i] ? ws[i] : 1) * Math.sin(wd[i]*Math.PI/180);
+				coss += (ws[i] ? ws[i] : 1) * Math.cos(wd[i]*Math.PI/180);
 			}
-			c = (Math.atan((-(1/num)*sins)/(-(1/num)*coss))*(180/Math.PI));
-			c = (c<180) ? (c+180) : (c-180);
+			as = (-1*(1/num)*sins);
+			ac = (-1*(1/num)*coss);
+			if(as===0){
+				if(ac < 0) c = 360;
+				else if(ac > 0) c = 180;
+				else c = 0;
+			} else{
+				c = 90 - (Math.atan(ac/as)*180/Math.PI);
+				if(as > 0) c += 180;
+			}
 			return c ? parseFloat(c.toFixed(1)) : 0;
 		},
 		getavg: function (input) {

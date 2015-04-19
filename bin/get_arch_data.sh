@@ -145,7 +145,7 @@ if [ x"$dry" = x"" ]; then
 	if [ x"$temp" != x"" ]; then
 	  wget -U 'Wget for ilm.majasa.ee/' -q -O $out/$temp $url
 	  [ -e $dir"/parse_$name.js" ] && node $dir"/parse_$name.js" $out/$temp
-	  rm -f $out"/"$temp
+	  #rm -f $out"/"$temp
 	else
 	  wget -T40 -U 'Wget for ilm.majasa.ee/' -q -O $out/$file $url		
 	fi
