@@ -477,6 +477,7 @@
 					', Järgmine uuendus: ' +
 					my.getTimeStr(my.lastdate + updateinterval)
 			);
+			$("#pagelogo").html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+"</span>");
     };
     
     var setTxtFileName = function (d) {
@@ -506,7 +507,7 @@
     
 	my.loadCur = function (url) {
 		var d, now;
-		now = d = (my.date > 0) ? new Date(my.date).getTime() : new Date().getTime();
+		now = d = (my.date > 0) ? new Date(my.date).getTime() : my.getTime();
 		//url = url || my.dataurl + '&hours=7&res=10m&wind_speed=1&dewpoint=1&outdoor_temperature=1&windchill=1&wind_direction=1&absolute_pressure=1';
 		//fake data...
 		//ajaxopt.delta="2y";

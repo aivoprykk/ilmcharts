@@ -19,7 +19,8 @@ var ilm = (function (my) {
 			chartorder : opt.chartorder || ["temp","wind_speed","wind_dir"],
 			showgroup : opt.showgroup || "",
 			binded : opt.binded || false,
-			linksasmenu : opt.linksasmenu || false
+			linksasmenu : opt.linksasmenu || false,
+			timezone: opt.timezone || 2
 		};
 		this.id = defaults.id;
 		this.attr = defaults;
@@ -104,17 +105,19 @@ var ilm = (function (my) {
 			"emhi_haademeeste":{id:"emhi_haademeeste",name:'Häädemeeste EMHI',group:"meri",link:'/meri/vaatlusandmed/',bind:"haademeeste"},
 			"emhi_ristna":{id:"emhi_ristna",name:"Ristna EMHI",group:"meri",link:'/meri/vaatlusandmed/',bind:"ristna"}
 		};
+		this.timezone = this.state.attr.timezone;
+		this.addDst = this.isDst();
 		this.curplace = this.state.attr.curplace;
 		this.datamode = this.state.attr.datamode;
 		this.timeframe = this.state.attr.timeframe;
 		this.showgroup = this.state.attr.showgroup;
 		this.binded = this.state.attr.binded;
 		this.linksasmenu = this.state.attr.linksasmenu;
-		this.lastdate = new Date().getTime();//-(4*24*3600);
+		this.lastdate = this.getTime();//-(4*24*3600);
 		this.date = 0;
 		this.start = this.lastdate;
 		this.historyactive=false;
-		this.logo = "Graafikud";
+		this.logo = "Ilmainfo";
  		this.chartoptions = {
 			chart: {
 				zoomType: 'x',
@@ -496,16 +499,16 @@ var ilm = (function (my) {
 		},
 		setDate: function(d,load) {
 			load=load||'ja';
-			var ret = 0,cur = new Date().getTime();
+			var ret = 0,cur = this.getTime();
 			if(d && /^\d*-\d*-\d*/.test(d)) {
 				d = d.split(/[\sT]/)[0]+" 23:59:59";
-				ret = new Date(d).getTime();
+				ret = this.getTime(d);
 			} else if(d && /^\d+$/.test(d)) {
-				ret = new Date().getTime() - (Number(d)*1000);
+				ret = this.getTime() - (Number(d)*1000);
 			} else if (d && /^\d*h/.test(d)) {
-				ret = new Date().getTime() - (Number(d.replace(/h*$/,""))*3600*1000);
+				ret = this.getTime() - (Number(d.replace(/h*$/,""))*3600*1000);
 			} else if (d && /^\d*d/.test(d)) {
-				ret = new Date().getTime() - (Number(d.replace(/d*$/,""))*24*3600*1000);
+				ret = this.getTime() - (Number(d.replace(/d*$/,""))*24*3600*1000);
 			}
 			if(!d || (ret && ret > cur)){
 				ret = cur;
@@ -516,9 +519,31 @@ var ilm = (function (my) {
 				if(load==='ja') this.doReload("curplace");
 			}
 		},
+		isDst: function(){
+			var utc = new Date();
+			var utcsec = utc.getTime();
+	                var dls = new Date(utc.getFullYear(), 3, 0);
+                        var dle = new Date(utc.getFullYear(), 10, 0);
+                        dls.setDate(dls.getDate()-dls.getDay());
+                        dle.setDate(dle.getDate()-dle.getDay());
+			//console.log("isDst: " + dls.getTime() + "  " + utcsec + "  " + dle.getTime());
+                        if(utcsec < dle.getTime() && utcsec>=dls.getTime()) return true;
+                        else return false;
+		},
+		getOffsetSec: function(offset){
+			if(this.addDst===undefined) this.addDst = this.isDst();
+			return ((offset||this.timezone)+(this.addDst?1:0))*3600000;
+		},
+		getTime: function(d,offset) {
+			d = this.getGmtTime(d);
+                        return  new Date(d.getTime() + this.getOffsetSec(offset));
+		},
+		getGmtTime: function(d){
+                        d = d ? new Date(d) : new Date();
+                        return new Date(d.getTime()+(d.getTimezoneOffset()*60000));
+		},
 		getTimeStr: function (d, f, g) {
-			d = new Date(d);
-			//console.log(d);
+			d = d ? new Date(d) : this.getTime();
 			var month = d.getMonth();
 			if(!/\d/.test(month)) return ret;
 			var ret ='', dsep = "." + (month < 9 ? "0" : "") + (month+1) + ".";
@@ -612,7 +637,7 @@ var ilm = (function (my) {
 	}
 	//my.setDate("2014-04-25T00:00:00");
 	//my.setFrame('3d');
-	console.log(my.getTimeStr(my.date) + " " + my.timeframe);
+	//console.log(my.getTimeStr(my.date) + " " + my.timeframe);
 	return my;
 })(ilm || {});
 ;
@@ -1094,6 +1119,7 @@ var ilm = (function (my) {
 					', Järgmine uuendus: ' +
 					my.getTimeStr(my.lastdate + updateinterval)
 			);
+			$("#pagelogo").html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+"</span>");
     };
     
     var setTxtFileName = function (d) {
@@ -1123,7 +1149,7 @@ var ilm = (function (my) {
     
 	my.loadCur = function (url) {
 		var d, now;
-		now = d = (my.date > 0) ? new Date(my.date).getTime() : new Date().getTime();
+		now = d = (my.date > 0) ? new Date(my.date).getTime() : my.getTime();
 		//url = url || my.dataurl + '&hours=7&res=10m&wind_speed=1&dewpoint=1&outdoor_temperature=1&windchill=1&wind_direction=1&absolute_pressure=1';
 		//fake data...
 		//ajaxopt.delta="2y";
@@ -1356,7 +1382,7 @@ var ilm = (function (my) {
 	
 	function intPlotLine(chart, intval) {
 		var interval = 60000;
-		var now = new Date().getTime();
+		var now = my.getTime();
 		clearInterval(intval);
 		removePlotLine(chart);
 		addPlotLine(chart, now);
@@ -1489,9 +1515,10 @@ var ilm = (function (my) {
 				wgd = (function (d) {
 						return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
 					})(wg.initdate.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/)),
-				d = (wgd.getTime()) - (new Date().getTimezoneOffset() * 60 * 1000) + 1800000,
-				//console.log("wg time " + wgd + " " + new Date(d));
+				//d = my.getTime(wgd.getTime()+1800000),
+				d = (wgd.getTime()) + my.getOffsetSec() + 1800000,
 				t = 0, i = 0, j = wg.hours.length;
+				//console.log("wg time " + wgd + " " + my.addDst);
 				for (; i < j; ++i) {
 					if (wg.hours[i] > 72) { break; }
 					//console.log("wg thing " + wg.hours[i] + " " + new Date(d));
@@ -1529,7 +1556,7 @@ var ilm = (function (my) {
 					i3 = intPlotLine(my.charts[5], i3);
 				}
 				$("#fctitle").html(
-					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(wg.update_last,1)
+					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(new Date(wg.update_last.replace(/\+.+/,"")).getTime()+my.getOffsetSec(),1)
 				).show();
 				var list = _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {
 					return '<li><a href="#" name="'+a.id+'" class="fcplace-select'+(a.id===my.fcplace?' active':'')+'">'+a.name+'</a></li>';
@@ -1553,10 +1580,11 @@ var ilm = (function (my) {
 					'<a href="' +
 						"http://www.windguru.cz/ee/?go=1&amp;sc="+my.fcplaces[my.fcplace].wglink+"&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22" +
 						'" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: ' + 
-						my.getTimeStr(wg.update_last) +
+						my.getTimeStr(new Date(wg.update_last.replace(/\+.+/,"")).getTime()+my.getOffsetSec()) +
 						', Järgmine uuendus: ' + 
-						my.getTimeStr(wg.update_next)
+						my.getTimeStr(new Date(wg.update_next.replace(/\+.+/,"")).getTime()+my.getOffsetSec())
 				);
+				$("#pagelogo").html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+"</span>");
 			});
 
 		});
@@ -1775,6 +1803,7 @@ var ilm = (function (my) {
 		});
 		$("#datepicker").datepicker({
 			dateFormat: 'yy-mm-dd',
+			timezone: "+0"+(((my.addDst)?1:0)+2)+"00", 
 			onSelect: function(dateText, inst) {
 				w.ilm.setDate(dateText);
 				//w.ilm.reload();

@@ -159,7 +159,7 @@
 	
 	function intPlotLine(chart, intval) {
 		var interval = 60000;
-		var now = new Date().getTime();
+		var now = my.getTime();
 		clearInterval(intval);
 		removePlotLine(chart);
 		addPlotLine(chart, now);
@@ -292,9 +292,10 @@
 				wgd = (function (d) {
 						return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
 					})(wg.initdate.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/)),
-				d = (wgd.getTime()) - (new Date().getTimezoneOffset() * 60 * 1000) + 1800000,
-				//console.log("wg time " + wgd + " " + new Date(d));
+				//d = my.getTime(wgd.getTime()+1800000),
+				d = (wgd.getTime()) + my.getOffsetSec() + 1800000,
 				t = 0, i = 0, j = wg.hours.length;
+				//console.log("wg time " + wgd + " " + my.addDst);
 				for (; i < j; ++i) {
 					if (wg.hours[i] > 72) { break; }
 					//console.log("wg thing " + wg.hours[i] + " " + new Date(d));
@@ -332,7 +333,7 @@
 					i3 = intPlotLine(my.charts[5], i3);
 				}
 				$("#fctitle").html(
-					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(wg.update_last,1)
+					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(new Date(wg.update_last.replace(/\+.+/,"")).getTime()+my.getOffsetSec(),1)
 				).show();
 				var list = _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {
 					return '<li><a href="#" name="'+a.id+'" class="fcplace-select'+(a.id===my.fcplace?' active':'')+'">'+a.name+'</a></li>';
@@ -356,10 +357,11 @@
 					'<a href="' +
 						"http://www.windguru.cz/ee/?go=1&amp;sc="+my.fcplaces[my.fcplace].wglink+"&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22" +
 						'" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: ' + 
-						my.getTimeStr(wg.update_last) +
+						my.getTimeStr(new Date(wg.update_last.replace(/\+.+/,"")).getTime()+my.getOffsetSec()) +
 						', Järgmine uuendus: ' + 
-						my.getTimeStr(wg.update_next)
+						my.getTimeStr(new Date(wg.update_next.replace(/\+.+/,"")).getTime()+my.getOffsetSec())
 				);
+				$("#pagelogo").html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+"</span>");
 			});
 
 		});
