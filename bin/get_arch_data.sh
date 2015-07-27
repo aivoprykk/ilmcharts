@@ -139,7 +139,13 @@ last=$last_stamp
 fi
 
 if [ $lab -gt 0 ]; then
-  echo "$place:$name: wget -U 'WG' -q -O $out/$file $url at `date '+%F %T'` last:$last_stamp"
+  echo "`date '+%F %T'` last:$last_stamp";
+  if [ x"$temp" != x"" ]; then
+    echo "$place:$name wget -U 'Wget for ilm.majasa.ee/' -q -O $out/$temp $url"
+    [ -e $dir"/parse_$name.js" ] && echo "node $dir/parse_$name.js $out/$temp"
+  else
+    echo "$place:$name wget -T40 -U 'Wget for ilm.majasa.ee/' -q -O $out/$file $url"
+  fi
 fi
 if [ x"$dry" = x"" ]; then
 	if [ x"$temp" != x"" ]; then

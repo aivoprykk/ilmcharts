@@ -70,9 +70,16 @@ fs.readFile(path, function(err, data) {
 			wdata.push(ret.join("\t"));
 		}
 	});
+	var datadate=$(".data-date").text().trim();
+	try {
+		datadate = new Date(datadate.replace(/^(\d*)\.(\d*)\.(\d*)\s+kell\s+/,'$3-$2-$1 '));
+		//console.log("datadate: "+datadate);
+	} catch(e) {
+		datadate = time;
+	}
 	if(wdata){
 		var j = wdata.length-1, t = 0, val, mc;
-		d = time.getTime();
+		d = datadate.getTime();
 		wd = timestr(d);
 		test = false;
 		ret = {};
