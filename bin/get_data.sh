@@ -174,8 +174,8 @@ fi
 #continue
 
 if [ $force -gt 0 -o $t -lt 0 ]; then
-	[ $name = "wg" ] && rotate json ${out} ${file}
-	[ $name = "yr" ] && rotate xml ${out} ${file}
+  #[ $name = "wg" ] && rotate json ${out} ${file}
+  #[ $name = "yr" ] && rotate xml ${out} ${file}
   if [ $lab -gt 0 ]; then
     echo wget -q -O ${out}/${file}.tmp "${url}"
   fi
@@ -186,10 +186,10 @@ if [ $force -gt 0 -o $t -lt 0 ]; then
   if [ $lab -gt 0 ]; then
     echo "next update time: $t"
   fi
-	if [ $t -gt 0 ]; then
-	  cp -f ${out}/${file}.tmp ${out}/${file}
-	  rm -f ${out}/${file}.tmp
-	fi
+  if [ $t -gt 0 ]; then
+    mv --backup=t -f ${out}/${file}.tmp ${out}/${file}
+    #rm -f ${out}/${file}.tmp
+  fi
 fi
 done ##split conf
 )
