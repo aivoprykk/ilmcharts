@@ -1557,7 +1557,7 @@ var ilm = (function (my) {
 					i3 = intPlotLine(my.charts[5], i3);
 				}
 				$("#fctitle").html(
-					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(new Date(wg.update_last.replace(/\+.+/,"")).getTime()+my.getOffsetSec(),1)
+					'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(yr_get_time($xml,'lastupdate'))
 				).show();
 				var list = _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {
 					return '<li><a href="#" name="'+a.id+'" class="fcplace-select'+(a.id===my.fcplace?' active':'')+'">'+a.name+'</a></li>';
