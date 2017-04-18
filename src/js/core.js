@@ -82,11 +82,12 @@ var ilm = (function (my) {
 		this.curplaces = {
 			"emu":{id:"emu",name:"Tartu EMU",group:"jarv",link:'/weather',bind:"tabivere"},
 			"ut_tartu":{id:"ut_tartu",name:"Tartu UT",group:"jarv",link:'',bind:"tartu"},
+			"arhiiv_vortsjarv_tamme":{id:"arhiiv_vortsjarv_tamme",name:"Võrtsjärv Tamme",group:"jarv",link:'',bind:"tamme"},
 			/*"zoig_vortsjarv":{id:"zoig_vortsjarv",name:"Tamme Zoig",group:"jarv",link:'/vortsjarv',bind:"tamme"},*/
 			/*"zoig_topu":{id:"zoig_topu",name:"Topu Zoig",group:"meri",link:'/topu',bind:"topu"},*/
 			/*"zoig_rapina":{id:"zoig_rapina",name:"Räpina Zoig",group:"jarv",link:'/rapina',bind:"rapina"},*/
 			/*"mnt_tartu":{id:"mnt_tartu",name:"Tartu MNT",group:"jarv",link:'',bind:''},*/
-			"mnt_tamme":{id:"mnt_tamme",name:"V-Rakke MNT",group:"jarv",link:'',bind:"tamme"},
+			"mnt_tamme":{id:"mnt_tamme",name:"V-Rakke MNT",group:"jarv",link:''},
 			"mnt_rapina":{id:"mnt_rapina",name:"Räpina MNT",group:"jarv",link:'',bind:"rapina"},
 			"mnt_uhmardu":{id:"mnt_uhmardu",name:"Uhmardu MNT",group:"jarv",link:''},
 			"mnt_jogeva":{id:"mnt_jogeva",name:"Jõgeva MNT",group:"jarv",link:''},
@@ -309,7 +310,7 @@ var ilm = (function (my) {
 			as = (-1*(1/num)*sins);
 			ac = (-1*(1/num)*coss);
 			if(as===0){
-				if(ac < 0) c = 360;
+				if(ac < 0) c = 0;
 				else if(ac > 0) c = 180;
 				else c = 0;
 			} else{

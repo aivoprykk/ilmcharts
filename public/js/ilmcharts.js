@@ -1,6 +1,6 @@
 /*!
  * Ilmcharts v1.1.7 (http://ilm.majasa.ee)
- * Copyright 2012-2016 Aivo Pruekk
+ * Copyright 2012-2017 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
 
@@ -90,11 +90,12 @@ var ilm = (function (my) {
 		this.curplaces = {
 			"emu":{id:"emu",name:"Tartu EMU",group:"jarv",link:'/weather',bind:"tabivere"},
 			"ut_tartu":{id:"ut_tartu",name:"Tartu UT",group:"jarv",link:'',bind:"tartu"},
+			"arhiiv_vortsjarv_tamme":{id:"arhiiv_vortsjarv_tamme",name:"Võrtsjärv Tamme",group:"jarv",link:'',bind:"tamme"},
 			/*"zoig_vortsjarv":{id:"zoig_vortsjarv",name:"Tamme Zoig",group:"jarv",link:'/vortsjarv',bind:"tamme"},*/
 			/*"zoig_topu":{id:"zoig_topu",name:"Topu Zoig",group:"meri",link:'/topu',bind:"topu"},*/
 			/*"zoig_rapina":{id:"zoig_rapina",name:"Räpina Zoig",group:"jarv",link:'/rapina',bind:"rapina"},*/
 			/*"mnt_tartu":{id:"mnt_tartu",name:"Tartu MNT",group:"jarv",link:'',bind:''},*/
-			"mnt_tamme":{id:"mnt_tamme",name:"V-Rakke MNT",group:"jarv",link:'',bind:"tamme"},
+			"mnt_tamme":{id:"mnt_tamme",name:"V-Rakke MNT",group:"jarv",link:''},
 			"mnt_rapina":{id:"mnt_rapina",name:"Räpina MNT",group:"jarv",link:'',bind:"rapina"},
 			"mnt_uhmardu":{id:"mnt_uhmardu",name:"Uhmardu MNT",group:"jarv",link:''},
 			"mnt_jogeva":{id:"mnt_jogeva",name:"Jõgeva MNT",group:"jarv",link:''},
@@ -317,7 +318,7 @@ var ilm = (function (my) {
 			as = (-1*(1/num)*sins);
 			ac = (-1*(1/num)*coss);
 			if(as===0){
-				if(ac < 0) c = 360;
+				if(ac < 0) c = 0;
 				else if(ac > 0) c = 180;
 				else c = 0;
 			} else{
@@ -736,6 +737,16 @@ var ilm = (function (my) {
 								if(c[4]!=="") obj.avg_humid_series.data.push([d, my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
 								if(c[5]!=="") obj.avg_dp_series.data.push([d, my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5])]);
 							}
+							else if(/arhiiv/.test(my.curplace)){
+								//c[4] = (!c[4] || c[4] < -49) ? null : c[4];
+								obj.avg_ws_series.data.push([d, my.ntof2p((e) ? my.getavg([c[6], e[6]]) : c[6])]);
+								obj.max_ws_series.data.push([d, my.ntof2p((e) ? my.getmax([c[7], e[7]]) : c[7])]);
+								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.wdavg([c[5], e[5]]) : c[5])]);
+								if(c[2]!=="") obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
+								if(c[4]!=="") obj.avg_dp_series.data.push([d, my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
+								if(c[8]!=="") obj.avg_humid_series.data.push([d, my.ntof2p((e) ? my.getavg([c[8], e[8]]) : c[8])]);
+								if(c[9]!=="") obj.avg_press_series.data.push([d, my.ntof2p((e) ? my.getavg([c[9], e[9]]) : c[9])]);
+							}
 						}
 					}
 				}
@@ -1110,6 +1121,7 @@ var ilm = (function (my) {
 					/emu/.test(my.curplace) ? 'energia.emu.ee' :
 					/^ut/.test(my.curplace) ? 'meteo.physic.ut.ee' :
 					/zoig/.test(my.curplace) ? 'ilm.zoig.ee' :
+					/arhiiv/.test(my.curplace) ? 'ilm.majasa.ee' :
 					/mnt/.test(my.curplace) ? 'balticroads.net': '';
 			$('#curmeta').html(
 				'<a href="http://' + host + my.curplaces[my.curplace].link  +
@@ -1138,6 +1150,10 @@ var ilm = (function (my) {
     	place=place.replace(/zoig_/,'');
 		return "zoig_data/"+place+"/"+setTxtFileName(d);
     };
+    var setMyFileName = function (d,place) {
+    	place=place.replace(/arhiiv_/,'');
+		return "arhiiv/"+place+"/"+setTxtFileName(d);
+    };
     var setEmhiFileName = function (d,place) {
     	place=place.replace(/emhi_/,'');
 		return "emhi_data/"+place+"/"+setTxtFileName(d);
@@ -1164,6 +1180,10 @@ var ilm = (function (my) {
 				ajaxopt={};
 				my.dataurl = setUtFileName(d, my.curplace);
 			}
+			else if(/arhiiv/.test(my.curplace)) {
+				ajaxopt={};
+				my.dataurl = setMyFileName(d, my.curplace);
+			}
 			else if(/zoig/.test(my.curplace)) {
 				ajaxopt={};
 				my.dataurl = setZoigFileName(d, my.curplace);
@@ -1182,7 +1202,7 @@ var ilm = (function (my) {
 					json_full += json;
 				}
 				var x = new Date(now).getDate() !== new Date(d).getDate();
-				if(/(emhi|emu|mnt|zoig|ut_)/.test(my.curplace) && x) {
+				if(/(emhi|emu|mnt|zoig|arhiiv|ut_)/.test(my.curplace) && x) {
 					d += (24 * 3600 * 1000);
 					cb(d);
 				} else {
@@ -1519,7 +1539,7 @@ var ilm = (function (my) {
 				d = (wgd.getTime()) + my.getOffsetSec() + 1800000,
 				t = 0, i = 0, j = wg.hours.length;
 				//console.log("wg time " + wgd + " " + my.addDst);
-				/*
+				
 				for (; i < j; ++i) {
 					if (wg.hours[i] > 72) { break; }
 					//console.log("wg thing " + wg.hours[i] + " " + new Date(d));
@@ -1542,7 +1562,7 @@ var ilm = (function (my) {
 				//temp_options.series.push(wg_rain_series);
 				temp_options.series.push(wg_press_series);
 				temp_options.series.push(wg_temp_series);
-				*/
+				
 				var i1, i2, i3;
 				if(my.chartorder.indexOf("wind_speed")>=0) {
 					my.charts[3] = new Highcharts.Chart(wind_speed_options);
@@ -1622,41 +1642,44 @@ var ilm = (function (my) {
 				{'href':'ilm/ilmavaatlused/vaatlusandmed/?filter%5BmapLayer%5D=wind','title':"Ilmavaatlused - tuul",'id':'emhi_kaart'},
 				{'href':'ilm/prognoosid/mudelprognoosid/eesti/#layers/tuul10ms,tuul10mb','title':"Prognoos - Suur Hirlam",'id':'emhi_hirlam_suur'}
 				]},
-				{'name': "WeatherOnline",'url':'http://www.weatheronline.co.uk/','list': [
-				{'href':'marine/weather?LEVEL=3&LANG=en&MENU=0&TIME=18&MN=gfs&WIND=g005','title':"Soome Laht",'id':'weatheronline_sl'},
-				]},
 				{'name': "WindGuru",'url':'http://www.windguru.cz/','list': [
-				{'href':'int/?go=1&amp;lang=ee&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180&amp;vp=1&amp;pi=2&amp;pu=413733','title':"Eesti Meri",'id':'windguru_meri'},
-				{'href':'int/?go=1&amp;lang=ee&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180&amp;vp=1&amp;pi=1&amp;pu=413733','title':"Sisej&auml;rved",'id':'windguru_jarved'},
-				{'href':'int/?go=1&amp;lang=ee&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"Saadj&auml;rv",'id':'windguru_saadjarv'},
-				{'href':'int/?go=1&amp;lang=ee&amp;sc=192609&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"V&otilde;rtsj&auml;rv",'id':'windguru_vortsjarv'},
-				{'href':'int/?go=1&amp;lang=ee&amp;sc=365700&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"Tartu",'id':'windguru_tartu'}
+				{'href':'365700','title':"Tartu",'id':'windguru_tartu'},
+				{'href':'266923','title':"Saadj&auml;rv",'id':'windguru_saadjarv'},
+				{'href':'204512','title':"V&otilde;rtsj&auml;rv Tamme",'id':'windguru_tamme'},
+				{'href':'92781','title':"P&auml;rnu",'id':'windguru_parnu'},
+				{'href':'152536','title':"H&auml;&auml;demeeste",'id':'windguru_haademeeste'},
+				{'href':'125320','title':"Pirita",'id':'windguru_tallinn'},
+				{'href':'?set=143499','title':"Eesti Meri",'id':'windguru_meri'},
+				{'href':'?set=143439','title':"Sisej&auml;rved",'id':'windguru_jarved'}
 				]},
 				{'name': "YR.no",'url':'http://www.yr.no/place/Estonia/','list': [
 				{'href':'Tartumaa/Tartu/hour_by_hour.html','title':"Tartu",'id':'yr_tartu'},
-				{'href':'Tartumaa/Tamme/hour_by_hour.html','title':"Võrtsjärv Tamme",'id':'yr_tamme'},
 				{'href':'Jõgevamaa/Tabivere~793956/hour_by_hour.html','title':"Saadjärv",'id':'yr_tabivere'},
-				{'href':'Harjumaa/Tallinn/hour_by_hour.html','title':"Tallinn",'id':'yr_tallinn'},
+				{'href':'Tartumaa/Tamme/hour_by_hour.html','title':"Võrtsjärv Tamme",'id':'yr_tamme'},
 				{'href':'Pärnumaa/Pärnu/hour_by_hour.html','title':"Pärnu",'id':'yr_parnu'},
-				{'href':'Pärnumaa/Häädemeeste/hour_by_hour.html','title':"Häädemeeste",'id':'yr_parnu'}
-				]},
-				{'name': 'GisMeteo.ru','url':'http://www.gismeteo.ru/towns/','list': [
-				{'href':'26231.htm','title':"P&auml;rnu",'id':'gismeteo_parnu'},
-				{'href':'26038.htm','title':"Tallinn",'id':'gismeteo_tallinn'},
-				{'href':'26242.htm','title':"Tartu",'id':'gismeteo_tartu'}
+				{'href':'Pärnumaa/Häädemeeste/hour_by_hour.html','title':"Häädemeeste",'id':'yr_parnu'},
+				{'href':'Harjumaa/Tallinn/hour_by_hour.html','title':"Tallinn",'id':'yr_tallinn'}
 				]},
 				{'name': 'Meteo.pl','url':'http://new.meteo.pl/um/php/meteorogram_map_um.php?lang=en&ntype=0u','list': [
 				{'href':'&row=227&col=325','title':"Saadj&auml;rv",'id':'meteopl_saadjarv'},
 				{'href':'&row=234&col=318','title':"Võrtsj&auml;rv",'id':'meteopl_vortsjarv'},
 				{'href':'&row=234&col=339','title':"Peipsi Räpina",'id':'meteopl_rapina'},
-				{'href':'&row=199&col=297','title':"Tallinn",'id':'meteopl_pirita'},
 				{'href':'&row=234&col=297','title':"Pärnu",'id':'meteopl_parnu'},
-				{'href':'&row=241&col=297','title':"Häädemeeste",'id':'meteopl_haademeeste'}
+				{'href':'&row=241&col=297','title':"Häädemeeste",'id':'meteopl_haademeeste'},
+				{'href':'&row=199&col=297','title':"Tallinn",'id':'meteopl_pirita'}
+				]},
+				{'name': "WeatherOnline",'url':'http://www.weatheronline.co.uk/','list': [
+				{'href':'marine/weather?LEVEL=3&LANG=en&MENU=0&TIME=18&MN=gfs&WIND=g005','title':"Soome Laht",'id':'weatheronline_sl'},
 				]},
 				{'name': 'Windfinder.com','url':'http://www.windfinder.com/forecast/','list': [
 				{'href':'aeksi_saadjaerv','title':"Saadj&auml;rv",'id':'windfinder_saadjarv'},
 				{'href':'tartu_airport','title':"Tartu",'id':'windfinder_tartu'},
 				{'href':'mustvee_peipus&wf_cmp=2','title':"Mustvee Peipsi",'id':'windfinder_mustvee'}
+				]},
+				{'name': 'GisMeteo.ru','url':'http://www.gismeteo.ru/towns/','list': [
+				{'href':'26242.htm','title':"Tartu",'id':'gismeteo_tartu'},
+				{'href':'26231.htm','title':"P&auml;rnu",'id':'gismeteo_parnu'},
+				{'href':'26038.htm','title':"Tallinn",'id':'gismeteo_tallinn'}
 				]},
 				{'name': 'Muud','url':'http://','list':[
 				{'href':'d.naerata.eu/','title':"Naerata.eu",'id':'naerata'},

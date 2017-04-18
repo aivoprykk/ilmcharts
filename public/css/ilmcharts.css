@@ -6467,7 +6467,7 @@ button.close {
 
 /*!
  * Ilmcharts v1.1.7 (http://ilm.majasa.ee)
- * Copyright 2012-2016 Aivo Pruekk
+ * Copyright 2012-2017 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
 
@@ -6478,6 +6478,7 @@ body {
 	padding: 0;
 }
 .ilm-sisu {
+	margin 0 1em;
 	padding: 0.5em;
 	position: absolute;
 	right: 0;

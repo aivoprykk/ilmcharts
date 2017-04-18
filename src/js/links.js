@@ -13,41 +13,44 @@
 				{'href':'ilm/ilmavaatlused/vaatlusandmed/?filter%5BmapLayer%5D=wind','title':"Ilmavaatlused - tuul",'id':'emhi_kaart'},
 				{'href':'ilm/prognoosid/mudelprognoosid/eesti/#layers/tuul10ms,tuul10mb','title':"Prognoos - Suur Hirlam",'id':'emhi_hirlam_suur'}
 				]},
-				{'name': "WeatherOnline",'url':'http://www.weatheronline.co.uk/','list': [
-				{'href':'marine/weather?LEVEL=3&LANG=en&MENU=0&TIME=18&MN=gfs&WIND=g005','title':"Soome Laht",'id':'weatheronline_sl'},
-				]},
 				{'name': "WindGuru",'url':'http://www.windguru.cz/','list': [
-				{'href':'int/?go=1&amp;lang=ee&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180&amp;vp=1&amp;pi=2&amp;pu=413733','title':"Eesti Meri",'id':'windguru_meri'},
-				{'href':'int/?go=1&amp;lang=ee&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180&amp;vp=1&amp;pi=1&amp;pu=413733','title':"Sisej&auml;rved",'id':'windguru_jarved'},
-				{'href':'int/?go=1&amp;lang=ee&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"Saadj&auml;rv",'id':'windguru_saadjarv'},
-				{'href':'int/?go=1&amp;lang=ee&amp;sc=192609&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"V&otilde;rtsj&auml;rv",'id':'windguru_vortsjarv'},
-				{'href':'int/?go=1&amp;lang=ee&amp;sc=365700&amp;wj=msd&amp;tj=c&amp;odh=3&amp;doh=22&amp;fhours=180','title':"Tartu",'id':'windguru_tartu'}
+				{'href':'365700','title':"Tartu",'id':'windguru_tartu'},
+				{'href':'266923','title':"Saadj&auml;rv",'id':'windguru_saadjarv'},
+				{'href':'204512','title':"V&otilde;rtsj&auml;rv Tamme",'id':'windguru_tamme'},
+				{'href':'92781','title':"P&auml;rnu",'id':'windguru_parnu'},
+				{'href':'152536','title':"H&auml;&auml;demeeste",'id':'windguru_haademeeste'},
+				{'href':'125320','title':"Pirita",'id':'windguru_tallinn'},
+				{'href':'?set=143499','title':"Eesti Meri",'id':'windguru_meri'},
+				{'href':'?set=143439','title':"Sisej&auml;rved",'id':'windguru_jarved'}
 				]},
 				{'name': "YR.no",'url':'http://www.yr.no/place/Estonia/','list': [
 				{'href':'Tartumaa/Tartu/hour_by_hour.html','title':"Tartu",'id':'yr_tartu'},
-				{'href':'Tartumaa/Tamme/hour_by_hour.html','title':"Võrtsjärv Tamme",'id':'yr_tamme'},
 				{'href':'Jõgevamaa/Tabivere~793956/hour_by_hour.html','title':"Saadjärv",'id':'yr_tabivere'},
-				{'href':'Harjumaa/Tallinn/hour_by_hour.html','title':"Tallinn",'id':'yr_tallinn'},
+				{'href':'Tartumaa/Tamme/hour_by_hour.html','title':"Võrtsjärv Tamme",'id':'yr_tamme'},
 				{'href':'Pärnumaa/Pärnu/hour_by_hour.html','title':"Pärnu",'id':'yr_parnu'},
-				{'href':'Pärnumaa/Häädemeeste/hour_by_hour.html','title':"Häädemeeste",'id':'yr_parnu'}
-				]},
-				{'name': 'GisMeteo.ru','url':'http://www.gismeteo.ru/towns/','list': [
-				{'href':'26231.htm','title':"P&auml;rnu",'id':'gismeteo_parnu'},
-				{'href':'26038.htm','title':"Tallinn",'id':'gismeteo_tallinn'},
-				{'href':'26242.htm','title':"Tartu",'id':'gismeteo_tartu'}
+				{'href':'Pärnumaa/Häädemeeste/hour_by_hour.html','title':"Häädemeeste",'id':'yr_parnu'},
+				{'href':'Harjumaa/Tallinn/hour_by_hour.html','title':"Tallinn",'id':'yr_tallinn'}
 				]},
 				{'name': 'Meteo.pl','url':'http://new.meteo.pl/um/php/meteorogram_map_um.php?lang=en&ntype=0u','list': [
 				{'href':'&row=227&col=325','title':"Saadj&auml;rv",'id':'meteopl_saadjarv'},
 				{'href':'&row=234&col=318','title':"Võrtsj&auml;rv",'id':'meteopl_vortsjarv'},
 				{'href':'&row=234&col=339','title':"Peipsi Räpina",'id':'meteopl_rapina'},
-				{'href':'&row=199&col=297','title':"Tallinn",'id':'meteopl_pirita'},
 				{'href':'&row=234&col=297','title':"Pärnu",'id':'meteopl_parnu'},
-				{'href':'&row=241&col=297','title':"Häädemeeste",'id':'meteopl_haademeeste'}
+				{'href':'&row=241&col=297','title':"Häädemeeste",'id':'meteopl_haademeeste'},
+				{'href':'&row=199&col=297','title':"Tallinn",'id':'meteopl_pirita'}
+				]},
+				{'name': "WeatherOnline",'url':'http://www.weatheronline.co.uk/','list': [
+				{'href':'marine/weather?LEVEL=3&LANG=en&MENU=0&TIME=18&MN=gfs&WIND=g005','title':"Soome Laht",'id':'weatheronline_sl'},
 				]},
 				{'name': 'Windfinder.com','url':'http://www.windfinder.com/forecast/','list': [
 				{'href':'aeksi_saadjaerv','title':"Saadj&auml;rv",'id':'windfinder_saadjarv'},
 				{'href':'tartu_airport','title':"Tartu",'id':'windfinder_tartu'},
 				{'href':'mustvee_peipus&wf_cmp=2','title':"Mustvee Peipsi",'id':'windfinder_mustvee'}
+				]},
+				{'name': 'GisMeteo.ru','url':'http://www.gismeteo.ru/towns/','list': [
+				{'href':'26242.htm','title':"Tartu",'id':'gismeteo_tartu'},
+				{'href':'26231.htm','title':"P&auml;rnu",'id':'gismeteo_parnu'},
+				{'href':'26038.htm','title':"Tallinn",'id':'gismeteo_tallinn'}
 				]},
 				{'name': 'Muud','url':'http://','list':[
 				{'href':'d.naerata.eu/','title':"Naerata.eu",'id':'naerata'},

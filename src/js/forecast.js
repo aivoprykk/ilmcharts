@@ -296,7 +296,7 @@
 				d = (wgd.getTime()) + my.getOffsetSec() + 1800000,
 				t = 0, i = 0, j = wg.hours.length;
 				//console.log("wg time " + wgd + " " + my.addDst);
-				/*
+				
 				for (; i < j; ++i) {
 					if (wg.hours[i] > 72) { break; }
 					//console.log("wg thing " + wg.hours[i] + " " + new Date(d));
@@ -319,7 +319,7 @@
 				//temp_options.series.push(wg_rain_series);
 				temp_options.series.push(wg_press_series);
 				temp_options.series.push(wg_temp_series);
-				*/
+				
 				var i1, i2, i3;
 				if(my.chartorder.indexOf("wind_speed")>=0) {
 					my.charts[3] = new Highcharts.Chart(wind_speed_options);

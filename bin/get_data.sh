@@ -9,7 +9,7 @@ station=""
 max=200
 dir=`dirname $0`
 echo "$dir" | grep -q '^/' || dir=`pwd`/$dir
-path=`echo "$dir"|sed -e 's/\/\?bin//'`
+path=`echo "$dir"|sed -e 's/\/\?bin\/\?$//'`
 [ x"$path" = x"" ] && path="." || path=$path
 [ -d $path ] || { echo $path not found; exit; }
 while [ $# -ge 1 ]; do
@@ -98,6 +98,12 @@ if(/update_next/) {
 s/^.*update_next":"([^\"]+)".*$/$1/;
 if(/^\w+, (\d{2}) (\w+) (\d{4}) (\d{2}):(\d{2}):(\d{2})/){
 $year=$3;$month=$months{$2};$mday=$1;$hour=$4;$min=$5;$sec=$6;
+$gmtime=timegm($sec,$min,$hour,$mday,$month-1,$year-1900);
+print $gmtime - $time;
+exit 0;
+}
+elsif(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/){
+$year=$1;$month=$2;$mday=$3;$hour=$4;$min=$5;$sec=$6;
 $gmtime=timegm($sec,$min,$hour,$mday,$month-1,$year-1900);
 print $gmtime - $time;
 exit 0;

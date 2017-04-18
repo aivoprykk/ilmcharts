@@ -94,6 +94,16 @@
 								if(c[4]!=="") obj.avg_humid_series.data.push([d, my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
 								if(c[5]!=="") obj.avg_dp_series.data.push([d, my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5])]);
 							}
+							else if(/arhiiv/.test(my.curplace)){
+								//c[4] = (!c[4] || c[4] < -49) ? null : c[4];
+								obj.avg_ws_series.data.push([d, my.ntof2p((e) ? my.getavg([c[6], e[6]]) : c[6])]);
+								obj.max_ws_series.data.push([d, my.ntof2p((e) ? my.getmax([c[7], e[7]]) : c[7])]);
+								obj.avg_wd_series.data.push([d, my.ntof2p((e) ? my.wdavg([c[5], e[5]]) : c[5])]);
+								if(c[2]!=="") obj.avg_temp_series.data.push([d,my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2])]);
+								if(c[4]!=="") obj.avg_dp_series.data.push([d, my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4])]);
+								if(c[8]!=="") obj.avg_humid_series.data.push([d, my.ntof2p((e) ? my.getavg([c[8], e[8]]) : c[8])]);
+								if(c[9]!=="") obj.avg_press_series.data.push([d, my.ntof2p((e) ? my.getavg([c[9], e[9]]) : c[9])]);
+							}
 						}
 					}
 				}
@@ -468,6 +478,7 @@
 					/emu/.test(my.curplace) ? 'energia.emu.ee' :
 					/^ut/.test(my.curplace) ? 'meteo.physic.ut.ee' :
 					/zoig/.test(my.curplace) ? 'ilm.zoig.ee' :
+					/arhiiv/.test(my.curplace) ? 'ilm.majasa.ee' :
 					/mnt/.test(my.curplace) ? 'balticroads.net': '';
 			$('#curmeta').html(
 				'<a href="http://' + host + my.curplaces[my.curplace].link  +
@@ -496,6 +507,10 @@
     	place=place.replace(/zoig_/,'');
 		return "zoig_data/"+place+"/"+setTxtFileName(d);
     };
+    var setMyFileName = function (d,place) {
+    	place=place.replace(/arhiiv_/,'');
+		return "arhiiv/"+place+"/"+setTxtFileName(d);
+    };
     var setEmhiFileName = function (d,place) {
     	place=place.replace(/emhi_/,'');
 		return "emhi_data/"+place+"/"+setTxtFileName(d);
@@ -522,6 +537,10 @@
 				ajaxopt={};
 				my.dataurl = setUtFileName(d, my.curplace);
 			}
+			else if(/arhiiv/.test(my.curplace)) {
+				ajaxopt={};
+				my.dataurl = setMyFileName(d, my.curplace);
+			}
 			else if(/zoig/.test(my.curplace)) {
 				ajaxopt={};
 				my.dataurl = setZoigFileName(d, my.curplace);
@@ -540,7 +559,7 @@
 					json_full += json;
 				}
 				var x = new Date(now).getDate() !== new Date(d).getDate();
-				if(/(emhi|emu|mnt|zoig|ut_)/.test(my.curplace) && x) {
+				if(/(emhi|emu|mnt|zoig|arhiiv|ut_)/.test(my.curplace) && x) {
 					d += (24 * 3600 * 1000);
 					cb(d);
 				} else {
