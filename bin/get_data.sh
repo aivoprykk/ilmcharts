@@ -112,6 +112,21 @@ print 0;
 exit 0;
 }'
 
+empgfilter='$ltime=$time=time;
+if(/forecast":\{"tabular/) {
+s/^.*forecast":\{"tabular":\{"time":\[\{".attributes":\{"from":"([^\"]+)".*$/$1/;
+if(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/){
+$year=$1;$month=$2;$mday=$3;$hour=$4;$min=$5;$sec=$6;
+$ltime=timelocal($sec,$min,$hour,$mday,$month-1,$year-1900);
+print (($ltime + (3600*6)) - $time);
+exit 0;
+}
+print 0;
+exit 0;
+}'
+
+
+
 xtime () {
 	local dir=$1
 	local file=$2
@@ -137,7 +152,7 @@ IFS=:
 set $j
 place=$1
 title=$2
-names="wg:$3 yr:$4 emhi:$5 mnt:$6 zoig:$7 emu:$8";
+names="wg:$3 yr:$4 emhi:$5 mnt:$6 zoig:${7} emu:${8} ut:${9} my:${10} empg:${11}";
 IFS=' '
 
 (
@@ -165,6 +180,12 @@ yr)
 	out=yr_data/$place
 	file=forecast_hour_by_hour.xml
 	;;
+empg)
+  url='http://www.ilmateenistus.ee/wp-content/themes/emhi2013/meteogram.php?locationId='$value'&lang=et'
+  out=empg_data/$place
+  file=empg_forecast.json
+  ;;
+
 *)
 	continue;
 	;;

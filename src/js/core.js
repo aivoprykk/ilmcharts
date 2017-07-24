@@ -6,7 +6,8 @@ var ilm = (function (my) {
 			id : 'ilmchartsstore01',
 			datamode : opt.datamode||'emu',
 			timeframe :  opt.timeframe||24*3600*1000,
-			fcplace : opt.fcplace||'tabivere',
+			fcsources : opt.fcsources || ["yr", "wg", "em"],
+			fcplace : opt.fcplace||'aksi',
 			curplace : opt.curplace||'emu',
 			chartorder : opt.chartorder || ["temp","wind_speed","wind_dir"],
 			showgroup : opt.showgroup || "",
@@ -65,22 +66,30 @@ var ilm = (function (my) {
 		this.dataurl = "/cgi-bin/cpp/ilm/image.cgi?t=json";
 		this.digits = 1;
 		this.graphs = ["temp","wind_speed","wind_dir"];
+		this.fcsources = this.state.attr.fcsources;
+		this.fcsources_available = ["yr", "wg", "em"];
+		this.fcsourcesdata = {
+			"yr":{"name":"Yr","url":"http://www.yr.no","datadir":"yr_data","fc_file":"forecast_hour_by_hour.xml"},
+			"wg":{"name":"WindGuru","url":"http://www.windguru.cz","datadir":"wg_data","fc_file":"windguru_forecast.json"},
+			"em":{"name":"EMHI","url":"http://www.ilmateenistus.ee","datadir":"empg_data","fc_file":"empg_forecast.json"}
+		};
 		this.fcplaces = {
 			//"tartu":{id:"tartu",name:'Tartu',wglink:"266923",yrlink:"Tartu",group:"jarv",bind:"tartu"},
-			"tabivere":{id:"tabivere",name:'Saadjärv',wglink:"266923",yrlink:"Jõgevamaa/Tabivere~587488",group:"jarv",bind:"emu"},
-			"tamme":{id:"tamme",name:'Võrtsjärv',"wglink":192609,yrlink:"Tartumaa/Tamme",group:"jarv",bind:"mnt_tamme"},
+			"aksi":{id:"aksi",name:'Saadjärv Äksi',wglink:"266923",yrlink:"Tartumaa/Äksi",group:"jarv",bind:"emu"},
+			"tamme":{id:"tamme",name:'Võrtsjärv Tamme',"wglink":192609,yrlink:"Tartumaa/Tamme",group:"jarv",bind:"mnt_tamme"},
 			//"nina":{id:"nina",name:'Peipsi Nina',"wglink":20401,yrlink:"Tartumaa/Nina",group:"jarv"},
 			"rapina":{id:"rapina",name:'Peipsi Räpina',"wglink":183648,yrlink:"Põlvamaa/Võõpsu",group:"jarv",bind:"mnt_rapina"},
-			"pirita":{id:"pirita",name:'Pirita',"wglink":125320,yrlink:"Harjumaa/Pirita~798565",group:"meri",bind:"emhi_pirita"},
-			"rohuneeme":{id:"rohuneeme",name:'Püünsi',"wglink":70524,yrlink:"Harjumaa/Rohuneeme",group:"meri",bind:"emhi_rohuneeme"},
+			"pirita":{id:"pirita",name:'Tallinn Pirita',"wglink":125320,yrlink:"Harjumaa/Pirita~798565",group:"meri",bind:"emhi_pirita"},
+			"rohuneeme":{id:"rohuneeme",name:'Tallinn Püünsi',"wglink":70524,yrlink:"Harjumaa/Rohuneeme",group:"meri",bind:"emhi_rohuneeme"},
 			"topu":{id:"topu",name:'Topu',"wglink":18713,yrlink:"Läänemaa/Topu",group:"meri",bind:"emhi_topu"},
 			"parnu":{id:"parnu",name:'Pärnu',"wglink":92781,yrlink:"Pärnumaa/Pärnu",group:"meri",bind:"emhi_parnu"},
 			"haademeeste":{id:"haademeeste",name:'Häädemeeste',"wglink":246420,yrlink:"Pärnumaa/Häädemeeste",group:"meri",bind:"emhi_haademeeste"},
-			"ristna":{id:"ristna",name:'Ristna',"wglink":96592,yrlink:"Hiiumaa/Ristna",group:"meri",bind:"emhi_ristna"}
+			"sorve":{id:"sorve",name:'Saaremaa Sõrve',"wglink":108163,yrlink:"Saaremaa/Sõrve_Tuletorn",group:"meri",bind:"emhi_sorve"},
+			"ristna":{id:"ristna",name:'Hiiumaa Ristna',"wglink":96592,yrlink:"Hiiumaa/Ristna",group:"meri",bind:"emhi_ristna"}
 		};
 		this.fcplace = this.state.attr.fcplace;
 		this.curplaces = {
-			"emu":{id:"emu",name:"Tartu EMU",group:"jarv",link:'/weather',bind:"tabivere"},
+			"emu":{id:"emu",name:"Tartu EMU",group:"jarv",link:'/weather',bind:"aksi"},
 			"ut_tartu":{id:"ut_tartu",name:"Tartu UT",group:"jarv",link:'',bind:"tartu"},
 			"arhiiv_vortsjarv_tamme":{id:"arhiiv_vortsjarv_tamme",name:"Võrtsjärv Tamme",group:"jarv",link:'',bind:"tamme"},
 			/*"zoig_vortsjarv":{id:"zoig_vortsjarv",name:"Tamme Zoig",group:"jarv",link:'/vortsjarv',bind:"tamme"},*/
@@ -96,6 +105,7 @@ var ilm = (function (my) {
 			"emhi_topu":{id:"emhi_topu",name:"Haapsalu EMHI",group:"meri",link:'/meri/vaatlusandmed/',bind:"topu"},
 			"emhi_parnu":{id:"emhi_parnu",name:"Pärnu EMHI",group:"meri",link:'/meri/vaatlusandmed/', bind:"parnu"},
 			"emhi_haademeeste":{id:"emhi_haademeeste",name:'Häädemeeste EMHI',group:"meri",link:'/meri/vaatlusandmed/',bind:"haademeeste"},
+			"emhi_sorve":{id:"emhi_sorve",name:"Sõrve EMHI",group:"meri",link:'/meri/vaatlusandmed/',bind:"sorve"},
 			"emhi_ristna":{id:"emhi_ristna",name:"Ristna EMHI",group:"meri",link:'/meri/vaatlusandmed/',bind:"ristna"}
 		};
 		this.timezone = this.state.attr.timezone;
@@ -391,7 +401,7 @@ var ilm = (function (my) {
 			place = this[name] || this.fcplace,
 			j = {}, i,reload="";
 			if(name==='fcplace' && d){
-				if(d==='tartu'||d==='saadjarv') d='tabivere';
+				if(d==='tartu'||d==='saadjarv') d='aksi';
 				else if(d==='vortsjarv') d='tamme';
 				else if(d==='haapsalu') d='topu';
 				else if(d==='tallinn') d='pirita';

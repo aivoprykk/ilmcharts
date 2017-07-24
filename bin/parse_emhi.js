@@ -60,8 +60,11 @@ fs.readFile(path, function(err, data) {
 			child = $(this);
 			text = child.text().trim();
 			ret.push(text.replace(/,/g,"."));
-			if(a===2 && text) {
-				if(/parnu/.test(path)) ret.push("");
+			if(a===2) {
+				if(/parnu/.test(path)) ret.push(""); //mootjal ei ole ohutemperatuuri
+				if(text) test = true;
+			}
+			else if(a===3 && text && !test) {
 				test = true;
 			}
 		});
