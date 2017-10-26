@@ -4,6 +4,15 @@ body {
 	margin: 0;
 	padding: 0;
 }
+.sans {
+	font-family: "Helvetica Neue", "Segoe UI", Helvetica, "Ubuntu Light", Arial, sans-serif;
+	line-height: 1.5em;
+}
+
+.serif {
+	font-family: Georgia, "MS Serif", "New York", Palatino, serif;
+	line-height:1.3em;
+}
 .ilm-sisu {
 	margin 0 1em;
 	padding: 0.5em;
@@ -11,6 +20,9 @@ body {
 	right: 0;
 	left: 0;
 	top: inherit;
+}
+.nopadding {
+	padding:0;
 }
 .ilm-pealkiri {
 font-size: 14px;
@@ -35,6 +47,11 @@ padding-top: 0.3em;
 width: 49%;
 float: left;
 }*/
+.meta {
+	font-size:80%;
+	color: lightgray;
+	margin-left: 5px;
+}
 .ilm-meta {
 margin-left: 50px;
 font-size: 60%;
@@ -45,13 +62,17 @@ color: lightgray;
 }
 .chart-frame1, .chart-frame2 {
 max-width: 750px;
-padding: 0.2em;
+padding-left: 3px;
+padding-bottom:3px;
 }
 .chart-frame1 {
 height: 280px;
 }
 .chart-frame2 {
 height: 230px;
+}
+.chartbox .chart-frame1, .chartbox .chart-frame2 {
+    height: 200px;
 }
 .ilm-backgr {
 position: fixed;
@@ -209,4 +230,116 @@ margin-left: 5px;
 .curmenu, .fcmenu {
 top: 80%;
 left: 50%;
+}
+.deferred {
+	color: #bababa;
+}
+.good {
+	color:rgb(27, 173, 96);
+}
+.hard {
+	color:red;
+}
+.extreme {
+	color:red;
+}
+.chilli {
+	color:blue;
+}
+.mapbox {
+	height:400px;
+	width:100%;
+}
+.two-lg {
+	width:50%;
+	float:left;
+}
+@media (max-width: 1400px) {
+.two-lg {
+	width:100%;
+	floa:none;
+}
+}
+@media (max-width: 992px) {
+.hide-lg {
+	display: none;
+	visibility: hidden;
+}
+.two-lg {
+	width:100%;
+	float:none;
+}
+}
+@media (min-width: 930px) and (max-width: 1150px) {
+.hide-edge-lg {
+	display: none;
+	visibility: hidden;
+}
+}
+
+@media (max-width: 768px) {
+.hide-xs {
+	display: none;
+	visibility: hidden;
+}
+}
+@media (min-width: 768px) and (max-width: 992px) {
+.hide-sm {
+	display: none;
+	visibility: hidden;
+}
+}
+
+@media (max-width: 400px) {
+.hide-edge-xs {
+	display: none;
+	visibility: hidden;
+}
+.mapbox {
+	height:300px;
+}
+}
+
+@media (max-width: 550px) {
+.hide-edge {
+	display: none;
+	visibility: hidden;
+}
+
+/*.chart-frame1, .chart-frame2 {
+    min-width: 450px;
+}*/
+}
+
+@media (min-width: 768px) and (max-width: 930px) {
+.hide-edge {
+	display: none;
+	visibility: hidden;
+}
+/*.chart-frame1, .chart-frame2 {
+    min-width: 450px;
+}*/
+}
+.data-menu-row:hover {
+	cursor: pointer;
+}
+.night {
+	background-color: #eee;
+}
+.grid-cell-title {
+	display:none;
+	visibility: hidden;
+}
+.infowindow {
+	font-size: 80%;
+}
+.infowindow .grid-cell-title {
+	display:inline-block;
+	visibility: visible;
+}
+.infowindow .grid-em {
+	font-weight: 300;
+}
+.chart-frame1 .table {
+	margin-bottom: 0;
 }

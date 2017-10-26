@@ -9,6 +9,7 @@
 (
 cd $dir;
 rsync -a -e "ssh -i $key" root@$host:$PWD/public/*_data public/
-rsync -a$dry -e "ssh -i $key" public/*_data root@$host:$PWD/public/
+rsync -a -e "ssh -i $key" root@$host:$PWD/public/arhiiv public/
+rsync -a$dry -e "ssh -i $key" public/*_data public/arhiiv root@$host:$PWD/public/
 bash bin/manage_old_data.sh
 );

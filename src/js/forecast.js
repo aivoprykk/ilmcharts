@@ -12,7 +12,7 @@
 		lang: {
 			months: my.months,
 			weekdays: my.weekdays
-		}
+		},
 	});
 
 	var wind_speed_options = $.extend(true, {}, my.chartoptions, {
@@ -152,6 +152,10 @@
 				id: 'nowline'
 			});
 	}
+	function addNight(chart, from, to) {
+		if(chart && chart.xAxis!==undefined) chart.xAxis[0].addPlotBand({color:'#eee',from:from,to:to});
+	}
+
 	function removePlotLine(chart) {
 		if(chart.xAxis!==undefined)
 			chart.xAxis[0].removePlotLine('nowline');
@@ -238,224 +242,355 @@
 	};
 
 	var get = {
-		yr: function(da, place) {
-			place = (place || my.fcplace || 'tabivere') + "/";
-			var fc = my.fcsourcesdata[da];
-			var idx = my.fcsources.indexOf(da);
-			$.ajax({
+		now:0,
+		dataseries:{},
+		datalen:[0,0],
+		do: function(place, fcid, fillfn) {
+			get.now = new Date().getTime();
+			place = (place || my.fcplace || 'tabivere');
+			var self = get;
+			if(ajax_done===0) {
+				get.datalen = [0,0];
+			}
+			if(my.samplemode=='table' && (my.fcsource!=fcid)) {
+				if(++ajax_done===fcsources.length) get.done();
+				return false;
+			}
+			var fc = my.fcsourcesdata[fcid];
+			var fcidx = my.fcsources.indexOf(fcid);
+			var fcfile = fc.fc_file;
+			if(my.sampletype=='long' && /hour_by_hour/.test(fcfile)) {
+				fcfile = 'forecast.xml';
+			}
+			var ajaxopt = {
 				type: "get",
-				url: fc.datadir + "/" + place  + "/" + fc.fc_file,
-		}).done(function (xml) {
-			var _ws_series = $.extend(true, {}, d_series, {name: fc.name+" wind", color: colors.wind[idx], lineWidth: 2});
-			var _wd_series = $.extend(true, {}, d_series, {name: fc.name+" dir", color: colors.dir[idx], lineWidth: 2});
-			var _temp_series = $.extend(true, {}, temp_series, {name: fc.name+" temperatuur", color: colors.temp[idx], lineWidth: 2});
-			var _press_series = $.extend(true, {}, press_series, {name: fc.name+" rõhk", color: colors.press[idx], lineWidth: 1});
-			var _rain_series = $.extend(true, {}, rain_series, {name: fc.name+" sademed", color: colors.rain[idx], type: 'column', lineWidth: 0});
-			
-			var $xml = $(xml);
-			var d;			
-			var yr_get_time = function(xml,name) {
-				return (function (d) {
-					return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
-				})((xml.find ? xml.find(name).text() : xml.getAttribute("from")).match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/));
+				url: fc.datadir + "/" + place  + "/" + fcfile + '?' + get.now,
 			};
+			if(fc.datatype==='json') {
+				ajaxopt.dataType = "jsonp";
+				ajaxopt.jsonp =  "callback";
+				ajaxopt.jsonpCallback = fcid==='wg' ? fcid+"_data" : "callback";
+			}
+			$.ajax(ajaxopt).always(function (data,type) {
+				if(!/error|timeout/.test(type)){
+					get.dataseries = get.dataseries || {};
+					get.dataseries[fcid] = get.dataseries[fcid] || {};
+					get.dataseries[fcid][place] = {};
+					var dt = get.dataseries[fcid][place];
+					dt.ws_series = $.extend(true, {}, d_series, {name: fc.name+" wind", color: colors.wind[fcidx], lineWidth: 2});
+					dt.wd_series = $.extend(true, {}, d_series, {name: fc.name+" dir", color: colors.dir[fcidx], lineWidth: 2});
+					dt.wg_series = $.extend(true, {}, d_series, {name: fc.name+" gust",color: colors.gust[fcidx], lineWidth: 2, dashStyle: 'shortdot'});
+					dt.temp_series = $.extend(true, {}, temp_series, {name: fc.name+" temperatuur", color: colors.temp[fcidx], lineWidth: 2});
+					dt.press_series = $.extend(true, {}, press_series, {name: fc.name+" rõhk", color: colors.press[fcidx], lineWidth: 1});
+					dt.rain_series = $.extend(true, {}, rain_series, {name: fc.name+" sademed", color: colors.rain[fcidx], type: 'column', lineWidth: 0});
+					dt.humid_series = $.extend(true, {}, humid_series, {name: fc.name+" niiskus", color: colors.humid[fcidx], lineWidth: 1});
+					
+					if(fillfn) fillfn(data, dt, fcid);
 
-			$xml.find('tabular time').each(function (i, times) {
-				d = (yr_get_time(times,"from").getTime()) + 1800000;
-				_ws_series.data.push([d, my.ntof2p($(times).find("windSpeed").attr("mps"))]);
-				_wd_series.data.push([d, my.ntof2p($(times).find("windDirection").attr("deg"))]);
-				_temp_series.data.push([d, my.ntof2p($(times).find("temperature").attr("value"))]);
-				_press_series.data.push([d, my.ntof2p($(times).find("pressure").attr("value"))]);
-				_rain_series.data.push([d, my.ntof2p($(times).find("precipitation").attr("maxvalue"))]);
-			});
-			wind_speed_options.series.push(_ws_series);
-			wind_dir_options.series.push(_wd_series);
-			temp_options.series.push(_rain_series);
-			temp_options.series.push(_press_series);
-			temp_options.series.push(_temp_series);
-			$('#yrmeta').html(
-				'<a href="' +
-				fc.url+'/place/Estonia/'+my.fcplaces[my.fcplace].yrlink+'/hour_by_hour.html' + 
-				'" onclick="window.open(this.href);return false;">Yr.no</a> andmed viimati uuendatud: '	+ 
-				my.getTimeStr(yr_get_time($xml,'lastupdate')) +
-				', Järgmine uuendus: ' +
-				my.getTimeStr(yr_get_time($xml,'nextupdate'))
-				);
-			last_time = yr_get_time($xml,'lastupdate');
-			if(++ajax_done===fcsources.length) get.done();
-		});
-	},
-	wg: function(da, place) {
-		place = (place || my.fcplace || 'tabivere');			
-		var fc = my.fcsourcesdata[da];
-		var idx = my.fcsources.indexOf(da);
-		$.ajax({
-			type: "get",
-			url: fc.datadir + "/" + place  + "/" + fc.fc_file,
-			dataType: "jsonp",
-			jsonp: "callback",
-			jsonpCallback: "wg_data"
-		}).done(function (json) {
-			var _ws_series = $.extend(true, {}, d_series, {name: fc.name+" tuul", color: colors.wind[idx], lineWidth: 2});
-			var _wd_series = $.extend(true, {}, d_series, {name: fc.name+" dir",color: colors.dir[idx], lineWidth: 2});
-			var _wg_series = $.extend(true, {}, d_series, {name: fc.name+" gust",color: colors.gust[idx], lineWidth: 2, dashStyle: 'shortdot'});
-			var _temp_series = $.extend(true, {}, temp_series, {name: fc.name+" temperatuur", color:colors.temp[idx], lineWidth: 2});
-			var _press_series = $.extend(true, {}, press_series, {name: fc.name+" rõhk", color: colors.press[idx], lineWidth: 1});
-			var _humid_series = $.extend(true, {}, humid_series, {name: fc.name+" niiskus", color: colors.humid[idx], lineWidth: 1});
-
-				var wg = json.fcst.fcst[3];
-				var wg_get_time = function(xd) {
-					return (function (d) {
-						return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
-					})(xd.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/));
-				};
-				var d = (wg_get_time(wg.initdate).getTime()) + my.getOffsetSec() + 1800000,
-				t = 0, i = 0, j = wg.hours.length;
-				
-				for (; i < j; ++i) {
-					if (wg.hours[i] > 72) { break; }
-					t = d + (wg.hours[i] * 3600 * 1000);
-					_ws_series.data.push([t, my.conv_knot2ms(wg.WINDSPD[i])]);
-					_wg_series.data.push([t, my.conv_knot2ms(wg.GUST[i])]);
-					_wd_series.data.push([t, my.ntof2p(wg.WINDDIR[i])]);
-					_temp_series.data.push([t, my.ntof2p(wg.TMP[i])]);
-					_press_series.data.push([t, my.ntof2p(wg.SLP[i])]);
-					_humid_series.data.push([t, my.ntof2p(wg.RH[i])]);
+					if(my.samplemode=='graph') {
+						if(dt.ws_series.data.length) wind_speed_options.series.push(dt.ws_series);
+						if(dt.wg_series.data.length) wind_speed_options.series.push(dt.wg_series);
+						if(dt.wd_series.data.length) wind_dir_options.series.push(dt.wd_series);
+						if(dt.humid_series.data.length) temp_options.series.push(dt.humid_series);
+						if(dt.rain_series.data.length) temp_options.series.push(dt.rain_series);
+						if(dt.press_series.data.length) temp_options.series.push(dt.press_series);
+						if(dt.temp_series.data.length) temp_options.series.push(dt.temp_series);
+					} 
+					var metadata = get.fclink(fcid,fc.url,my.fcplaces[place][fcid+"link"],fc.name,dt.last,dt.next);
+					get.dometa(fcid, metadata);
 				}
-				// windguru series: 6 for now
-				wind_speed_options.series.push(_wg_series);
-				wind_speed_options.series.push(_ws_series);
-				
-				wind_dir_options.series.push(_wd_series);
-				
-				temp_options.series.push(_humid_series);
-				temp_options.series.push(_press_series);
-				temp_options.series.push(_temp_series);
-
-				$('#wgmeta').html(
-					'<a href="' +
-					fc.url+"/ee/?go=1&amp;sc="+my.fcplaces[my.fcplace].wglink+"&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22" +
-					'" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: ' + 
-					my.getTimeStr(new Date(wg.update_last.replace(/\+.+/,"")).getTime()+my.getOffsetSec()) +
-					', Järgmine uuendus: ' + 
-					my.getTimeStr(new Date(wg.update_next.replace(/\+.+/,"")).getTime()+my.getOffsetSec())
-					);
-				last_time = (wg_get_time(wg.initdate).getTime()) + my.getOffsetSec();
 				if(++ajax_done===fcsources.length) get.done();
 			});
-	},
-	em: function(da, place) {
-		place = (place || my.fcplace || 'tabivere');
-		var fc = my.fcsourcesdata[da];
-		var idx = my.fcsources.indexOf(da);
-		$.ajax({
-			type: "get",
-			url: fc.datadir + "/" + place  + "/" + fc.fc_file,
-			dataType: "jsonp",
-			jsonp: "callback",
-			jsonpCallback: "callback"
-		}).done(function (json) {
-			var _ws_series = $.extend(true, {}, d_series, {name: fc.name+" tuul",color:colors.wind[idx], lineWidth: 2});
-			var _wd_series = $.extend(true, {}, d_series, {name: fc.name+" dir",color:colors.dir[idx], lineWidth: 2});
-			var _temp_series = $.extend(true, {}, temp_series, {name: fc.name+" temperatuur", color: colors.temp[idx], lineWidth: 2});
-			var _press_series = $.extend(true, {}, press_series, {name: fc.name+" rõhk", color: colors.press[idx], lineWidth: 1});
-			var _rain_series = $.extend(true, {}, rain_series, {name: fc.name+" sademed", color: colors.rain[idx], lineWidth: 1});
+		},
+		fclink: function(fc,url,placeid,placename,last,next) {
+			var t = '<a onclick="window.open(this.href);return false;" href="<%=url%>"><%=title%><%if(last){%> <%=last%><%}if(next){%>, järgmine <%=next%><%}%></a>';
+			var meta = "";
+			if(my.fcsources.indexOf(fc)<0||!url||!placeid||!placename) {
+				var link = {},ll=my.lingid.JSON.list,lm={},ln={},metadata="";
+				for(var i=0,j=ll.length;i<j;++i){
+					if(ll[i].name == 'Ilmalingid') {
+						lm=ll[i].list;
+						for(var k=0,l=lm.length;k<l;++k){
+							if(lm[k].name == fc) {
+								ln = lm[k].list;
+								for(var m=0,n=ln.length;m<n;++m){
+									var x = new RegExp('.+_('+my.fcplace+')');
+									if(x.test(ln[m].id)) {
+										url = lm[k].url;
+										placeid = ln[m].href;
+										placename = lm[k].name;
+										break;
+									}
+								}
+								break;
 
-			var em = json.forecast.tabular;
-			var em_get_time = function(xd) {
+							}
+						}
+						break;
+					}
+				}
+			}			
+			var fcurl = fc==='em' ? url + '/asukoha-prognoos/?id=' + placeid : 
+			fc==='yr' ? url+'/place/Estonia/'+placeid+'/'+(my.sampletype=='long' ? 'long' :'hour_by_hour')+'.html' :
+			fc==='wg' ? url + "/" + placeid : url + placeid ;
+
+			return _.template(t, {title:placename,url:fcurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
+		},
+		do_em: function(data,dt,fcid){
+			var fcmax=get.getmax();
+			var  offset = my.getOffsetSec(), em = data.forecast.tabular,
+			em_get_time = function(xd) {
 				return (function (d) {
 					return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
 				})(xd.match(/(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2})/));
-			};
-			var t = 0, i = 0, j = em.time.length;
+			}, i = 0, j = em.time.length, k = j-1, initdate = 0;
 
 			for (; i < j; ++i) {
-				t = (em_get_time(em.time[i]["@attributes"].from).getTime())+1800000;
-				_ws_series.data.push([t, my.ntof2p(em.time[i].windSpeed["@attributes"].mps)]);
-				_wd_series.data.push([t, my.ntof2p(em.time[i].windDirection["@attributes"].deg)]);
-				_temp_series.data.push([t, my.ntof2p(em.time[i].temperature["@attributes"].value)]);
-				_press_series.data.push([t, my.ntof2p(em.time[i].pressure["@attributes"].value)]);
-				_rain_series.data.push([t, my.ntof2p(em.time[i].precipitation["@attributes"].value)]);
+				var from=em_get_time(em.time[i]["@attributes"].from).getTime(), to=em_get_time(em.time[i]["@attributes"].to).getTime(),
+				d = from + ((to-from)/2);
+				if(i===0) {
+					initdate = new Date(d);
+				}
+				if(i===0||i===k||(fcmax&&d>fcmax)) get.update_len(d,i===0?1:i===k||(fcmax&&d>fcmax)?2:0);
+				if (fcmax&&d>fcmax) { break; }
+				dt.ws_series.data.push([d, my.ntof2p(em.time[i].windSpeed["@attributes"].mps)]);
+				dt.wd_series.data.push([d, my.ntof2p(em.time[i].windDirection["@attributes"].deg)]);
+				dt.temp_series.data.push([d, my.ntof2p(em.time[i].temperature["@attributes"].value)]);
+				dt.press_series.data.push([d, my.ntof2p(em.time[i].pressure["@attributes"].value)]);
+				dt.rain_series.data.push([d, my.ntof2p(em.time[i].precipitation["@attributes"].value)]);
 			}
 
-			wind_speed_options.series.push(_ws_series);
+			var from=initdate.getTime();
+			dt.last = from;
+			dt.next = from+6*3600000;
+		},
+		getmax: function(hours){
+			if(my.sampletype=='long') return 0;
+			hours = hours||my.fcmax||72;
+			return (get.now||new Date().getTime())+hours*3600000;
+		},
+		do_wg: function(data,dt,fcid){
+			var fcmax=get.getmax();
+			var wg = data.fcst.fcst[3], 
+			wg_get_time = function(xd) {
+				return (function (d) {
+					return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
+				})(xd.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/));
+			},
+			offset = data.fcst.utc_offset*3600000, d = (wg_get_time(wg.initdate).getTime()) + offset; //+ 1800000,
+			t = 0, i = 0, j = wg.hours.length, k = j-1;
 
-			wind_dir_options.series.push(_wd_series);
+			for (; i < j; ++i) {
+				t = d + (wg.hours[i] * 3600000);
+				if(i===0||i===k||(fcmax&&t>fcmax)) get.update_len(t,i===0?1:i===k||(fcmax&&t>fcmax)?2:0);
+				if (fcmax&&t>fcmax) { break; }
+				dt.ws_series.data.push([t, my.conv_knot2ms(wg.WINDSPD[i])]);
+				dt.wg_series.data.push([t, my.conv_knot2ms(wg.GUST[i])]);
+				dt.wd_series.data.push([t, my.ntof2p(wg.WINDDIR[i])]);
+				dt.temp_series.data.push([t, my.ntof2p(wg.TMP[i])]);
+				dt.press_series.data.push([t, my.ntof2p(wg.SLP[i])]);
+				dt.humid_series.data.push([t, my.ntof2p(wg.RH[i])]);
+				if(my.samplemode!=='graph') dt.rain_series.data.push([t, my.ntof2p(wg.PCPT[i])]);
+			}
 
-			temp_options.series.push(_rain_series);
-			temp_options.series.push(_press_series);
-			temp_options.series.push(_temp_series);
-			if(++ajax_done===fcsources.length) get.done();
-		});
-	},	
-	done: function() {
-		ajax_done = 0;
-		var i1, i2, i3;
-		if(my.chartorder.indexOf("wind_speed")>=0) {
-			my.charts[3] = new Highcharts.Chart(wind_speed_options);
-			i1 = intPlotLine(my.charts[3], i1);
-		}
-		if(my.chartorder.indexOf("wind_dir")>=0) {
-			my.charts[4] = new Highcharts.Chart(wind_dir_options);
-			i2 = intPlotLine(my.charts[4], i2);
-		}
-		if(my.chartorder.indexOf("temp")>=0) {
-			my.charts[5] = new Highcharts.Chart(temp_options);
-			i3 = intPlotLine(my.charts[5], i3);
-		}
-		$("#fctitle").html(
-			'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(last_time)
-			).show();
-		var list = _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {
-			return '<li><a href="#" name="'+a.id+'" class="fcplace-select'+(a.id===my.fcplace?' active':'')+'">'+a.name+'</a></li>';
-		}}).join("");
-		$("#fcmenu").html(list);
-		$("#fcsel").show();
-		$(".fcplace-select").on("click",function(){
-			w.ilm.setEstPlace($(this).attr('name'));
-					//w.ilm.reloadest();
+			dt.last = new Date(wg.update_last.replace(/-/g,"/").replace(/\+.+/,"")).getTime()+offset;
+			dt.next = new Date(wg.update_next.replace(/-/g,"/").replace(/\+.+/,"")).getTime()+offset;
+			last_time = (wg_get_time(wg.initdate).getTime()) + offset;
+		},
+		update_len: function(date, i){
+			if(i==1) {
+				if(date<get.datalen[0] || !get.datalen[0]) get.datalen[0] = date;
+			}
+			else if(i==2) {
+				if(date>get.datalen[1] || !get.datalen[1])get.datalen[1] = date;
+			}
+		},
+		do_yr: function(data,dt,fcid){
+			var fcmax=get.getmax();
+			var $xml = $(data), d, 
+			yr_get_time = function(xml,name) {
+				var attr = xml.find ? xml.find(name).text() : xml.getAttribute(name);
+				return (function (d) {
+					return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
+				})((attr ? attr : xml.getAttribute("from")).match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/));
+			};
+			var nodes = $xml.find('tabular time'),i = 0, j=nodes.length, k = j-1, times;
+			for (; i < j; ++i) {
+			//nodes.each(function (i, times) {
+				times = nodes[i];
+				var from=yr_get_time(times,"from").getTime(), to=yr_get_time(times,"to").getTime();
+				d = from + ((to-from)/2);
+				if(i===0||i===k||(fcmax&&d>fcmax)) get.update_len(d,i===0?1:i===k||(fcmax&&d>fcmax)?2:0);
+				if (fcmax&&d>fcmax) { break; }
+				dt.ws_series.data.push([d, my.ntof2p($(times).find("windSpeed").attr("mps"))]);
+				dt.wd_series.data.push([d, my.ntof2p($(times).find("windDirection").attr("deg"))]);
+				dt.temp_series.data.push([d, my.ntof2p($(times).find("temperature").attr("value"))]);
+				dt.press_series.data.push([d, my.ntof2p($(times).find("pressure").attr("value"))]);
+				dt.rain_series.data.push([d, my.ntof2p($(times).find("precipitation").attr("value"))]);
+			//});
+			}
+
+			dt.last = yr_get_time($xml,'lastupdate').getTime();
+			dt.next = yr_get_time($xml,'nextupdate').getTime();
+			last_time = dt.last;
+		},
+		dometa: function(box,data){
+			var cnt = $('#'+box+'meta'), cntn=null;
+			if(cnt && cnt.length) cnt.html(data);
+			else {
+				cnt = $(".meta");
+				cntn = (cnt.length===1) ? $(cnt[0]) : (cnt.length===2) ? $(cnt[1]) : null;
+				if (cntn) cntn.append('<div class="'+box+'-focecast-meta-info">'+data+'</div>');
+			}
+		},
+		done: function() {
+			ajax_done = 0;
+			var self=my, i1, i2, i3, i=0,j=0,dn=null,
+			dt = get.dataseries[my.fcsource||my.fcsources[0]][my.fcplace]||{},
+			fc=my.fcplaces[my.fcplace],
+			loc=fc.location, sun = {},
+			has = {
+					ws: (dt.ws_series && dt.ws_series.data.length),
+					wg: (dt.wg_series && dt.wg_series.data.length),
+					wd: (dt.wd_series && dt.wd_series.data.length),
+					humid: (dt.humid_series && dt.humid_series.data.length),
+					rain: (dt.rain_series && dt.rain_series.data.length),
+					press: (dt.press_series && dt.press_series.data.length),
+					temp: (dt.temp_series && dt.temp_series.data.length)
+			}, 
+			dbase = has.ws ? dt.ws_series.data : has.temp ? dt.temp_series.data : dt.wd_series.data,
+			k=0, l=0, kn='', night=false, nightplot=[], doplot=false;
+
+			if(my.samplemode=='graph') {
+				$("#"+my.chartorder[0]+"2").css({height:''});
+				$("#"+my.chartorder[1]+"2").show();
+				$("#"+my.chartorder[2]+"2").show();
+				if(my.chartorder.indexOf("wind_speed")>=0) {
+					my.charts[3] = new Highcharts.Chart(wind_speed_options);
+					i1 = intPlotLine(my.charts[3], i1);
+				}
+				if(my.chartorder.indexOf("wind_dir")>=0) {
+					my.charts[4] = new Highcharts.Chart(wind_dir_options);
+					i2 = intPlotLine(my.charts[4], i2);
+				}
+				if(my.chartorder.indexOf("temp")>=0) {
+					my.charts[5] = new Highcharts.Chart(temp_options);
+					i3 = intPlotLine(my.charts[5], i3);
+				}
+				var nightPlots = my.nightPlots(get.datalen,loc);
+				for(i=3,j=6;i<j;++i) {
+					for(k=0,l=nightPlots.length;k<l;++k) {
+						if(my.charts[i]) my.charts[i].xAxis[0].addPlotBand(nightPlots[k]);
+					}
+				}
+			} else {
+				//var htempl = '<tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Sademed</th><th class="hide-edge-xs">Rõhk</th></tr>';
+				//var templ = '<tr class="<%=night?"night hide":""%>"><td><span class="day hide"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="hide-edge-xs"><%=press?press:""%></td></tr>';
+				var str="";
+				var hlinks = '<tr><th colspan="5"><span class="fc-source" name="em">Ilmateenistus</span>&nbsp;<span class="fc-source" name="wg">Windguru.cz</span>&nbsp;<span class="fc-source" name="yr">Yr.no</span></th></tr>';
+				var keys = Object.keys(has),tnow=new Date().getTime();
+
+				for(i=0,j=dbase.length;i<j;++i) {
+					dn=dbase[i][0]||0;
+					if(dn<tnow) continue;
+					sun = SunCalc.getPosition(new Date(dn), loc[0], loc[1]);
+					//if(dbase[i][0]>(tnow+(24*3600*1001))) break;
+					var opt = {
+						time: self.getTimeStr(dn),
+						night:(sun.altitude<0),
+						wscolor:has.ws?self.colorasbf(dt.ws_series.data[i][1]).color:'',
+						wgcolor:has.wg?self.colorasbf(dt.wg_series.data[i][1]).color:'',
+						day:self.getDayLetter(dn),
+					};
+					for(k=0,l=keys.length;k<l;++k) {
+						kn = keys[k];
+						opt[kn] = (has[kn]) ? dt[kn+"_series"].data[i][1] : null;
+					}
+					str += _.template(self.fcRowTemplate,opt);
+				}
+
+				var where = $("#"+my.chartorder[0]+"2");
+				if(where) {
+					where.html(_.template(self.dataTableTemplate,{classes:'table',thead:_.template(self.fcHeadTemplate,{inforows:hlinks}),tbody:str}));
+					where.css("height","100%");
+				}
+				$("#"+my.chartorder[1]+"2").hide();
+				$("#"+my.chartorder[2]+"2").hide();
+				where = $(".fc-source");
+				_.each(where,function(a){
+					if($(a).attr('name')==my.fcsource) $(a).css('font-weight','600');
+					else $(a).css('font-weight','400');
 				});
-		$("#pagelogo").html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+"</span>");
-	}
-}
+				$(".fc-source").on("click",function(){
+					w.ilm.setFcSource($(this).attr('name'));
+						//w.ilm.reloadest();
+				});
+			}
+			$("#fctitle").html(
+				'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(last_time)
+				).show();
+			var list = _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {
+				return '<li><a href="#" name="'+a.id+'" class="fcplace-select'+(a.id===my.fcplace?' active':'')+'">'+a.name+'</a></li>';
+			}}).join("");
+			$("#fcmenu").html(list);
+			$("#fcsel").show();
+			$(".fcplace-select").on("click",function(){
+				w.ilm.fcsource = $(this).attr('name');
+				w.ilm.reloadest();
+			});
+			$("#pagelogo").html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+"</span>");
+			var metadata = get.fclink('Meteo.pl');
+			if(metadata) get.dometa('meteo-pl', metadata);
+		}
+	};
 
-my.loadEst = function (place) {
-	place = (place || my.fcplace || 'tabivere') + "/";
+	my.loadEst = function (place) {
+		if(!$('#'+my.chartorder[0]+"2").length) return;
+		place = (place || my.fcplace || 'tabivere');
 
-	ajax_done = 0;
+		ajax_done = 0;
 
-	wind_speed_options.series = null;
-	wind_speed_options.series = [];
-	wind_speed_options.chart.renderTo = 'wind_speed2';
+		wind_speed_options.series = null;
+		wind_speed_options.series = [];
+		wind_speed_options.chart.renderTo = 'wind_speed2';
 
-	wind_dir_options.series = null;
-	wind_dir_options.series = [];
-	wind_dir_options.chart.renderTo = 'wind_dir2';
+		wind_dir_options.series = null;
+		wind_dir_options.series = [];
+		wind_dir_options.chart.renderTo = 'wind_dir2';
 
-	temp_options.series = null;
-	temp_options.series = [];
-	temp_options.chart.renderTo = 'temp2';
+		temp_options.series = null;
+		temp_options.series = [];
+		temp_options.chart.renderTo = 'temp2';
 
-	for (var a='', i = my.fcsources.length - 1; i >= 0; i--) {
-		a = my.fcsources[i];
-		get[a](a, place);
-	}
-};
+		var cnt = $(".meta");
+		if(cnt.length===1) {
+			cnt[0].innerHTML='';
+		}
+		if(cnt.length===2) {
+			cnt[1].innerHTML='';
+		}
 
-var intval = 0;
+		for (var a='', i = my.fcsources.length - 1; i >= 0; i--) {
+			a = my.fcsources[i];
+			//get[a](a, place);
+			get.do(place, a, get['do_'+a]);
+		}
+	};
 
-my.loadEstInt = function (interval) {
-	if (interval && interval > 10000) updateinterval = interval;
-	else interval = updateinterval;
-	my.loadEst();
-	clearInterval(intval);
-	intval = setInterval(my.loadEst, interval);
-};
+	var intval = 0;
 
-my.reloadest = function () {
-	my.loadEstInt();
-};
+	my.loadEstInt = function (interval) {
+		if (interval && interval > 10000) updateinterval = interval;
+		else interval = updateinterval;
+		my.loadEst();
+		clearInterval(intval);
+		intval = setInterval(my.loadEst, interval);
+	};
 
-return my;
+	my.reloadest = function () {
+		my.loadEstInt();
+	};
+
+	return my;
 
 })(window.ilm || {});

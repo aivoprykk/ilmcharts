@@ -34,15 +34,15 @@ require("jaamconf.php");
 header("Content-Type:text/plain");
 
 //* mitmed konfi asjad siin
-$jaamad = array('vortsjarv_tamme');
+$jaamad = array('vortsjarv_tamme','vortsjarv_joesuu');
 $sisendjaam = "";
 $sisendaeg = 0;
 $ajaraam = "";
-$verbose = 1;
+$verbose = 0;
 $komakohti = 1;
 //* vajalikud sekundid mis lisatakse viimasele 
 //* failist leitud (minutiteni alla ümardatud) ajastringile
-$puhveraeg = 20;
+$puhveraeg = (20+60*5);
 //* kui skript on bin kataloogis, siis kuhu võiks teha kataloogid ja failid?
 //* praegu on tee $PWD/../public/, aga võib ka html vms
 $bindir = "/bin";
@@ -50,6 +50,7 @@ $htmldir = "/public";
 
 if(isset($argv)){
 	foreach ($argv as $arg) {
+		if($arg == 'lab'||$arg == 'debug') { $verbose=1; continue; }
 		$e=explode("=",$arg);
 		if(count($e)==2) $_GET[$e[0]]=$e[1];
 		else $_GET[$e[0]]=0;
@@ -76,6 +77,8 @@ foreach($_GET as $get=>$val){
 		$sisendjaam = ($get=="jaam") ? $_GET[$get] : $tmp;
 	}
 }
+
+if(!$verbose) error_reporting(E_ALL ^ E_WARNING);
 
 chdir(normalizeDir($bindir, $htmldir));
 //echo getcwd();
@@ -144,6 +147,7 @@ for($k=0,$l=count($jaamad);$k<$l;++$k){
 	$jaam=$k;
 	$jaamastr = $jaamad[$jaam];
 	if($jaamastr=='vortsjarv_tamme') $jstr="TammeSurf";
+	else if($jaamastr=='vortsjarv_joesuu') $jstr="Joesuu";
 	else $jstr = $jaam;
 	$query = "select time, $fstr from wsds where station_id='$jstr'$aeg order by time asc";
 	//$query = "select aeg, ti, ilm.to as 'to', hi, ho, dp, wc, ws, wd, rt, r1, r24, pr, pa, wf, wt, ccalt, wg from ilm where jaam=$jaam$aeg order by aeg asc"; 
@@ -159,6 +163,8 @@ for($k=0,$l=count($jaamad);$k<$l;++$k){
 		$sql->Query($query);
 		$count = $sql->rows;
 	}
+	if($verbose) { echo "$jaamastr akohta leiti $count rida.\n"; }
+	$lastpath = $archivePath.DIRECTORY_SEPARATOR.$jaamastr.DIRECTORY_SEPARATOR."last.txt";
 
 	$fields = array();
 	$fields_count = 0;
@@ -181,6 +187,7 @@ for($k=0,$l=count($jaamad);$k<$l;++$k){
 	$nowdate = "";
 	$prevdate = "";
 	$rowscount = 0;
+	//$lastdata = "";
 	for($o=0;$o<$count;++$o){
 		if($sql) {
 			$sql->Fetch($o);
@@ -216,8 +223,10 @@ for($k=0,$l=count($jaamad);$k<$l;++$k){
 		$nowdatestr = $mc[2].$mc[3].$mc[4]." ".$mc[5];
 		$nowstamp = strtotime($row[0]);
 
-
-		$flush = ($prevminute && testm($nowminute) && !testm($prevminute)) ? ($flush ? 2 : 1) : FALSE;
+		$delta = abs($nowminute-$prevminute);
+		$flush = ($prevminute!="" && testm($nowminute) && (!testm($prevminute) || $delta>10)) ? ($flush ? 2 : 1) : FALSE;
+		if($flush==2 && $delta>10) $flush=1;
+		if($verbose) { echo "Kas flushida ? $prevdate:$prevminute:$nowdate:$nowminute:$flush:$delta\n"; }
 		//* kuup vahetusel otsib uue nimega failist viimast ajastringi
 		if($datechanged){
 			$prevpath = $path;
@@ -237,41 +246,45 @@ for($k=0,$l=count($jaamad);$k<$l;++$k){
 				if(($laststamp+$puhveraeg)>=$nowstamp){
 					unset($tdata[$i]);
 				}
-        //$query = "select aeg, ti, ilm.to as 'to', hi, ho, dp, wc, ws, wd, rt, r1, r24, pr, pa, wf, wt, ccalt, wg from ilm where jaam=$jaam$aeg order by aeg asc";
-	//$fieldnames = array("temperature", "heat_index", "dewpoint", "wind_direction", "wind_speed", "wind_gust", "humidity", "pressure");
+        		//$query = "select aeg, ti, ilm.to as 'to', hi, ho, dp, wc, ws, wd, rt, r1, r24, pr, pa, wf, wt, ccalt, wg from ilm where jaam=$jaam$aeg order by aeg asc";
+				//$fieldnames = array("temperature", "heat_index", "dewpoint", "wind_direction", "wind_speed", "wind_gust", "humidity", "pressure");
 
 				else if($i==0) {
 					$rowdata = $nowdatestr; // see on hüpoteetiline minuti vaheldumise string
 				}
 				else if(is_array($tdata[$i])){
-					if($i==4||$i==5) {
-						if($i==4) {
-							$rowdata .= "\t" . wdAvg($tdata[4],$tdata[5]);
-							$rowdata .= "\t" . sMean($tdata[5]);
-						}
-						unset($tdata[$i]);
+					if($verbose) { echo "Välja [".$i."] vaartuste jada: ".array_sum($tdata[$i])."\n"; }
+					if($i==4) { #wind_dir
+						$rowdata .= "\t" . wdAvg($tdata[4],$tdata[5]);
+					}
+					else if($i==5) { #wind_speed
+						$rowdata .= "\t" . sMean($tdata[5]);
 					}
 					//jada keskmine
-					else if($i!=6) {
+					else if($i!=6) { #teised, keskmine
 						$rowdata .= "\t" . sMean($tdata[$i]);
 					}
 					//puhangute puhul max
-					else {
+					else { #wind_gust
 						$rowdata .= "\t" . max($tdata[$i]);
 					}
 					// nullib lugeri
 					unset($tdata[$i]);
 				} else {
-					$rowdata .= "\t" . $tdata[$i];
+					$rowdata .= "\t" . ($i==4 || $i==5 ? 0 : $tdata[$i]);
+					if($verbose) { echo "Väli[".$i."]: ".$tdata[$i]."\n"; }
 				}
 			}
 			if($i>0 && is_numeric($row[$i])) $tdata[$i][] = $row[$i];
 			else $tdata[$i] = $row[$i];
 		}
 		if($rowdata) {
-			if($verbose) {echo "row $rowdata $laststamp+$puhveraeg>=$nowstamp\n";}
+			if($verbose) {echo "row $rowdata $laststamp+$puhveraeg>=$nowstamp (".$row[0].")\n";}
 			$data .= $rowdata."\n";
 			++$rowscount;
+			/*if($i>$j-5) {
+				$lastdata .= $rowdata."\n";
+			}*/
 		}
 		if(($nowtime == '23:55' && $prevtime && $prevtime != '23:55') || $rownum == $count) {
 			//kuupäeva vahetusel või viimasel real salvestatakse andmestring faili
@@ -286,6 +299,9 @@ for($k=0,$l=count($jaamad);$k<$l;++$k){
 			}
 		}
 	}
+	if($verbose) { echo "Parsiti $rownum rida.\n"; }
+	//addContent($lastpath, $lastdata, 'w');
+	wrapLastRows($path, $lastpath);
 	if(!$sql) $result->close();
 }
 if(!$sql) $mysqli->close();
@@ -367,6 +383,29 @@ function getLastStamp($path){
 	return $df;
 }
 
+function wrapLastRows($big, $path){
+	$df=0;
+	if(file_exists($big)) {
+		//echo "fail:".$path."\n";
+		$handle       = fopen($big, "r");
+		$fileContents = fread($handle, filesize($big));
+		fclose($handle);
+		$rows = explode("\n",$fileContents);
+		$count = count($rows);
+		if($count<6) return 0;
+		$tmp = "";
+		$i=$count-6;
+		if($i<0) $i=0;
+		while($i<$count-1){
+			++$i;
+			//echo "rida:".$rows[$i]."\n";
+			if(preg_match("/^\d{6}/", $rows[$i])) $tmp .= $rows[$i]."\n";
+		}
+		if($tmp) {
+			addContent($path, $tmp, 'w');
+		}
+	}
+}
 //* rekursiivne kataloogide loomine
 function mkdirp($path, $mode = 0777) {
     $dirs = explode(DIRECTORY_SEPARATOR , $path);
@@ -381,7 +420,7 @@ function mkdirp($path, $mode = 0777) {
     return TRUE;
 }
 //* datastringi faili lisamine
-function addContent($path,$data){
+function addContent($path,$data,$mode='a'){
 	if(!$data) return FALSE;
 	$dir = dirname($path);
 	mkdirp($dir);
@@ -389,7 +428,7 @@ function addContent($path,$data){
 		echo "Directory ($dir) not exist.\n";
 		return FALSE;
 	}
-	if (!$handle = fopen($path, 'a')) {
+	if (!$handle = fopen($path, $mode)) {
 		 echo "Cannot open file ($path).\n";
 		 return FALSE;
 	}
@@ -402,7 +441,7 @@ function addContent($path,$data){
 }
 //* 0/5/10 minuti test
 function testm($m){
-	if(!$m) return FALSE;
+	//if(!$m) return FALSE;
 	return ($m % 5 == 0 || $m % 10 == 0 || $m == 0);
 }
 //* kasutusjuhend

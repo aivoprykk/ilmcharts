@@ -10,9 +10,9 @@ path = '',
 dir;
 
 process.argv.forEach(function (val, index, array) {
-  if(index===2 && val) {
-  	  input=val;
-  }
+	if(index===2 && val) {
+		input=val;
+	}
 });
 if (!fs.existsSync(input)) throw "Could not find input file:" + input;
 path = fs.realpathSync(input) || '';
@@ -32,13 +32,13 @@ function getLast(file) {
 	var last="", ret = 0;
 	if(file) {
 		try {
-		var obj = fs.readFileSync(file, 'utf-8');
-		if(obj){
-			last = obj.trim().split("\n").pop();
-			if(last) last = last.match(/^(\d+\s\d\d:\d\d)/);
-			if(last) last = last[1].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1-$2-$3");
-			if(last) ret = new Date(last).getTime();
-		}
+			var obj = fs.readFileSync(file, 'utf-8');
+			if(obj){
+				last = obj.trim().split("\n").pop();
+				if(last) last = last.match(/^(\d+\s\d\d:\d\d)/);
+				if(last) last = last[1].replace(/(\d\d\d\d)(\d\d)(\d\d)/,"$1-$2-$3");
+				if(last) ret = new Date(last).getTime();
+			}
 		} catch (e) {
 		}
 	}
@@ -108,13 +108,21 @@ fs.readFile(path, function(err, data) {
 				ret[wd[0]].push(wd[1] + " " + wdata[j]);
 			}
 		}
+		i=0;
 		for(val in ret){
 			if(val && ret[val].length){
-				ret[val].reverse()
+				
+				ret[val].reverse();
 				//console.log(ret[val]);
-				//console.log(ret[val].join("\n"));
+				//console.log(val + " >> " + ret[val].join("\n"));
 				file = dir+"ARC-"+val+".txt";
-				fs.appendFile(file, ret[val].join("\n")+"\n");
+				fs.appendFileSync(file, ret[val].join("\n")+"\n");
+				//console.log("vals: " + i + " " + k+ " " + wdata.length);
+				//if(i===0) {
+				//	fs.writeFileSync(dir+"last.txt", ret[val].join("\n")+"\n");
+				//	++i;
+				//} else 
+				fs.appendFileSync(dir+"last.txt",ret[val].join("\n")+"\n");
 			}
 		}
 	}

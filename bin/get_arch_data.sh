@@ -8,6 +8,7 @@ last=""
 station=""
 temp=""
 dir=`dirname $0`
+meinfo='//ilm.majasa.ee/'
 echo "$dir" | grep -q '^/' || dir=`pwd`/$dir
 path=`echo "$dir"|sed -e 's/\/\?bin//'`
 [ x"$path" = x"" ] && path="." || path=$path
@@ -50,7 +51,7 @@ IFS=:
 set $j
 place=$1
 title=$2
-names="wg:$3 yr:$4 emhi:$5 mnt:$6 zoig:$7 emu:$8 ut:$9";
+names="wg:$3 yr:$4 emhi:$5 mnt:$6 zoig:$7 emu:$8 ut:$9 my:${10} empg:${11} flydog:${12}";
 IFS=' '
 (
 cd public
@@ -98,6 +99,11 @@ mnt)
 	minutes=11
 	#continue;
 	;;
+flydog)
+  url='http://sensornest.flydog.eu/api-v1/'$value'/'
+  out="flydog_data/"$place
+  temp="arc-file-$place.json"
+  ;;
 *)
 	continue;
 	;;
@@ -141,19 +147,26 @@ fi
 if [ $lab -gt 0 ]; then
   echo "`date '+%F %T'` last:$last_stamp";
   if [ x"$temp" != x"" ]; then
-    echo "$place:$name wget -U 'Wget for ilm.majasa.ee/' -q -O $out/$temp $url"
+    echo "$place:$name wget -U '$meinfo' -q -O $out/$temp $url"
     [ -e $dir"/parse_$name.js" ] && echo "node $dir/parse_$name.js $out/$temp"
   else
-    echo "$place:$name wget -T40 -U 'Wget for ilm.majasa.ee/' -q -O $out/$file $url"
+    echo "$place:$name wget -T40 -U '$meinfo' -q -O $out/$file $url"
   fi
 fi
 if [ x"$dry" = x"" ]; then
 	if [ x"$temp" != x"" ]; then
-	  wget -U 'Wget for ilm.majasa.ee/' -q -O $out/$temp $url
-	  [ -e $dir"/parse_$name.js" ] && node $dir"/parse_$name.js" $out/$temp
+	  wget -U "$meinfo" -q -O $out/$temp $url
+	  [ -e $dir"/parse_$name.js" ] && node --trace-deprecation $dir"/parse_$name.js" $out/$temp $value
+    x=`cat $out/last.txt|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}'|wc -l`
+    if [ $x -gt 0 ]; then
+      tail -6 $out/last.txt|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}' > $out/last.tmp.txt;
+      mv $out/last.tmp.txt $out/last.txt;
+    fi
 	  #rm -f $out"/"$temp
 	else
-	  wget -T40 -U 'Wget for ilm.majasa.ee/' -q -O $out/$file $url		
+	  wget -T40 -U "$meinfo" -q -O $out/$file $url		
+    x=`cat $out/$file|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}'|wc -l`
+    if [ $x -gt 0 ]; then tail -6 $out/$file|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}' > $out/last.txt; fi
 	fi
 fi
 done

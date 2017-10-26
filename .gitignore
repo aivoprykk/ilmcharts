@@ -1,3 +1,7 @@
+cgi-bin
+mirrors
+prev
+.well-known
 emu_data/*
 */emu_data/*
 emhi_data/*

@@ -8,6 +8,7 @@ last=""
 station=""
 max=200
 dir=`dirname $0`
+meinfo='//ilm.majasa.ee/'
 echo "$dir" | grep -q '^/' || dir=`pwd`/$dir
 path=`echo "$dir"|sed -e 's/\/\?bin\/\?$//'`
 [ x"$path" = x"" ] && path="." || path=$path
@@ -176,12 +177,14 @@ wg)
 	file=windguru_forecast.json
 	;;
 yr)
-	url='http://www.yr.no/sted/Estland/'$value'/varsel_time_for_time.xml'
-	out=yr_data/$place
-	file=forecast_hour_by_hour.xml
+  out=yr_data/$place
+  file=forecast_hour_by_hour.xml
+  file2=forecast.xml
+	url='http://www.yr.no/sted/Estland/'$value'/'$file
+  url2='http://www.yr.no/sted/Estland/'$value'/'$file2
 	;;
 empg)
-  url='http://www.ilmateenistus.ee/wp-content/themes/emhi2013/meteogram.php?locationId='$value'&lang=et'
+  url='http://www.ilmateenistus.ee/wp-content/themes/emhi2013/meteogram.php/?locationId='$value
   out=empg_data/$place
   file=empg_forecast.json
   ;;
@@ -204,10 +207,13 @@ if [ $force -gt 0 -o $t -lt 0 ]; then
   #[ $name = "wg" ] && rotate json ${out} ${file}
   #[ $name = "yr" ] && rotate xml ${out} ${file}
   if [ $lab -gt 0 ]; then
-    echo wget -q -O ${out}/${file}.tmp "${url}"
+    echo wget -U "$meinfo" -q -O ${out}/${file}.tmp "${url}"
   fi
   if [ x"$dry" = x"" ]; then
-    wget -q -O ${out}/${file}.tmp "${url}"
+    wget -U "$meinfo" -q -O ${out}/${file}.tmp "${url}"
+    if [ x"$file2" != x"" ]; then
+      wget -U "$meinfo" -q -O ${out}/${file2}.tmp "${url2}"
+    fi
   fi
   t=`xtime ${out} ${file}.tmp ${name}`
   if [ $lab -gt 0 ]; then
@@ -215,6 +221,9 @@ if [ $force -gt 0 -o $t -lt 0 ]; then
   fi
   if [ $t -gt 0 ]; then
     mv --backup=t -f ${out}/${file}.tmp ${out}/${file}
+    if [ x"$file2" != x"" ]; then
+      mv --backup=t -f ${out}/${file2}.tmp ${out}/${file2}
+    fi
     #rm -f ${out}/${file}.tmp
   fi
 fi

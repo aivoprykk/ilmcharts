@@ -6,7 +6,7 @@
     my = w.ilm,
 	contid = 0;
 	function fixCharts(width, fn) {
-		$(fn).css("width", width);
+		/*$(fn).css("width", width);
 		$(d).ready(function () {
 				var inner = $(fn).width();
 				setTimeout(function () {
@@ -14,7 +14,8 @@
 						obj.setSize($(fn).width() - 6, obj.containerHeight, false);
 					});
 				}, 500);
-			});
+		});
+		*/
 	}
 	function setWidth() {
 		console.log(w.ilm.getWidth());
@@ -103,6 +104,7 @@
 			//w.ilm.reload();
 			return false;
 		});
+		w.ilm.loadGrid();
 		w.ilm.loadBase();
 		w.ilm.loadInt(1000 * 60); // 1min
 		w.ilm.loadEstInt(1000 * 60 * 10); // 10min

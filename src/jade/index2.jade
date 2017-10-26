@@ -9,7 +9,7 @@ html(lang=opt.lang)
 		link(rel="stylesheet", href= opt.css + min + '.css?' + opt.version, media="screen")
 		link(rel="shortcut icon" type="image/x-icon" href="css/images/favicon.ico")
 		// [if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]
-	body(style='padding-top:30px').sans
+	body(style='padding-top:25px')
 		#header
 			div.navbar.navbar-inverse.navbar-fixed-top
 				div.container-fluid
@@ -45,12 +45,27 @@ html(lang=opt.lang)
 		#backgr.ilm-backgr: img(src="css/images/ranna-001.jpg" alt="Peipsi pilt")
 		#bghide.ilm-bghide
 		#dots.ilm-dots
-		#sisu.ilm-sisu.nopadding
-			.container-fluid.col-lg-12
-				div.menu.col-lg-5.col-sm-6.col-xs-12
-					#menu-container
-				div.chart.col-lg-7.col-sm-6.col-xs-12
-					#container.chart-container.col-lg-12
+		#sisu.ilm-sisu
+			#container.col-lg-12
+				div.float.col-lg-6
+					div.title.btn-group
+						a#curplace.btn.btn-default.btn-xs.navbar-btn(style="display:none")
+						a#curtime.btn.btn-default.btn-xs.navbar-btn(style="display:none")
+						a#cursel.btn.btn-default.btn-xs.navbar-btn.dropdown-toggle(style="display:none" data-toggle="dropdown")
+							span.caret
+						ul#curmenu.curmenu.dropdown-menu(role="menu")
+					input#datepicker(type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0")
+					div.meta
+						#curmeta.ilm-meta
+				div.float.col-lg-6
+					div.title.btn-group
+						a#fctitle.btn.btn-default.btn-xs.navbar-btn(style="display:none")
+						a#fcsel.btn.btn-default.btn-xs.navbar-btn.dropdown-toggle(style="display:none" data-toggle="dropdown")
+							span.caret
+						ul#fcmenu.fcmenu.dropdown-menu(role="menu")
+					div.meta
+						#yrmeta.ilm-meta
+						#wgmeta.ilm-meta
 		#popup.ilm-popup.panel.panel-primary(style="display:none;")
 			#popup_in.panel-heading
 				b.panel-title
@@ -58,5 +73,4 @@ html(lang=opt.lang)
 			#lingid.panel-body
 		script(src= opt.contrib + min + '.js')
 		script(src= opt.js + min + '.js?' + opt.version)
-		script(async="" defer="" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBKPcJDwBUmu-xio9gPQsi-FjWtY_9XQmg&callback=ilm.loadMap")
 
