@@ -12,7 +12,8 @@
 		},
 		lang: {
 			months: my.months,
-			weekdays: my.weekdays
+			weekdays: my.weekdays,
+			shortWeekdays: my.shortweekdays
 		},
 	});
 
@@ -262,6 +263,7 @@
 		donetable: function(json) {
 			var self=my, d, s = {};
 			//var table = $('<div>&nbsp;</div><table class="table" style="background-color:white;font-size:80%"><thead></thead><tbody class="tbody"></tbody></table>');
+			var hlinks = '<tr><th colspan="5"><span class="hist-length" name="4"> 4h </span>&nbsp;<span class="hist-length" name="6"> 6h </span>&nbsp;<span class="hist-length" name="12"> 12h </span>&nbsp;<span class="hist-length" name="24"> 24h </span>&nbsp;<span class="hist-length" name="48"> 2p </span>&nbsp;<span class="hist-length" name="72"> 3p </span></th></tr>';
 			var html = '<tbody>';
 			my.lastdate = my.normalizeData(my.curplace, json, function(obj,count,i){
 				//if(count-i>20) return false;
@@ -281,11 +283,12 @@
 			}, 0, my.start);
 			html += '</tbody>';
 			var $html = $(html);
-			var rev = _.filter($html.children('.item').get().reverse(),function(a,i){return i<15;});
+			//var rev = _.filter($html.children('.item').get().reverse(),function(a,i){return i<15;});
+			var rev = $html.children('.item').get().reverse();
 			$html.html(rev);
 			d = new Date(my.lastdate);
 			var where = $('#'+my.chartorder[0]+"1");
-			where.html(_.template(self.dataTableTemplate,{classes:'table',thead:self.histHeadTemplate,tbody:$html.html()}));
+			where.html(_.template(self.dataTableTemplate,{classes:'table',thead:_.template(self.histHeadTemplate,{inforows:hlinks}),tbody:$html.html()}));
 			where.css("height","100%");
 			var where2 = where.find('.table')[0];
 			$("#"+my.chartorder[1]+"1").hide();
@@ -293,6 +296,18 @@
 			var metadata = get.histlink(my.curplace,my.lastdate,(my.lastdate + updateinterval));
 			get.dohmeta(my.curplace, metadata);
 			$("#pagelogo").html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+"</span>");
+			where = $(".hist-length");
+			_.each(where,function(a){
+				var d=$(a), c = d.attr('name'), b = parseInt(c,10)*3600*1000;
+				d.off("click");
+				d.on("click",function(e){
+					var c = d.attr('name'), b = parseInt(c,10)*3600*1000;
+					if(b===self.timeframe) return false;
+					self.setFrame(c+"h");
+				});
+				if(b==my.timeframe) d.css('font-weight','600');
+				else d.css('font-weight','400');
+			});
 		},
    		done: function (json) {
 			var d_series = {
@@ -454,6 +469,29 @@
 			var metadata = get.histlink(my.curplace,my.lastdate,(my.lastdate + updateinterval));
 			get.dohmeta(my.curplace, metadata);
 			$("#pagelogo").html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+"</span>");
+			var where = $(".hist-length");
+			_.each(where,function(a){
+				var d=$(a), c = d.attr('name'), b = parseInt(c,10)*3600*1000;
+				d.off("click");
+				d.on("click",function(e){
+					var c = d.attr('name'), b = parseInt(c,10)*3600*1000;
+					if(b===self.timeframe) return false;
+					my.setFrame(c+"h");
+				});
+				var islabel = d.hasClass('label');
+				if(islabel) {
+					d.removeClass('label-primary');
+				}
+				if(b==my.timeframe) {
+					if(islabel) {
+						d.addClass('label-primary');
+					}
+					d.css('font-weight','600');
+				}
+				else {
+					d.css('font-weight','400');
+				}
+			});
     	},
     	histlink: function(fc,last,next) {
     		var cid= my.curplaces[fc],link=cid.link,fcid=cid.cid;

@@ -224,9 +224,12 @@ for($k=0,$l=count($jaamad);$k<$l;++$k){
 		$nowstamp = strtotime($row[0]);
 
 		$delta = abs($nowminute-$prevminute);
-		$flush = ($prevminute!="" && testm($nowminute) && (!testm($prevminute) || $delta>10)) ? ($flush ? 2 : 1) : FALSE;
-		if($flush==2 && $delta>10) $flush=1;
-		if($verbose) { echo "Kas flushida ? $prevdate:$prevminute:$nowdate:$nowminute:$flush:$delta\n"; }
+		$flush = ($prevminute!="" && testm($nowminute) && (!testm($prevminute) || $delta>4)) ? ($flush ? 2 : 1) : FALSE;
+		if($flush==2 && $delta>4) $flush=1;
+		if($verbose) { 
+			echo "Kas flushida ? $prevdate:$prevminute:$nowdate:$nowminute:$flush:$delta\n"; 
+			echo "testid:".testm($nowminute).":".testm($prevminute).":".$prevminute."\n";
+		}
 		//* kuup vahetusel otsib uue nimega failist viimast ajastringi
 		if($datechanged){
 			$prevpath = $path;

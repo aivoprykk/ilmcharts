@@ -144,7 +144,9 @@ let 'm=cur_min-last_min';
 last=$last_stamp
 fi
 
+labstr=""
 if [ $lab -gt 0 ]; then
+  labstr="lab"
   echo "`date '+%F %T'` last:$last_stamp";
   if [ x"$temp" != x"" ]; then
     echo "$place:$name wget -U '$meinfo' -q -O $out/$temp $url"
@@ -156,7 +158,7 @@ fi
 if [ x"$dry" = x"" ]; then
 	if [ x"$temp" != x"" ]; then
 	  wget -U "$meinfo" -q -O $out/$temp $url
-	  [ -e $dir"/parse_$name.js" ] && node --trace-deprecation $dir"/parse_$name.js" $out/$temp $value
+	  [ -e $dir"/parse_$name.js" ] && node --trace-deprecation $dir"/parse_$name.js" $out/$temp $value $labstr
     x=`cat $out/last.txt|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}'|wc -l`
     if [ $x -gt 0 ]; then
       tail -6 $out/last.txt|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}' > $out/last.tmp.txt;

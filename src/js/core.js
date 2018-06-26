@@ -5,7 +5,7 @@ var ilm = (function (my) {
 		var defaults = {
 			id : 'ilmchartsstore01',
 			datamode : opt.datamode||'emu',
-			timeframe :  opt.timeframe||24*3600*1000,
+			timeframe :  opt.timeframe||0,
 			fcsources : opt.fcsources || ["wg","yr","em"],
 			fcplace : opt.fcplace||'aksi',
 			curplace : opt.curplace||'emu',
@@ -153,11 +153,24 @@ var ilm = (function (my) {
 				spacingRight: 20,
 				maxZoom: 3600000,
 				marginRight: 110,
-				marginLeft: 85
+				marginLeft: 85,
+				credits: {
+					enabled:false
+				}
 			},
 			xAxis: {
 				type: 'datetime',
-				gridLineWidth: 1
+				gridLineWidth: 1,
+				dateTimeLabelFormats: {
+					millisecond: "%H:%M:%S.%L",
+				    second: "%H:%M:%S",
+				    minute: "%H:%M",
+				    hour: "%H:%M",
+				    day: "%a, %e.%m",
+				    week: "%a, %e.%m",
+				    month: "%b '%y",
+				    year: "%Y"
+				}
 			},
 			plotOptions: {
 				spline: {
@@ -191,9 +204,9 @@ var ilm = (function (my) {
 			}
 		};
 		this.charts = [];
-		this.months = ['Jaanuar', 'Veebruar', 'Märts', 'Aprill', 'Mai', 'Juuni',
-		'Juuli', 'August', 'September', 'Oktoober', 'November', 'Detsember'];
+		this.months = ['Jaanuar', 'Veebruar', 'Märts', 'Aprill', 'Mai', 'Juuni', 'Juuli', 'August', 'September', 'Oktoober', 'November', 'Detsember'];
 		this.weekdays = ['Pühapäev', 'Esmaspäev', 'Teisipäev', 'Kolmapäev', 'Neljapäev', 'Reede', 'Laupäev'];
+		this.shortweekdays = ['P', 'E', 'T', 'K', 'N', 'R', 'L'];
 		if(loc.hash) this.hash_data();
 	}
 
@@ -439,17 +452,23 @@ var ilm = (function (my) {
 				var u=0,xlarge=(self.getWidth()>=1400)?true:false, s = '';
 				s += '<div class="chartbox" style="width:100%;height:100%;">';
 				s += '<div class="chart-control-box" style="width:100%;position:relative;font-size:80%;">&nbsp;';
+				if(self.samplemode!=='table' && self.viewmode==='cur'){
+					s += '<div id="graph-timeframe-control" style="position:absolute;z-index:10000;top:-7px;left:8px;">';
+					s += '<span class="hist-length label label-default" name="4"> 4h </span>&nbsp;<span class="hist-length label label-default" name="6"> 6h </span>&nbsp;<span class="hist-length label label-default" name="12"> 12h </span>&nbsp;<span class="hist-length label label-default" name="24"> 24h </span>&nbsp;<span class="hist-length label label-default" name="48"> 2p </span>&nbsp;<span class="hist-length label label-default" name="72"> 3p </span>';
+					s += '</div>';
+				}
 				s += '<div style="position:absolute;z-index:10000;left:5px;top:5px;">';
 				s += '<span class="title-chart"></span>&nbsp;<span class="change-chart label label-default" name="cur">Ajalugu</span>&nbsp;<span class="change-chart label label-default" name="est">Prognoos</span>';
 				s += '</div>';
 				s += '<div style="position:absolute;z-index:10000;right:35px;top:5px;">';
+				s += (self.samplemode==='table') ? ('<span class="night-chart label label-default" name="'+(self.fcshownight?'fcsnf':'fcsnt')+'"> '+(self.fcshownight?'-':'+')+'Ööd</span>&nbsp;') : '&nbsp;';
 				s += '<span class="sample-chart label label-default" name="'+(self.samplemode=='table'?'graph':'table')+'">Näita '+(self.samplemode=='table'?'Graafikut':'Tabelit')+'</span>&nbsp;';
 				s += (self.viewmode!=='cur'||xlarge) ? ('<span class="long-chart label label-default" name="'+(self.sampletype=='long'?'detail':'long')+'">Näita '+(self.sampletype=='long'?'Detailset':'Pikaajalist')+'</span>&nbsp;') : '&nbsp;';
 				s += '</div>';
 				s += '</div>';
 				el.html(s);
 				var v = self.getWidth(null,el[0]);
-				if(self.viewmode=='cur') {
+				if(!self.timeframe) {
 					if(v<400) self.timeframe=4*3600*1000;
 					else if(v<500) self.timeframe = 6*3600*1000;
 					else if(v<600) self.timeframe = 12*3600*1000;
@@ -470,14 +489,18 @@ var ilm = (function (my) {
 				}
 
 				//$('span.title-chart').html(n.name);
+				var tfc=$("#graph-timeframe-control");
+				//tfc.find('.hist-length[name="'+(self.timeframe/3600/1000)+'"]').addClass('label-primary');
 				if(!xlarge) {
-				$('span.change-chart[name="'+self.viewmode+'"]').addClass('label-primary');
-				$('.change-chart').on("click",function(e){
-					var a = $(this).attr('name');
-					if(a==my.viewmode) return false;
-					self.loadGraph(e,a);
-				});
+					tfc.css({top:"-7px"})
+					$('span.change-chart[name="'+self.viewmode+'"]').addClass('label-primary');
+					$('.change-chart').on("click",function(e){
+						var a = $(this).attr('name');
+						if(a==my.viewmode) return false;
+						self.loadGraph(e,a);
+					});
 				} else {
+					tfc.css({top:"5px"})
 					$('span.change-chart').css({display:'none'});
 				}
 				$('.long-chart').on("click",function(e){
@@ -488,6 +511,11 @@ var ilm = (function (my) {
 				$('.sample-chart').on("click",function(e){
 					var a = $(this).attr('name');
 					if(a==my.samplemode) return false;
+					self.loadGraph(e,a);
+				});
+				$('.night-chart').on("click",function(e){
+					var a = $(this).attr('name');
+					if(('fcsnf'==a &&!my.fcshownight)||('fcsnt'==a &&my.fcshownight)) return false;
 					self.loadGraph(e,a);
 				});
 				return false;
@@ -506,6 +534,13 @@ var ilm = (function (my) {
 				modechanged = true;
 				$('.long-chart').off("click");
 				changed='sampletype';
+			}
+			else if(/(fcsnt|fcsnf)$/.test(name)) {
+				self.fcshownight = name=='fcsnt' ? true : false;
+				self.state.set({fcshownight : self.fcshownight});
+				modechanged = true;
+				$('.night-chart').off("click");
+				changed='fcshownight';
 			}
 			else if(/(graph|table)$/.test(name)) {
 				self.samplemode = name;
@@ -553,8 +588,8 @@ var ilm = (function (my) {
 		},
 		dataTableTemplate: '<table class="<%=classes%>" style="background-color:white;font-size:80%"><%=thead%><%=tbody%></table>',
 		fcHeadTemplate: '<thead><%=inforows%><tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Sademed</th><th class="hide-edge-xs">Rõhk</th></tr></thead>',
-		fcRowTemplate: '<tr class="<%=night?"night hide":""%>"><td><span class="day"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="hide-edge-xs"><%=press?press:""%></td></tr>',
-		histHeadTemplate: '<thead><tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Vesi</th><th class="hide-lg">Veetemp</th><th class="hide-edge-xs">Sademed</th></tr></thead>',
+		fcRowTemplate: '<tr class="<%=night?"night":""%><%=night&&hide?" hide":""%>"><td><span class="day"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="hide-edge-xs"><%=press?press:""%></td></tr>',
+		histHeadTemplate: '<thead><%=inforows%><tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Vesi</th><th class="hide-lg">Veetemp</th><th class="hide-edge-xs">Sademed</th></tr></thead>',
 		histRowTemplate: '<tr class="item <%=night?"night":""%>" id="<%=d.time%>"><td><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class="hide-edge"><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td><td><span class="grid-cell-title">Tuul:&nbsp;</span><span class="grid-em"><span class="avg_ws" style="color:<%=wscolor%>"><%=d.avg_ws%></span>/<span class="max_ws" style="color:<%=wgcolor%>"><%=d.max_ws%></span></span></td><td class="avg_wd" title="<%=dn%>"><span class="grid-cell-title">Suund:&nbsp;</span><span class="grid-em"><%=d.avg_wd%></span></td><td class="avg_temp"><span class="grid-cell-title">Temp:&nbsp;</span><span class="grid-em"><%=d.avg_temp%></span></td><td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td><td class="avg_wtemp hide-lg"><span class="grid-cell-title">Veetemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td><td class="hide-edge-xs avg_rain"><span class="grid-cell-title">Sademed:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td></tr>',
 		gridHeadTemplate: '<thead><tr style="background-color:white"><th><span class="data-menu-order change label label-default" style="position:absolute;display:inline-block;background-color:white;border-radius:5px;color:black">+</span></th><th class="sortable-is-active hide"></th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Vesi</th><th class="hide-lg">Veetemp</th><th class="hide-edge">Sademed</th><th class="hide-edge-xs">Aeg</th></tr></thead>',
 		gridRowTemplate: '<td class="sortable-is-active hide">-</td><td><span class="grid-em"><%=first%><span class="hide-edge-xs">&nbsp;<%=last%></span></span></td><td><span class="grid-cell-title">Tuul:&nbsp;</span><span class="trend"><%=d.trend=="u"?"&uarr;":d.trend=="d"?"&darr;":"&nbsp;"%>&nbsp;</span><span class="grid-em" style="color:<%=wscolor%>"><span class="avg_ws"><%=d.avg_ws%></span>/<span class="max_ws" style="color:<%=wgcolor%>"><%=d.max_ws%></span></span></td><td class="avg_wd" title="<%=dn%>"><span class="grid-cell-title">Suund:&nbsp;</span><span class="grid-em"><%=d.avg_wd%></span></td><td class="avg_temp"><span class="grid-cell-title">Temp:&nbsp;</span><span class="grid-em"><%=d.avg_temp%></span></td><td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td><td class="avg_wtemp hide-lg"><span class="grid-cell-title">Veetemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td><td class="avg_rain hide-edge"><span class="grid-cell-title">Sademed:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td><td class="time hide-edge-xs"><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class="hide-edge hide-edge-lg"><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td>',
@@ -1058,6 +1093,16 @@ var ilm = (function (my) {
 			}
 			return false;
 		},
+		setFcShowNight: function(value) {
+			if(/(0|false)/.test(value)) value = false;
+			if(/(1|true)/.test(value)) value = true;
+			if(this.fcshownight!=value) {
+				this.fcshownight = value;
+				this.state.set({fcshownight : this.fcshownight});
+				this.reloadest();
+			}
+			return false;
+		},
 		setDate: function(d,load) {
 			load=load||'ja';
 			var ret = 0,cur = this.getTime();
@@ -1148,6 +1193,7 @@ var ilm = (function (my) {
 				html += _.map(my.graphs,function(a,i){return (my.chartorder.indexOf(a)<0) ? '<li class="drag-item" name="'+a+'">'+my.graph_name(a)+'</li>' : "";}).join("");
 				html += '</ul></div><div class="checkbox"><label>Näita viiteid menüüs <input type="checkbox" onclick="ilm.setLinksAsMenu(this.checked);return true;" id="linksasmenu" name="linksasmenu"></label></div>';
 				html += '<div class="checkbox"><label>Näita ennustust tabelis <input type="checkbox" onclick="ilm.setFcAsTable(this.checked);return true;" id="samplemode" name="samplemode"></label></div>';
+				html += '<div class="checkbox"><label>Näita öist ennustust <input type="checkbox" onclick="ilm.setFcShowNight(this.checked);return true;" id="fcshownight" name="fcshownight"></label></div>';
 				html += '</form>';
 			}
 			if(div){
@@ -1191,7 +1237,7 @@ var ilm = (function (my) {
 					lastdate = parseInt(data.data[j - 1].time_stamp, 10) * 1000;
 				}
 			} else if (data) {
-				var c,e,f,g,h=/^ut/.test(place);
+				var c,e,f,g,h=/^ut/.test(place),z=/\d+:\d[012346789]\s/.test(data);
 				var reg= new RegExp(h?",\\s*":"\\s+?");
 				var rtmp = data.split("\n");
 				var rows = _.filter(rtmp,function(a,i){return a && /^(\d\d)/.test(a);});
@@ -1202,7 +1248,7 @@ var ilm = (function (my) {
 						if (b && !/^(--|Aeg)/.test(b)) {
 							c = b.split(reg);
 							c[9] = (!c[9] || c[9] < 0) ? 0 : c[9];
-							if(!last && ((h && /5:00$/.test(c[0])) || (!h && /5$/.test(c[1])))){
+							if(!last && ((h && /5:00$/.test(c[0])) || (!h && z && /5$/.test(c[1])))){
 								e=c;
 							} else {
 								if(h) lastdate = d = new Date(c[0].replace(/(\d\d\d\d)-?(\d\d)-?(\d\d)/,"$1/$2/$3")).getTime();
@@ -1243,14 +1289,14 @@ var ilm = (function (my) {
 					if(x<d.sunrise.getTime()) {
 						night[0] = x;
 						night[1] = d.sunrise.getTime();
-						plots.push({color:'#eee',from:night[0],to:night[1]});
+						plots.push({color:'#eee',from:night[0],to:night[1],zIndex:0});
 						//night=[];
 					}
 				}
 				else {
 					night[1] = d.sunrise.getTime();
 					if(night[1]>times[1]) night[1]=times[1];
-					if(night[0] && night[1] && night[1] > night[0]) plots.push({color:'#eee',from:night[0],to:night[1]});
+					if(night[0] && night[1] && night[1] > night[0]) plots.push({color:'#f9f9f9',from:night[0],to:night[1]});
 					//night=[];
 				}
 				night[0] = d.sunset.getTime();
@@ -1305,20 +1351,47 @@ var ilm = (function (my) {
 					r.avg_press = my.ntof2p((e) ? my.getavg([c[11], e[11]]) : c[11]);
 				}
 				else if(/emhi/.test(place)){
-					c[4] = (!c[4] || c[4] < -49) ? null : c[4];
-					c[7] = (c[7] && (c[7] <0||c[7]>49)) ? null : c[7];
-					if(e) e[7] = (e[7] && (e[7] <0||e[7]>49)) ? null : e[7];
+					/*
+<tr>
+<th>Aeg</th>
+<th>Veetase (BK77, cm)</th>
+<th>Veetase (EH2000, cm)</th>
+<th>Veetemperatuur (°C)</th>
+<th>Õhutemperatuur (°C)</th>
+<th>Tuule kiirus 2 minuti keskmine (m/s)</th>
+<th>Tuule suund 2 minuti keskmine (°)</th>
+<th>Tuule kiirus 10 minuti keskmine (m/s)</th>
+<th>Tuule kiirus 10 minuti maksimum (m/s)</th>
+<th>Tuule suund 10 minuti keskmine (°)</th>
+</tr>
+<tr>
+date 0
+time 1 <td class="number">14:00</td>
+wl1 2 <td class="number">-13</td>
+wl2 3 <td class="number">4</td>
+wtemp 4 <td class="number">9,3</td>
+temp 5 <td class="number">9,8</td>
+2ws 6 <td class="number">9,2</td>
+2wd 7 <td class="number">224</td>
+10avgws 8 <td class="number">9,3</td>
+10maxws 9 <td class="number">11,6</td>
+10wd 10 <td class="number">225</td>
+</tr>
+					*/
+					c[5] = (c[5]==null || c[5]==undefined || c[5] < -49) ? null : c[5];
 					c[8] = (c[8] && (c[8] <0||c[8]>49)) ? null : c[8];
 					if(e) e[8] = (e[8] && (e[8] <0||e[8]>49)) ? null : e[8];
-					r.avg_ws = my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7]);
-					r.max_ws = my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8]);
-					r.avg_wd = my.ntof2p((e) ? my.wdavg([c[9], e[9]]) : c[9]);
-					if(c[4]!==null) r.avg_temp = my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4]);
-					r.avg_wtemp = my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3]);
+					c[9] = (c[9] && (c[9] <0||c[9]>49)) ? null : c[9];
+					if(e) e[9] = (e[9] && (e[9] <0||e[9]>49)) ? null : e[9];
+					r.avg_ws = my.ntof2p((e) ? my.getavg([c[8], e[8]]) : c[8]);
+					r.max_ws = my.ntof2p((e) ? my.getmax([c[9], e[9]]) : c[9]);
+					r.avg_wd = my.ntof2p((e) ? my.wdavg([c[10], e[10]]) : c[10]);
+					if(c[5]!==null) r.avg_temp = my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5]);
+					r.avg_wtemp = my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4]);
 					r.avg_wl = my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2]);
 				}
 				else if(/mnt/.test(place)){
-					c[2] = (!c[2] || c[2] < -49) ? null : c[2];
+					c[2] = (c[2]==null || c[2]==undefined || c[2] < -49) ? null : c[2];
 					c[8] = (c[8] && (c[8] <0||c[8]>49)) ? null : c[8];
 					if(e) e[8] = (e[8] && (e[8] <0||e[8]>49)) ? null : e[8];
 					c[6] = (c[6] && (c[6] <0||c[6]>49)) ? null : c[6];

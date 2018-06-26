@@ -11,7 +11,8 @@
 		},
 		lang: {
 			months: my.months,
-			weekdays: my.weekdays
+			weekdays: my.weekdays,
+			shortWeekdays: my.shortweekdays
 		},
 	});
 
@@ -153,7 +154,7 @@
 			});
 	}
 	function addNight(chart, from, to) {
-		if(chart && chart.xAxis!==undefined) chart.xAxis[0].addPlotBand({color:'#eee',from:from,to:to});
+		if(chart && chart.xAxis!==undefined) chart.xAxis[0].addPlotBand({color:'#f9f9f9',from:from,to:to, zIndex:0});
 	}
 
 	function removePlotLine(chart) {
@@ -501,6 +502,7 @@
 						wscolor:has.ws?self.colorasbf(dt.ws_series.data[i][1]).color:'',
 						wgcolor:has.wg?self.colorasbf(dt.wg_series.data[i][1]).color:'',
 						day:self.getDayLetter(dn),
+						hide:!self.fcshownight
 					};
 					for(k=0,l=keys.length;k<l;++k) {
 						kn = keys[k];

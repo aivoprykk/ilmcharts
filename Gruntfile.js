@@ -87,7 +87,8 @@
       },
       src: [
       'node_modules/jquery/dist/jquery.js',
-      'contrib/highcharts/js/highcharts.js',
+      //'node_modules/highcharts/highcharts.src.js',
+      'contrib/highcharts/js/highcharts.src.js',
       'node_modules/underscore/underscore.js',
       'node_modules/jquery-ui/core.js',
       'node_modules/jquery-ui/datepicker.js',

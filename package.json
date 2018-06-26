@@ -1,7 +1,7 @@
 {
   "name": "ilmcharts",
   "description": "Domestic weather application http://ilm.majasa.ee",
-  "version": "1.1.8",
+  "version": "1.1.12",
   "language": "et",
   "charset": "utf-8",
   "keywords": [
@@ -11,7 +11,7 @@
   "homepage": "http://ilm.majasa.ee",
   "author": "Aivo Pruekk",
   "scripts": {
-    "test": "grunt test"
+    "build": "npm install && grunt"
   },
   "repository": {
     "type": "git",
@@ -32,7 +32,6 @@
     "grunt-contrib-cssmin": "~0.7.0",
     "grunt-contrib-jade": "~0.9.1",
     "grunt-contrib-jshint": "*",
-    "grunt-contrib-jscs": "*",
     "grunt-contrib-watch": "*",
     "grunt-jsonlint": "1.0.4",
     "grunt-contrib-copy": "~0.5.0",
@@ -46,13 +45,10 @@
     "jquery": "~2.1.1",
     "jquery-ui": "~1.10.5",
     "bootstrap": "~3.1.1",
-    "suncalc":"*"
+    "suncalc": "*"
   },
   "dependencies": {
-    "cheerio": "*",
-    "request": "*"
-  },
-  "scripts": {
-    "build": "npm install && grunt"
+    "cheerio": "^0.22.0",
+    "request": "^2.87.0"
   }
 }
