@@ -59,7 +59,10 @@
                                 { 'href': '&row=241&col=297', 'title': 'Häädemeeste', 'id': 'meteopl_haademeeste' },
                                 { 'href': '&row=199&col=297', 'title': 'Tallinn', 'id': 'meteopl_pirita' },
                                 { 'href': '&row=248&col=262', 'title': 'Saaremaa Sõrve', 'id': 'meteopl_sorve' },
-                                { 'href': '&row=220&col=262', 'title': 'Hiiumaa Ristna', 'id': 'meteopl_ristna' }
+                                { 'href': '&row=220&col=262', 'title': 'Hiiumaa Ristna', 'id': 'meteopl_ristna' },
+                                { 'href': '&row=213&col=283', 'title': 'Dirhami', 'id': 'meteopl_dirhami' },
+                                { 'href': '&row=220&col=276', 'title': 'Haapsalu', 'id': 'meteopl_haapsalu' },
+                                { 'href': '&row=199&col=304', 'title': 'Loksa', 'id': 'meteopl_loksa' }
                             ]
                         },
                         {

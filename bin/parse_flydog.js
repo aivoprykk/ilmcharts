@@ -219,11 +219,11 @@ function parseOut(ret, fn) {
             //console.log(ret[val]);
             //console.log(data.join('\n'));
             file = dir + 'ARC-' + val + '.txt';
-            fs.appendFile(file, data.join('\n') + '\n', function(err) {
+            fs.appendFile(file, (data.join('\n') + '\n').replace(/\n+/m,'\n'), function(err) {
                 if (err) console.log('ERR: not saved ' + file + ':' + err);
                 else if (debug) console.log('Saved ' + file);
                 var last = lastData(ret[val]);
-                fs.appendFile(dir + 'last.txt', last.join('\n') + '\n', function(err) {
+                fs.appendFile(dir + 'last.txt', (last.join('\n') + '\n').replace(/\n+/m,'\n'), function(err) {
                     if (err) console.log('ERR: not saved ' + file + ':' + err);
                     else if (debug) console.log('Saved ' + file);
                     if (fn) fn();
@@ -260,6 +260,7 @@ function getData(time) {
                         ]);
                 } else {
                     if (debug) console.log('bad response: '+ JSON.stringify(body));
+                    --myrunningrequests;
                 }
             }
             if (debug) console.log('[' + done + '] done.');
@@ -282,6 +283,7 @@ function getAllDataRecursive(a, b) {
         a+=(60 * 1000);
         getData(toFlydogTimeStr(a));
         setTimeout(function(t) {
+            //if (debug) console.log('next bunch: '+ a + ' ' + myrunningrequests);
             getAllDataRecursive(a, b);
         }, 1010, a);
         ++myrunningrequests;

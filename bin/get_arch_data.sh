@@ -138,9 +138,9 @@ let 'm=cur_min-last_min';
     if [ $s -lt $w ]; then
       let 's=w-s'
       [ $force -eq 0 ] && sleep $s
-    fi 
-  } 
-}  
+    fi
+  }
+}
 last=$last_stamp
 fi
 
@@ -150,7 +150,7 @@ if [ $lab -gt 0 ]; then
   echo "`date '+%F %T'` last:$last_stamp";
   if [ x"$temp" != x"" ]; then
     echo "$place:$name wget -U '$meinfo' -q -O $out/$temp $url"
-    [ -e $dir"/parse_$name.js" ] && echo "node $dir/parse_$name.js $out/$temp"
+    [ -e $dir"/parse_$name.js" ] && echo "node $dir/parse_$name.js $out/$temp $value $labstr"
   else
     echo "$place:$name wget -T40 -U '$meinfo' -q -O $out/$file $url"
   fi
@@ -166,7 +166,7 @@ if [ x"$dry" = x"" ]; then
     fi
 	  #rm -f $out"/"$temp
 	else
-	  wget -T40 -U "$meinfo" -q -O $out/$file $url		
+	  wget -T40 -U "$meinfo" -q -O $out/$file $url
     x=`cat $out/$file|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}'|wc -l`
     if [ $x -gt 0 ]; then tail -6 $out/$file|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}' > $out/last.txt; fi
 	fi

@@ -7,13 +7,21 @@ cd=timestr(time),
 last = 0,
 file,
 path = '',
+debug = 0,
 dir;
 
 process.argv.forEach(function (val, index, array) {
 	if(index===2 && val) {
 		input=val;
 	}
+    if (index === 3 && val) {
+        station = val;
+    }
+    if (index === 4 && val) {
+        debug++;
+    }
 });
+
 if (!fs.existsSync(input)) throw "Could not find input file:" + input;
 path = fs.realpathSync(input) || '';
 if(!path) throw "Could not resolve input file path:" + input;
@@ -42,7 +50,7 @@ function getLast(file) {
 		} catch (e) {
 		}
 	}
-	//console.log("got last: '" + last + "' from file: " + file )
+	if(debug) console.log('last:"' + last + '",ret:"' + ret + '",file: "' + file + '"');
 	return ret;
 }
 //dir = input.match(/.*\//);
@@ -59,17 +67,21 @@ fs.readFile(path, function(err, data) {
 		trs.each(function(a){
 			child = $(this);
 			text = child.text().trim();
-			ret.push(text.replace(/,/g,"."));
-			if(a===2) {
+			//if(debug) console.log(a+' -> ' + test + ' -> ' +text);
+			ret.push(text.replace(/,/g, "."));
+			if(a===1) {
+				//none
+			}
+			else if(a===2) {
 				if(/parnu/.test(path)) ret.push(""); //mootjal ei ole ohutemperatuuri
 				if(text) test = true;
 			}
-			else if(a===3 && text && !test) {
+			else if(a>=3 && text && !test) {
 				test = true;
 			}
 		});
 		if (ret.length&&test) {
-			//console.log(ret);
+			//if(debug) console.log(ret);
 			wdata.push(ret.join("\t"));
 		}
 	});
@@ -80,6 +92,7 @@ fs.readFile(path, function(err, data) {
 	} catch(e) {
 		datadate = time;
 	}
+	//if(debug) console.log(path+" " + err + " " + wdata);
 	if(wdata){
 		var j = wdata.length-1, t = 0, val, mc;
 		d = datadate.getTime();
@@ -103,15 +116,15 @@ fs.readFile(path, function(err, data) {
 			mc = wdata[j].match(/^\d+:\d+/);
 			t = new Date(wd[0] + " " + (mc && mc[0] ? mc[0] : "00:00")).getTime()||0;
 			//console.log(t + " "+ last);
-			//console.log(wdata[j].split(/\s+?/));
-			if(!last||(t&&t>last)) {				
+			//if(debug) console.log(wdata[j].split(/\s+?/));
+			if(!last||(t&&t>last)) {
 				ret[wd[0]].push(wd[1] + " " + wdata[j]);
 			}
 		}
 		i=0;
 		for(val in ret){
 			if(val && ret[val].length){
-				
+
 				ret[val].reverse();
 				//console.log(ret[val]);
 				//console.log(val + " >> " + ret[val].join("\n"));
@@ -121,7 +134,7 @@ fs.readFile(path, function(err, data) {
 				//if(i===0) {
 				//	fs.writeFileSync(dir+"last.txt", ret[val].join("\n")+"\n");
 				//	++i;
-				//} else 
+				//} else
 				fs.appendFileSync(dir+"last.txt",ret[val].join("\n")+"\n");
 			}
 		}
