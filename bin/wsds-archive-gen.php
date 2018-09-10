@@ -34,13 +34,13 @@ require("jaamconf.php");
 header("Content-Type:text/plain");
 
 //* mitmed konfi asjad siin
-$jaamad = array('vortsjarv_tamme','vortsjarv_joesuu');
+$jaamad = array('vortsjarv_tamme','vortsjarv_joesuu','peipsi_nina');
 $sisendjaam = "";
 $sisendaeg = 0;
 $ajaraam = "";
 $verbose = 0;
 $komakohti = 1;
-//* vajalikud sekundid mis lisatakse viimasele 
+//* vajalikud sekundid mis lisatakse viimasele
 //* failist leitud (minutiteni alla ümardatud) ajastringile
 $puhveraeg = (20+60*5);
 //* kui skript on bin kataloogis, siis kuhu võiks teha kataloogid ja failid?
@@ -111,7 +111,7 @@ if($sisendaeg!='koik'){
 			$time = date("Y-m-d H:i:s", mktime(0, 0, 0, $mc[3]+1, $mc[4], $mc[2]));
 		} else if(stripos($ajaraam," YEAR") !== FALSE){
 			$time = date("Y-m-d H:i:s", mktime(0, 0, 0, $mc[3], $mc[4], $mc[2]+1));
-		} else {				
+		} else {
 			$time = date("Y-m-d H:i:s", mktime($mc[6], $mc[5]+1, 0, $mc[3], $mc[4], $mc[2]));
 		}
 		$aeg = ' AND time BETWEEN DATE_SUB("'.$time.'",INTERVAL '.$ajaraam.') AND "'.$time.'"';
@@ -143,14 +143,15 @@ if(!$sql){
 $fieldnames = array("temperature", "heat_index", "dewpoint", "wind_direction", "wind_speed", "wind_gust", "humidity", "pressure");
 $fstr = join(", ",$fieldnames);
 for($k=0,$l=count($jaamad);$k<$l;++$k){
-	if($sisendjaam!=FALSE && $k!=$sisendjaam) continue; 
+	if($sisendjaam!=FALSE && $k!=$sisendjaam) continue;
 	$jaam=$k;
 	$jaamastr = $jaamad[$jaam];
 	if($jaamastr=='vortsjarv_tamme') $jstr="TammeSurf";
 	else if($jaamastr=='vortsjarv_joesuu') $jstr="Joesuu";
+	else if($jaamastr=='peipsi_nina') $jstr="MobileSurf";
 	else $jstr = $jaam;
 	$query = "select time, $fstr from wsds where station_id='$jstr'$aeg order by time asc";
-	//$query = "select aeg, ti, ilm.to as 'to', hi, ho, dp, wc, ws, wd, rt, r1, r24, pr, pa, wf, wt, ccalt, wg from ilm where jaam=$jaam$aeg order by aeg asc"; 
+	//$query = "select aeg, ti, ilm.to as 'to', hi, ho, dp, wc, ws, wd, rt, r1, r24, pr, pa, wf, wt, ccalt, wg from ilm where jaam=$jaam$aeg order by aeg asc";
 	if($verbose) { echo $query."\n"; }
 	//siin mysqli eripärad
 	if(!$sql) {
@@ -226,8 +227,8 @@ for($k=0,$l=count($jaamad);$k<$l;++$k){
 		$delta = abs($nowminute-$prevminute);
 		$flush = ($prevminute!="" && testm($nowminute) && (!testm($prevminute) || $delta>4)) ? ($flush ? 2 : 1) : FALSE;
 		if($flush==2 && $delta>4) $flush=1;
-		if($verbose) { 
-			echo "Kas flushida ? $prevdate:$prevminute:$nowdate:$nowminute:$flush:$delta\n"; 
+		if($verbose) {
+			echo "Kas flushida ? $prevdate:$prevminute:$nowdate:$nowminute:$flush:$delta\n";
 			echo "testid:".testm($nowminute).":".testm($prevminute).":".$prevminute."\n";
 		}
 		//* kuup vahetusel otsib uue nimega failist viimast ajastringi
@@ -314,7 +315,7 @@ function hMean($arg) {
 	$count=count($arg);
 	$avs=0;
 	$datas = 0;
-	for($i=0;$i<$count;++$i) { 
+	for($i=0;$i<$count;++$i) {
 		if($arg[$i]) {
 			$avs += (1/$arg[$i]);
 			++$datas;
