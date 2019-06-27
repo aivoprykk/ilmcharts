@@ -47,29 +47,33 @@ var ilm = (function(my) {
             return this;
         },
         set: function(opt) {
-            if (!opt) return this;
-            var changed = false;
-            for (var a in this.attr) {
+            if (!opt) {
+                return this;
+            }
+            var changed = false, a;
+            for (a in this.attr) {
                 if (a !== 'id' && (opt[a] || typeof opt[a] === 'boolean') && opt[a] !== this.attr[a]) {
                     this.attr[a] = (opt[a] === 'none') ? '' : opt[a];
                     changed = true;
                     console.log(a + ' ' + opt[a]);
                 }
             }
-            if (changed) this.save();
+            if (changed) {
+                this.save();
+            }
             return this;
         },
         get: function(name) {
             return this.attr[name] || null;
         },
         destroy: function() {
-            if (localStorage) localStorage.removeItem(this.id);
+            if (localStorage) {localStorage.removeItem(this.id);}
             return this;
         },
         toJSON: function() {
-            var ret = {};
-            for (var a in this.attr) {
-                if (a !== 'id') ret[a] = this.attr[a];
+            var ret = {}, a;
+            for (a in this.attr) {
+                if (a !== 'id') {ret[a] = this.attr[a];}
             }
             return ret;
         }
@@ -99,9 +103,9 @@ var ilm = (function(my) {
         this.linksasmenu = this.state.attr.linksasmenu;
         this.chartorder = this.state.attr.chartorder;
         this.fcsourcesdata = {
-            'yr': { 'name': 'Yr', 'url': 'http://www.yr.no', 'datadir': 'yr_data', 'fc_file': 'forecast_hour_by_hour.xml', datatype: 'xml' },
-            'wg': { 'name': 'WindGuru', 'url': 'http://www.windguru.cz', 'datadir': 'wg_data', 'fc_file': 'windguru_forecast.json', datatype: 'json' },
-            'em': { 'name': 'Ilmateenistus', 'url': 'http://www.ilmateenistus.ee', 'datadir': 'empg_data', 'fc_file': 'empg_forecast.json', datatype: 'json' }
+            yr: { 'name': 'Yr', 'url': 'http://www.yr.no', 'datadir': 'yr_data', 'fc_file': 'forecast_hour_by_hour.xml', datatype: 'xml' },
+            wg: { 'name': 'WindGuru', 'url': 'http://www.windguru.cz', 'datadir': 'wg_data', 'fc_file': 'windguru_forecast.json', datatype: 'json' },
+            em: { 'name': 'Ilmateenistus', 'url': 'http://www.ilmateenistus.ee', 'datadir': 'empg_data', 'fc_file': 'empg_forecast.json', datatype: 'json' }
         };
         this.histsourcesdata = {
                 'emhi': 'ilmateenistus.ee',
@@ -131,6 +135,7 @@ var ilm = (function(my) {
                 'ristna': { id: 'ristna', name: 'Hiiumaa Ristna', 'wglink': 96592, yrlink: 'Hiiumaa/Ristna', emlink: '2561', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
                 'loksa': { id: 'loksa', name: 'Loksa', 'wglink': 108851, yrlink: 'Harjumaa/Loksa', emlink: '4471', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
                 'dirhami': { id: 'dirhami', name: 'Dirhami', 'wglink': 261785, yrlink: 'Läänemaa/Dirhami', emlink: '1505', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
+                'paatsalu': { id: 'paatsalu', name: 'Paatsalu', 'wglink': 479054, yrlink: 'Pärnumaa/Paatsalu', emlink: '5801', group: 'meri', bind: 'emhi_virtsu', location: [58.508902, 23.663027] },
             };
         this.curplaces = {
             'flydog_aksi': { id: 'flydog_aksi', name: 'Saadjärv Äksi', cid: '', group: 'saadjarv-aksi', link: '/saadjarve/', bind: 'aksi', location: [58.523056, 26.668889] },
@@ -154,6 +159,7 @@ var ilm = (function(my) {
             'emhi_ristna': { id: 'emhi_ristna', cid: 'ristna-2', name: 'Ristna EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'ristna', location: [58.927304, 22.041023] },
             'emhi_loksa': { id: 'emhi_loksa', cid: 'loksa', name: 'Loksa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'loksa', location: [59.5872, 25.6943] },
             'emhi_dirhami': { id: 'emhi_dirhami', cid: 'dirhami', name: 'Dirhami EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'dirhami', location: [59.2133, 23.5031] },
+            'emhi_virtsu': { id: 'emhi_virtsu', cid: 'virtsu', name: 'Virtsu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'paatsalu', location: [58.508902, 23.663027] },
         };
         this.addDst = this.isDst();
         this.lastdate = this.getTime(); //-(4*24*3600);
@@ -230,7 +236,7 @@ var ilm = (function(my) {
             var changed = {};
             //if(!loc.hash) return false;
             if (loc.hash) {
-                var a = loc.hash.substring(1).split(/[\&|\/]/);
+                var a = loc.hash.substring(1).split(/[\&\|\/]/);
                 var i = 0;
                 var j = a.length;
                 var places = Object.keys(this.fcplaces);
@@ -238,12 +244,12 @@ var ilm = (function(my) {
                     for (; i < j; ++i) {
                         var b = a[i].split('=');
                         if (b[0]) {
-                            if ((/aeg/.test(b[0]) && b[1]) || /\d*-\d*-\d/.test(b[0])) {
+                            if ((/aeg/.test(b[0]) && b[1]) || (/\d*-\d*-\d/).test(b[0])) {
                                 changed.aeg = b[1] || b[0];
                             } else if ((/koht/.test(b[0]) && b[1]) || places.indexOf(b[0]) >= 0) {
                                 this.setEstPlace(b[1] || b[0], 'ei');
                                 changed.place = b[1] || b[0];
-                            } else if ((/raam/.test(b[0]) && b[1]) || /\d*[dh]/.test(b[0])) {
+                            } else if ((/raam/.test(b[0]) && b[1]) || (/\d*[dh]/).test(b[0])) {
                                 changed.raam = b[1] || b[0];
                             }
                         }
@@ -267,7 +273,7 @@ var ilm = (function(my) {
                 a;
             if (!div) { div = this.placeholder; }
             $(div).children().each(function(k, l) {
-                if (l.className && /float/.test(l.className)) {
+                if (l.className && (/float/).test(l.className)) {
                     a = [];
                     _.each(l.childNodes, function(i) {
                         if (i && (j = i.className || '')) {
@@ -306,7 +312,7 @@ var ilm = (function(my) {
                     ++m;
                     for (i = 0, j = l.childNodes.length; i < j; ++i) {
                         el = l.childNodes[i];
-                        if (el.classname && /(title|datepicker)/i.test(el.className)) continue;
+                        if (el.classname && (/(title|datepicker)/i).test(el.className)) continue;
                         if (el.className && el.className.match(/meta/)) {
                             break;
                         }
@@ -653,7 +659,7 @@ var ilm = (function(my) {
                         type: 'get',
                         url: url,
                     }).always(function(json, type) {
-                        if (!/error|timeout/.test(type)) {
+                        if (!(/error|timeout/).test(type)) {
                             var attachMarkerMessage = function(marker, message) {
                                 var infowindow = new w.google.maps.InfoWindow({
                                     content: message
@@ -874,27 +880,27 @@ var ilm = (function(my) {
             }
         },
         ntof2p: function(input) {
-            if (input === '-' || input === '' || input === null || input === undefined) { return null; }
-            if (Object.prototype.toString.call(input) === '[object String]' && /^0(\d+\.)/.test(input)) input = input.replace(/^0(\d+\.)/, '-$1');
+            if (input === '-' || input === '' || input === null || input === undefined || input === 'nan') { return null; }
+            if (Object.prototype.toString.call(input) === '[object String]' && (/^0(\d+\.)/).test(input)) input = input.replace(/^0(\d+\.)/, '-$1');
             return parseFloat(parseFloat(input).toFixed(1));
         },
         conv_kmh2ms: function(input) {
-            if (input === '-' || input === '' || input === null || input === undefined) { return null; }
+            if (input === '-' || input === '' || input === null || input === undefined || input === 'nan') { return null; }
             var t = (parseFloat(input) * 1000) / 3600;
             return parseFloat(t.toFixed(1));
         },
         conv_mh2ms: function(input) {
-            if (input === '-' || input === '' || input === null || input === undefined) { return null; }
+            if (input === '-' || input === '' || input === null || input === undefined || input === 'nan') { return null; }
             var t = parseFloat(input) / 2.23693629;
             return parseFloat(t.toFixed(1));
         },
         conv_knot2ms: function(input) {
-            if (input === '-' || input === '' || input === null || input === undefined) { return null; }
+            if (input === '-' || input === '' || input === null || input === undefined || input === 'nan') { return null; }
             var t = parseFloat(input) / 1.9426;
             return parseFloat((t + (t * 0.000639)).toFixed(1));
         },
         conv_ms2knots: function(input) {
-            if (input === '-' || input === '' || input === null || input === undefined) { return null; }
+            if (input === '-' || input === '' || input === null || input === undefined || input === 'nan') { return null; }
             var t = parseFloat(input) / 0.515;
             return parseFloat((t + (t * 0.000639)).toFixed(1));
         },
@@ -944,7 +950,7 @@ var ilm = (function(my) {
                 sum = 0;
             for (; i < j; i++) {
                 if (input[i] === '-' || input[i] === '' || input[i] === null || input[i] === undefined) {--num; continue; }
-                if (Object.prototype.toString.call(input[i]) === '[object String]' && /^0(\d+\.)/.test(input[i])) input[i] = input[i].replace(/^0(\d+\.)/, '-$1');
+                if (Object.prototype.toString.call(input[i]) === '[object String]' && (/^0(\d+\.)/).test(input[i])) input[i] = input[i].replace(/^0(\d+\.)/, '-$1');
                 sum += parseFloat(input[i]);
             }
             if (!num) return null;
@@ -971,13 +977,13 @@ var ilm = (function(my) {
             var x = '';
             persist = persist || 'ja';
             load = load || 'ja';
-            if (d && /^\d*d/.test(d)) {
+            if (d && (/^\d*d/).test(d)) {
                 x = d.replace(/d*$/, '');
                 this.timeframe = x * 24 * 3600 * 1000;
-            } else if (d && /^\d*h/.test(d)) {
+            } else if (d && (/^\d*h/).test(d)) {
                 x = d.replace(/h*$/, '');
                 this.timeframe = x * 3600 * 1000;
-            } else if (d && /^\d+$/.test(d)) {
+            } else if (d && (/^\d+$/).test(d)) {
                 this.timeframe = d;
             }
             if (persist === 'ja') this.state.set({ 'timeframe': this.timeframe });
@@ -1171,14 +1177,14 @@ var ilm = (function(my) {
             load = load || 'ja';
             var ret = 0,
                 cur = this.getTime();
-            if (d && /^\d*-\d*-\d*/.test(d)) {
+            if (d && (/^\d*-\d*-\d*/).test(d)) {
                 d = d.split(/[\sT]/)[0] + ' 23:59:59';
                 ret = this.getTime(d);
-            } else if (d && /^\d+$/.test(d)) {
+            } else if (d && (/^\d+$/).test(d)) {
                 ret = this.getTime() - (Number(d) * 1000);
-            } else if (d && /^\d*h/.test(d)) {
+            } else if (d && (/^\d*h/).test(d)) {
                 ret = this.getTime() - (Number(d.replace(/h*$/, '')) * 3600 * 1000);
-            } else if (d && /^\d*d/.test(d)) {
+            } else if (d && (/^\d*d/).test(d)) {
                 ret = this.getTime() - (Number(d.replace(/d*$/, '')) * 24 * 3600 * 1000);
             }
             if (!d || (ret && ret > cur)) {
@@ -1216,7 +1222,7 @@ var ilm = (function(my) {
         getTimeStr: function(d, f, g) {
             d = d ? new Date(d) : this.getTime();
             var month = d.getMonth();
-            if (!/\d/.test(month)) return ret;
+            if (!(/\d/).test(month)) return ret;
             var ret = '',
                 dsep = '.' + (month < 9 ? '0' : '') + (month + 1) + '.';
             if (f) { dsep = '. ' + my.months[month].toLowerCase() + ' '; }
@@ -1311,15 +1317,15 @@ var ilm = (function(my) {
                     z = /\d+:\d[012346789]\s/.test(data);
                 var reg = new RegExp(h ? ',\\s*' : '\\s+?');
                 var rtmp = data.split('\n');
-                var rows = _.filter(rtmp, function(a) { return a && /^(\d\d)/.test(a); });
+                var rows = _.filter(rtmp, function(a) { return a && (/^(\d\d)/).test(a); });
                 for (i = last ? rows.length - 2 : 0, j = rows.length, k = rows.length - 1; i < j; ++i) {
                     if (i < 0) continue;
                     b = rows[i];
                     //$.each(rows,function(a, b) {
-                    if (b && !/^(--|Aeg)/.test(b)) {
+                    if (b && !(/^(--|Aeg)/).test(b)) {
                         c = b.split(reg);
                         c[9] = (!c[9] || c[9] < 0) ? 0 : c[9];
-                        if (!last && ((h && /5:00$/.test(c[0])) || (!h && z && /5$/.test(c[1])))) {
+                        if (!last && ((h && (/5:00$/).test(c[0])) || (!h && z && (/5$/).test(c[1])))) {
                             e = c;
                         } else {
                             if (h) lastdate = d = new Date(c[0].replace(/(\d\d\d\d)-?(\d\d)-?(\d\d)/, '$1/$2/$3')).getTime();
@@ -1446,7 +1452,7 @@ temp 5 <td class="number">9,8</td>
 10maxws 9 <td class="number">11,6</td>
 10wd 10 <td class="number">225</td>
 </tr>
-					*/
+*/
                     c[5] = (c[5] == null || c[5] == undefined || c[5] < -49) ? null : c[5];
                     c[8] = (c[8] && (c[8] < 0 || c[8] > 49)) ? null : c[8];
                     if (e) e[8] = (e[8] && (e[8] < 0 || e[8] > 49)) ? null : e[8];

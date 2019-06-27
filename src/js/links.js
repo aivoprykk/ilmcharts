@@ -29,6 +29,7 @@
                                 { 'href': '125320', 'title': 'Tallinn', 'id': 'windguru_tallinn' },
                                 { 'href': '108163', 'title': 'Saaremaa Sõrve', 'id': 'windguru_sorve' },
                                 { 'href': '96592', 'title': 'Hiiumaa Ristna', 'id': 'windguru_ristna' },
+                                { 'href': '479054', 'title': 'Pärnumaa Paatsalu', 'id': 'windguru_paatsalu' },
                                 { 'href': '?set=143499', 'title': 'Eesti Meri', 'id': 'windguru_meri' },
                                 { 'href': '?set=143439', 'title': 'Sisej&auml;rved', 'id': 'windguru_jarved' }
                             ]
@@ -44,7 +45,8 @@
                                 { 'href': 'Pärnumaa/Häädemeeste/hour_by_hour.html', 'title': 'Häädemeeste', 'id': 'yr_parnu' },
                                 { 'href': 'Harjumaa/Tallinn/hour_by_hour.html', 'title': 'Tallinn', 'id': 'yr_tallinn' },
                                 { 'href': 'Saaremaa/Sõrve_Tuletorn/hour_by_hour.html', 'title': 'Saaremaa Sõrve', 'id': 'yr_sorve' },
-                                { 'href': 'Hiiumaa/Ristna/hour_by_hour.html', 'title': 'Hiiumaa Ristna', 'id': 'yr_ristna' }
+                                { 'href': 'Hiiumaa/Ristna/hour_by_hour.html', 'title': 'Hiiumaa Ristna', 'id': 'yr_ristna' },
+                                { 'href': 'Pärnumaa/Paatsalu/hour_by_hour.html', 'title': 'Pärnumaa Paatsalu', 'id': 'yr_paatsalu' }
                             ]
                         },
                         {
@@ -63,6 +65,7 @@
                                 { 'href': '&row=248&col=262', 'title': 'Saaremaa Sõrve', 'id': 'meteopl_sorve' },
                                 { 'href': '&row=220&col=262', 'title': 'Hiiumaa Ristna', 'id': 'meteopl_ristna' },
                                 { 'href': '&row=213&col=283', 'title': 'Dirhami', 'id': 'meteopl_dirhami' },
+                                { 'href': '&row=227&col=283', 'title': 'Virtsu', 'id': 'meteopl_virtsu' },
                                 { 'href': '&row=220&col=276', 'title': 'Haapsalu', 'id': 'meteopl_haapsalu' },
                                 { 'href': '&row=199&col=304', 'title': 'Loksa', 'id': 'meteopl_loksa' }
                             ]

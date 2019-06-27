@@ -9,7 +9,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="css/images/favicon.ico">
     <!-- [if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
   </head>
-  <body style="padding-top:30px" class="sans">
+  <body style="padding-top:25px">
     <div id="header">
       <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="container-fluid">
@@ -47,13 +47,25 @@
     <div id="backgr" class="ilm-backgr"><img src="css/images/ranna-001.jpg" alt="Peipsi pilt"></div>
     <div id="bghide" class="ilm-bghide"></div>
     <div id="dots" class="ilm-dots"></div>
-    <div id="sisu" class="ilm-sisu nopadding">
-      <div class="container-fluid col-lg-12">
-        <div class="menu col-lg-5 col-sm-6 col-xs-12">
-          <div id="menu-container"></div>
+    <div id="sisu" class="ilm-sisu">
+      <div id="container" class="col-lg-12">
+        <div class="float col-lg-6">
+          <div class="title btn-group"><a id="curplace" style="display:none" class="btn btn-default btn-xs navbar-btn"></a><a id="curtime" style="display:none" class="btn btn-default btn-xs navbar-btn"></a><a id="cursel" style="display:none" data-toggle="dropdown" class="btn btn-default btn-xs navbar-btn dropdown-toggle"><span class="caret"></span></a>
+            <ul id="curmenu" role="menu" class="curmenu dropdown-menu"></ul>
+          </div>
+          <input id="datepicker" type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0">
+          <div class="meta">
+            <div id="curmeta" class="ilm-meta"></div>
+          </div>
         </div>
-        <div class="chart col-lg-7 col-sm-6 col-xs-12">
-          <div id="container" class="chart-container col-lg-12"></div>
+        <div class="float col-lg-6">
+          <div class="title btn-group"><a id="fctitle" style="display:none" class="btn btn-default btn-xs navbar-btn"></a><a id="fcsel" style="display:none" data-toggle="dropdown" class="btn btn-default btn-xs navbar-btn dropdown-toggle"><span class="caret"></span></a>
+            <ul id="fcmenu" role="menu" class="fcmenu dropdown-menu"></ul>
+          </div>
+          <div class="meta">
+            <div id="yrmeta" class="ilm-meta"></div>
+            <div id="wgmeta" class="ilm-meta"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -63,6 +75,5 @@
     </div>
     <script src="js/libs.js"></script>
     <script src="js/ilmcharts.js?1.1.13.5"></script>
-    <script async="" defer="" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBKPcJDwBUmu-xio9gPQsi-FjWtY_9XQmg&amp;callback=ilm.loadMap"></script>
   </body>
 </html>
