@@ -1,5 +1,5 @@
 /*!
- * Ilmcharts v1.1.13.6 (http://ilm.majasa.ee)
+ * Ilmcharts v1.1.13.8 (http://ilm.majasa.ee)
  * Copyright 2012-2019 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
@@ -128,11 +128,11 @@ var ilm = (function(my) {
                 'tartu': { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: 'Tartumaa/Tartu', emlink: '795', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
                 'aksi': { id: 'aksi', name: 'Saadjärv Äksi', wglink: '266923', yrlink: 'Tartumaa/Äksi', emlink: '9748', group: 'saadjarv-aksi', bind: 'flydog_aksi', location: [58.523056, 26.668889] },
                 'uhmardu': { id: 'uhmardu', name: 'Uhmardu', yrlink: 'Jõgevamaa/Uhmardu', emlink: '8629', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
-                'jogeva': { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: 'Jõgevamaa/Jõgeva', emlink: '249', link: '', 'bind': 'mnt_jogeva', location: [58.764849, 26.404618] },
+                'jogeva': { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: 'Jõgevamaa/Jõgeva', emlink: '2262', link: '', 'bind': 'mnt_jogeva', location: [58.764849, 26.404618] },
                 'tamme': { id: 'tamme', name: 'Võrtsjärv Tamme', 'wglink': 192609, yrlink: 'Tartumaa/Tamme', emlink: '8094', group: 'vortsjarv-tamme', bind: 'arhiiv_vortsjarv_tamme', location: [58.271306, 26.134923] },
                 'joesuu': { id: 'joesuu', name: 'Võrtsjärv Jõesuu', 'wglink': 692681, yrlink: 'Viljandimaa/Jõesuu', emlink: '8864', group: 'vortsjarv-joesuu', bind: 'arhiiv_vortsjarv_joesuu', location: [58.386441, 26.131942] },
                 'rapina': { id: 'rapina', name: 'Peipsi Räpina', 'wglink': 183648, yrlink: 'Põlvamaa/Võõpsu', emlink: '7216', group: 'peipsi', bind: 'mnt_rapina', location: [58.124988, 27.530086] },
-                'mustvee': { id: 'mustvee', name: 'Peipsi Mustvee', 'wglink': 104337, yrlink: 'Jõgevamaa/Mustvee', emlink: '485', group: 'peipsi', bind: 'emhi_mustvee', location: [58.847500, 26.951111] },
+                'mustvee': { id: 'mustvee', name: 'Peipsi Mustvee', 'wglink': 104337, yrlink: 'Jõgevamaa/Mustvee', emlink: '5097', group: 'peipsi', bind: 'emhi_mustvee', location: [58.847500, 26.951111] },
                 'nina': { id: 'nina', name: 'Peipsi Nina', 'wglink': 20401, yrlink: 'Tartumaa/Nina', emlink: '5427', group: 'peipsi', bind: 'emhi_nina', location: [58.598889, 27.209722] },
                 'pirita': { id: 'pirita', name: 'Tallinn Pirita', 'wglink': 125320, yrlink: 'Harjumaa/Pirita~798565', emlink: '596', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
                 'rohuneeme': { id: 'rohuneeme', name: 'Rohuneeme', 'wglink': 70524, yrlink: 'Harjumaa/Rohuneeme', emlink: '7039', group: 'meri', bind: 'emhi_rohuneeme', location: [59.551945, 24.794094] },
