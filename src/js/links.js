@@ -65,7 +65,7 @@
                                 { 'href': '&row=248&col=262', 'title': 'Saaremaa Sõrve', 'id': 'meteopl_sorve' },
                                 { 'href': '&row=220&col=262', 'title': 'Hiiumaa Ristna', 'id': 'meteopl_ristna' },
                                 { 'href': '&row=213&col=283', 'title': 'Dirhami', 'id': 'meteopl_dirhami' },
-                                { 'href': '&row=227&col=283', 'title': 'Virtsu', 'id': 'meteopl_virtsu' },
+                                { 'href': '&row=227&col=283', 'title': 'Virtsu', 'id': 'meteopl_paatsalu' },
                                 { 'href': '&row=220&col=276', 'title': 'Haapsalu', 'id': 'meteopl_haapsalu' },
                                 { 'href': '&row=199&col=304', 'title': 'Loksa', 'id': 'meteopl_loksa' }
                             ]

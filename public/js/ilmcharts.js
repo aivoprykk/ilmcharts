@@ -1,5 +1,5 @@
 /*!
- * Ilmcharts v1.1.13.5 (http://ilm.majasa.ee)
+ * Ilmcharts v1.1.13.6 (http://ilm.majasa.ee)
  * Copyright 2012-2019 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
@@ -143,7 +143,7 @@ var ilm = (function(my) {
                 'ristna': { id: 'ristna', name: 'Hiiumaa Ristna', 'wglink': 96592, yrlink: 'Hiiumaa/Ristna', emlink: '2561', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
                 'loksa': { id: 'loksa', name: 'Loksa', 'wglink': 108851, yrlink: 'Harjumaa/Loksa', emlink: '4471', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
                 'dirhami': { id: 'dirhami', name: 'Dirhami', 'wglink': 261785, yrlink: 'Läänemaa/Dirhami', emlink: '1505', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
-                'paatsalu': { id: 'paatsalu', name: 'Paatsalu', 'wglink': 479054, yrlink: 'Pärnumaa/Paatsalu', emlink: '5801', group: 'meri', bind: 'emhi_virtsu', location: [58.508902, 23.663027] },
+                'paatsalu': { id: 'paatsalu', name: 'Paatsalu', 'wglink': 479054, yrlink: 'Pärnumaa/Paatsalu', emlink: '5801', group: 'meri', bind: 'emhi_paatsalu', location: [58.508902, 23.663027] },
             };
         this.curplaces = {
             'flydog_aksi': { id: 'flydog_aksi', name: 'Saadjärv Äksi', cid: '', group: 'saadjarv-aksi', link: '/saadjarve/', bind: 'aksi', location: [58.523056, 26.668889] },
@@ -167,7 +167,7 @@ var ilm = (function(my) {
             'emhi_ristna': { id: 'emhi_ristna', cid: 'ristna-2', name: 'Ristna EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'ristna', location: [58.927304, 22.041023] },
             'emhi_loksa': { id: 'emhi_loksa', cid: 'loksa', name: 'Loksa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'loksa', location: [59.5872, 25.6943] },
             'emhi_dirhami': { id: 'emhi_dirhami', cid: 'dirhami', name: 'Dirhami EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'dirhami', location: [59.2133, 23.5031] },
-            'emhi_virtsu': { id: 'emhi_virtsu', cid: 'virtsu', name: 'Virtsu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'paatsalu', location: [58.508902, 23.663027] },
+            'emhi_paatsalu': { id: 'emhi_paatsalu', cid: 'virtsu', name: 'Virtsu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'paatsalu', location: [58.508902, 23.663027] },
         };
         this.addDst = this.isDst();
         this.lastdate = this.getTime(); //-(4*24*3600);
@@ -2981,7 +2981,9 @@ window.$(function() {
 		done: function() {
 			ajax_done = 0;
 			var self=my, i1, i2, i3, i=0,j=0,dn=null,
-			dt = get.dataseries[my.fcsource||my.fcsources[0]][my.fcplace]||{},
+			dtf = Object.keys(get.dataseries)[0], 
+			dtp = get.dataseries[my.fcsource||my.fcsources[0]]||get.dataseries[dtf],  
+			dt = dtp[my.fcplace]||{},
 			fc=my.fcplaces[my.fcplace],
 			loc=fc.location, sun = {},
 			has = {
@@ -2993,7 +2995,7 @@ window.$(function() {
 					press: (dt.press_series && dt.press_series.data.length),
 					temp: (dt.temp_series && dt.temp_series.data.length)
 			}, 
-			dbase = has.ws ? dt.ws_series.data : has.temp ? dt.temp_series.data : dt.wd_series.data,
+			dbase = has.ws ? dt.ws_series.data : has.temp ? dt.temp_series.data : has.wd ? dt.wd_series.data : [],
 			k=0, l=0, kn='', night=false, nightplot=[], doplot=false;
 
 			if(my.samplemode=='graph') {
@@ -3197,7 +3199,7 @@ window.$(function() {
                                 { 'href': '&row=248&col=262', 'title': 'Saaremaa Sõrve', 'id': 'meteopl_sorve' },
                                 { 'href': '&row=220&col=262', 'title': 'Hiiumaa Ristna', 'id': 'meteopl_ristna' },
                                 { 'href': '&row=213&col=283', 'title': 'Dirhami', 'id': 'meteopl_dirhami' },
-                                { 'href': '&row=227&col=283', 'title': 'Virtsu', 'id': 'meteopl_virtsu' },
+                                { 'href': '&row=227&col=283', 'title': 'Virtsu', 'id': 'meteopl_paatsalu' },
                                 { 'href': '&row=220&col=276', 'title': 'Haapsalu', 'id': 'meteopl_haapsalu' },
                                 { 'href': '&row=199&col=304', 'title': 'Loksa', 'id': 'meteopl_loksa' }
                             ]

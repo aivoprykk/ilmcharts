@@ -447,7 +447,9 @@
 		done: function() {
 			ajax_done = 0;
 			var self=my, i1, i2, i3, i=0,j=0,dn=null,
-			dt = get.dataseries[my.fcsource||my.fcsources[0]][my.fcplace]||{},
+			dtf = Object.keys(get.dataseries)[0], 
+			dtp = get.dataseries[my.fcsource||my.fcsources[0]]||get.dataseries[dtf],  
+			dt = dtp[my.fcplace]||{},
 			fc=my.fcplaces[my.fcplace],
 			loc=fc.location, sun = {},
 			has = {
@@ -459,7 +461,7 @@
 					press: (dt.press_series && dt.press_series.data.length),
 					temp: (dt.temp_series && dt.temp_series.data.length)
 			}, 
-			dbase = has.ws ? dt.ws_series.data : has.temp ? dt.temp_series.data : dt.wd_series.data,
+			dbase = has.ws ? dt.ws_series.data : has.temp ? dt.temp_series.data : has.wd ? dt.wd_series.data : [],
 			k=0, l=0, kn='', night=false, nightplot=[], doplot=false;
 
 			if(my.samplemode=='graph') {

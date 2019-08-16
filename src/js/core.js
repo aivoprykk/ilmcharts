@@ -135,7 +135,7 @@ var ilm = (function(my) {
                 'ristna': { id: 'ristna', name: 'Hiiumaa Ristna', 'wglink': 96592, yrlink: 'Hiiumaa/Ristna', emlink: '2561', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
                 'loksa': { id: 'loksa', name: 'Loksa', 'wglink': 108851, yrlink: 'Harjumaa/Loksa', emlink: '4471', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
                 'dirhami': { id: 'dirhami', name: 'Dirhami', 'wglink': 261785, yrlink: 'Läänemaa/Dirhami', emlink: '1505', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
-                'paatsalu': { id: 'paatsalu', name: 'Paatsalu', 'wglink': 479054, yrlink: 'Pärnumaa/Paatsalu', emlink: '5801', group: 'meri', bind: 'emhi_virtsu', location: [58.508902, 23.663027] },
+                'paatsalu': { id: 'paatsalu', name: 'Paatsalu', 'wglink': 479054, yrlink: 'Pärnumaa/Paatsalu', emlink: '5801', group: 'meri', bind: 'emhi_paatsalu', location: [58.508902, 23.663027] },
             };
         this.curplaces = {
             'flydog_aksi': { id: 'flydog_aksi', name: 'Saadjärv Äksi', cid: '', group: 'saadjarv-aksi', link: '/saadjarve/', bind: 'aksi', location: [58.523056, 26.668889] },
@@ -159,7 +159,7 @@ var ilm = (function(my) {
             'emhi_ristna': { id: 'emhi_ristna', cid: 'ristna-2', name: 'Ristna EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'ristna', location: [58.927304, 22.041023] },
             'emhi_loksa': { id: 'emhi_loksa', cid: 'loksa', name: 'Loksa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'loksa', location: [59.5872, 25.6943] },
             'emhi_dirhami': { id: 'emhi_dirhami', cid: 'dirhami', name: 'Dirhami EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'dirhami', location: [59.2133, 23.5031] },
-            'emhi_virtsu': { id: 'emhi_virtsu', cid: 'virtsu', name: 'Virtsu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'paatsalu', location: [58.508902, 23.663027] },
+            'emhi_paatsalu': { id: 'emhi_paatsalu', cid: 'virtsu', name: 'Virtsu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'paatsalu', location: [58.508902, 23.663027] },
         };
         this.addDst = this.isDst();
         this.lastdate = this.getTime(); //-(4*24*3600);
