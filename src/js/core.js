@@ -129,7 +129,7 @@ var ilm = (function(my) {
                 'pirita': { id: 'pirita', name: 'Tallinn Pirita', 'wglink': 125320, yrlink: 'Harjumaa/Pirita~798565', emlink: '596', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
                 'rohuneeme': { id: 'rohuneeme', name: 'Rohuneeme', 'wglink': 70524, yrlink: 'Harjumaa/Rohuneeme', emlink: '7039', group: 'meri', bind: 'emhi_rohuneeme', location: [59.551945, 24.794094] },
                 'haapsalu': { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', 'wglink': 245713, yrlink: 'Läänemaa/Haapsalu_Laht', emlink: '183', group: 'meri', bind: 'emhi_haapsalu', location: [58.9578, 23.4901] },
-                'parnu': { id: 'parnu', name: 'Pärnu', 'wglink': 92781, yrlink: 'Pärnumaa/Pärnu', emlink: '625', group: 'meri', bind: 'emhi_parnu', location: [58.365958, 24.526257] },
+                'parnu': { id: 'parnu', name: 'Pärnu', 'wglink': 92781, yrlink: 'Pärnumaa/Pärnu', emlink: '624', group: 'meri', bind: 'emhi_parnu', location: [58.365958, 24.526257] },
                 'haademeeste': { id: 'haademeeste', name: 'Häädemeeste', 'wglink': 246420, yrlink: 'Pärnumaa/Häädemeeste', emlink: '1957', group: 'meri', bind: 'emhi_haademeeste', location: [58.071644, 24.478816] },
                 'sorve': { id: 'sorve', name: 'Saaremaa Sõrve', 'wglink': 108163, yrlink: 'Saaremaa/Sõrve_Tuletorn', emlink: '7950', group: 'meri', bind: 'emhi_sorve', location: [57.909984, 22.055313] },
                 'ristna': { id: 'ristna', name: 'Hiiumaa Ristna', 'wglink': 96592, yrlink: 'Hiiumaa/Ristna', emlink: '2561', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
