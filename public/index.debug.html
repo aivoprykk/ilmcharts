@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Domestic weather application http://ilm.majasa.ee">
-    <link rel="stylesheet" href="css/ilmcharts.css?1.1.14.1" media="screen">
+    <link rel="stylesheet" href="css/ilmcharts.css?1.1.14.4" media="screen">
     <link rel="shortcut icon" type="image/x-icon" href="css/images/favicon.ico">
     <!-- [if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
   </head>
@@ -58,11 +58,24 @@
       </div>
     </div>
     <div id="popup" style="display:none;" class="ilm-popup panel panel-primary">
-      <div id="popup_in" class="panel-heading"><b class="panel-title"><a id="sl" href="#" onclick="return ilm.Popup();" class="ilm-sl">Sulge</a></b></div>
+      <div id="popup_in" class="panel-heading"><b class="panel-title"><a id="sl" href="#" onclick="return ilm.Popup.render();" class="ilm-sl">Sulge</a></b></div>
       <div id="lingid" class="panel-body"></div>
     </div>
+    <div id="ilm-modal" aria-hidden="true" role="dialog" class="modal ilm-modal fade">
+      <div role="document" class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-label="Sulge" class="close"><span aria-hidden="true">&times;</span></button>
+            <h5 class="modal-title popup-title">Pealkiri</h5>
+          </div>
+          <div class="modal-body">
+            <div class="container-fluid popup-sisu">Oodake, laadin sisu ...</div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script src="js/libs.js"></script>
-    <script src="js/ilmcharts.js?1.1.14.1"></script>
+    <script src="js/ilmcharts.js?1.1.14.4"></script>
     <script async="" defer="" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBKPcJDwBUmu-xio9gPQsi-FjWtY_9XQmg&amp;callback=ilm.loadMap"></script>
   </body>
 </html>

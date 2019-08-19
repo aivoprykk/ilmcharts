@@ -1,4 +1,5 @@
 var ilm = (function(my) {
+    'use strict';
     var w = window,
         doc = document,
         loc = w.location,
@@ -103,64 +104,64 @@ var ilm = (function(my) {
         this.linksasmenu = this.state.attr.linksasmenu;
         this.chartorder = this.state.attr.chartorder;
         this.fcsourcesdata = {
-            yr: { 'name': 'Yr', 'url': 'http://www.yr.no', 'datadir': 'yr_data', 'fc_file': 'forecast_hour_by_hour.xml', datatype: 'xml' },
-            wg: { 'name': 'WindGuru', 'url': 'http://www.windguru.cz', 'datadir': 'wg_data', 'fc_file': 'windguru_forecast.json', datatype: 'json' },
-            em: { 'name': 'Ilmateenistus', 'url': 'http://www.ilmateenistus.ee', 'datadir': 'empg_data', 'fc_file': 'empg_forecast.json', datatype: 'json' }
+            yr: { name: 'Yr', url: 'http://www.yr.no', datadir: 'yr_data', fc_file: 'forecast_hour_by_hour.xml', datatype: 'xml' },
+            wg: { name: 'WindGuru', url: 'http://www.windguru.cz', datadir: 'wg_data', fc_file: 'windguru_forecast.json', datatype: 'json' },
+            em: { name: 'Ilmateenistus', url: 'http://www.ilmateenistus.ee', datadir: 'empg_data', fc_file: 'empg_forecast.json', datatype: 'json' }
         };
         this.histsourcesdata = {
-                'emhi': 'ilmateenistus.ee',
-                'emu': 'energia.emu.ee',
-                'ut': 'meteo.physic.ut.ee',
-                'zoig': 'ilm.zoig.ee',
-                'arhiiv': 'ilm.majasa.ee',
-                'mnt': 'balticroads.net',
-                'flydog': 'databuoys.sensornest.com'
-            },
-            this.fcplaces = {
-                'tartu': { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: 'Tartumaa/Tartu', emlink: '793', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
-                'aksi': { id: 'aksi', name: 'Saadjärv Äksi', wglink: '266923', yrlink: 'Tartumaa/Äksi', emlink: '9748', group: 'saadjarv-aksi', bind: 'flydog_aksi', location: [58.523056, 26.668889] },
-                'uhmardu': { id: 'uhmardu', name: 'Uhmardu', yrlink: 'Jõgevamaa/Uhmardu', emlink: '8629', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
-                'jogeva': { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: 'Jõgevamaa/Jõgeva', emlink: '2262', link: '', 'bind': 'mnt_jogeva', location: [58.764849, 26.404618] },
-                'tamme': { id: 'tamme', name: 'Võrtsjärv Tamme', 'wglink': 192609, yrlink: 'Tartumaa/Tamme', emlink: '8094', group: 'vortsjarv-tamme', bind: 'arhiiv_vortsjarv_tamme', location: [58.271306, 26.134923] },
-                'joesuu': { id: 'joesuu', name: 'Võrtsjärv Jõesuu', 'wglink': 692681, yrlink: 'Viljandimaa/Jõesuu', emlink: '8864', group: 'vortsjarv-joesuu', bind: 'arhiiv_vortsjarv_joesuu', location: [58.386441, 26.131942] },
-                'rapina': { id: 'rapina', name: 'Peipsi Räpina', 'wglink': 183648, yrlink: 'Põlvamaa/Võõpsu', emlink: '7216', group: 'peipsi', bind: 'arhiiv_peipsi_rapina', location: [58.124988, 27.530086] },
-                'nina': { id: 'nina', name: 'Peipsi Nina', 'wglink': 20401, yrlink: 'Tartumaa/Nina', emlink: '5427', group: 'peipsi', bind: 'arhiiv_peipsi_nina', location: [58.598889, 27.209722] },
-                'mustvee': { id: 'mustvee', name: 'Peipsi Mustvee', 'wglink': 104337, yrlink: 'Jõgevamaa/Mustvee', emlink: '5097', group: 'peipsi', bind: 'emhi_mustvee', location: [58.847500, 26.951111] },
-                'pirita': { id: 'pirita', name: 'Tallinn Pirita', 'wglink': 125320, yrlink: 'Harjumaa/Pirita~798565', emlink: '596', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
-                'rohuneeme': { id: 'rohuneeme', name: 'Rohuneeme', 'wglink': 70524, yrlink: 'Harjumaa/Rohuneeme', emlink: '7039', group: 'meri', bind: 'emhi_rohuneeme', location: [59.551945, 24.794094] },
-                'haapsalu': { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', 'wglink': 245713, yrlink: 'Läänemaa/Haapsalu_Laht', emlink: '183', group: 'meri', bind: 'emhi_haapsalu', location: [58.9578, 23.4901] },
-                'parnu': { id: 'parnu', name: 'Pärnu', 'wglink': 92781, yrlink: 'Pärnumaa/Pärnu', emlink: '624', group: 'meri', bind: 'emhi_parnu', location: [58.365958, 24.526257] },
-                'haademeeste': { id: 'haademeeste', name: 'Häädemeeste', 'wglink': 246420, yrlink: 'Pärnumaa/Häädemeeste', emlink: '1957', group: 'meri', bind: 'emhi_haademeeste', location: [58.071644, 24.478816] },
-                'sorve': { id: 'sorve', name: 'Saaremaa Sõrve', 'wglink': 108163, yrlink: 'Saaremaa/Sõrve_Tuletorn', emlink: '7950', group: 'meri', bind: 'emhi_sorve', location: [57.909984, 22.055313] },
-                'ristna': { id: 'ristna', name: 'Hiiumaa Ristna', 'wglink': 96592, yrlink: 'Hiiumaa/Ristna', emlink: '2561', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
-                'loksa': { id: 'loksa', name: 'Loksa', 'wglink': 108851, yrlink: 'Harjumaa/Loksa', emlink: '4471', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
-                'dirhami': { id: 'dirhami', name: 'Dirhami', 'wglink': 261785, yrlink: 'Läänemaa/Dirhami', emlink: '1505', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
-                'paatsalu': { id: 'paatsalu', name: 'Paatsalu', 'wglink': 479054, yrlink: 'Pärnumaa/Paatsalu', emlink: '5801', group: 'meri', bind: 'emhi_paatsalu', location: [58.508902, 23.663027] },
-            };
+            emhi: 'ilmateenistus.ee',
+            emu: 'energia.emu.ee',
+            ut: 'meteo.physic.ut.ee',
+            zoig: 'ilm.zoig.ee',
+            arhiiv: 'ilm.majasa.ee',
+            mnt: 'balticroads.net',
+            flydog: 'databuoys.sensornest.com'
+        };
+        this.fcplaces = {
+            tartu: { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: 'Tartumaa/Tartu', emlink: '793', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
+            aksi: { id: 'aksi', name: 'Saadjärv Äksi', wglink: '266923', yrlink: 'Tartumaa/Äksi', emlink: '9748', group: 'saadjarv-aksi', bind: 'flydog_aksi', location: [58.523056, 26.668889] },
+            uhmardu: { id: 'uhmardu', name: 'Uhmardu', yrlink: 'Jõgevamaa/Uhmardu', emlink: '8629', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
+            jogeva: { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: 'Jõgevamaa/Jõgeva', emlink: '2262', link: '', bind: 'mnt_jogeva', location: [58.764849, 26.404618] },
+            tamme: { id: 'tamme', name: 'Võrtsjärv Tamme', wglink: 192609, yrlink: 'Tartumaa/Tamme', emlink: '8094', group: 'vortsjarv-tamme', bind: 'arhiiv_vortsjarv_tamme', location: [58.271306, 26.134923] },
+            joesuu: { id: 'joesuu', name: 'Võrtsjärv Jõesuu', wglink: 692681, yrlink: 'Viljandimaa/Jõesuu', emlink: '8864', group: 'vortsjarv-joesuu', bind: 'arhiiv_vortsjarv_joesuu', location: [58.386441, 26.131942] },
+            rapina: { id: 'rapina', name: 'Peipsi Räpina', wglink: 183648, yrlink: 'Põlvamaa/Võõpsu', emlink: '7216', group: 'peipsi', bind: 'arhiiv_peipsi_rapina', location: [58.124988, 27.530086] },
+            nina: { id: 'nina', name: 'Peipsi Nina', wglink: 20401, yrlink: 'Tartumaa/Nina', emlink: '5427', group: 'peipsi', bind: 'arhiiv_peipsi_nina', location: [58.598889, 27.209722] },
+            mustvee: { id: 'mustvee', name: 'Peipsi Mustvee', wglink: 104337, yrlink: 'Jõgevamaa/Mustvee', emlink: '5097', group: 'peipsi', bind: 'emhi_mustvee', location: [58.847500, 26.951111] },
+            pirita: { id: 'pirita', name: 'Tallinn Pirita', wglink: 125320, yrlink: 'Harjumaa/Pirita~798565', emlink: '596', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
+            rohuneeme: { id: 'rohuneeme', name: 'Rohuneeme', wglink: 70524, yrlink: 'Harjumaa/Rohuneeme', emlink: '7039', group: 'meri', bind: 'emhi_rohuneeme', location: [59.551945, 24.794094] },
+            haapsalu: { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', wglink: 245713, yrlink: 'Läänemaa/Haapsalu_Laht', emlink: '183', group: 'meri', bind: 'emhi_haapsalu', location: [58.9578, 23.4901] },
+            parnu: { id: 'parnu', name: 'Pärnu', wglink: 92781, yrlink: 'Pärnumaa/Pärnu', emlink: '624', group: 'meri', bind: 'emhi_parnu', location: [58.365958, 24.526257] },
+            haademeeste: { id: 'haademeeste', name: 'Häädemeeste', wglink: 246420, yrlink: 'Pärnumaa/Häädemeeste', emlink: '1957', group: 'meri', bind: 'emhi_haademeeste', location: [58.071644, 24.478816] },
+            sorve: { id: 'sorve', name: 'Saaremaa Sõrve', wglink: 108163, yrlink: 'Saaremaa/Sõrve_Tuletorn', emlink: '7950', group: 'meri', bind: 'emhi_sorve', location: [57.909984, 22.055313] },
+            ristna: { id: 'ristna', name: 'Hiiumaa Ristna', wglink: 96592, yrlink: 'Hiiumaa/Ristna', emlink: '2561', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
+            loksa: { id: 'loksa', name: 'Loksa', wglink: 108851, yrlink: 'Harjumaa/Loksa', emlink: '4471', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
+            dirhami: { id: 'dirhami', name: 'Dirhami', wglink: 261785, yrlink: 'Läänemaa/Dirhami', emlink: '1505', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
+            paatsalu: { id: 'paatsalu', name: 'Paatsalu', wglink: 479054, yrlink: 'Pärnumaa/Paatsalu', emlink: '5801', group: 'meri', bind: 'emhi_paatsalu', location: [58.508902, 23.663027] }
+        };
         this.curplaces = {
-            'flydog_aksi': { id: 'flydog_aksi', name: 'Saadjärv Äksi', cid: '', group: 'saadjarv-aksi', link: '/saadjarve/', bind: 'aksi', location: [58.523056, 26.668889] },
-            'emu': { id: 'emu', name: 'Tartu EMU', cid: '', group: 'tartu', link: '/weather', bind: 'tartu', location: [58.388575, 26.694013] },
-            'ut_tartu': { id: 'ut_tartu', cid: '', name: 'Tartu UT', group: 'koht', link: '', bind: 'tartu', location: [58.365945, 26.690791] },
-            'arhiiv_vortsjarv_tamme': { id: 'arhiiv_vortsjarv_tamme', cid: '', name: 'Võrtsjärv Tamme', group: 'vortsjarv-tamme', link: '', bind: 'tamme', location: [58.271306, 26.134923] },
-            'arhiiv_vortsjarv_joesuu': { id: 'arhiiv_vortsjarv_joesuu', cid: '', name: 'Võrtsjärv Jõesuu', group: 'vortsjarv-joesuu', link: '', bind: 'joesuu', location: [58.386441, 26.131942] },
-            'arhiiv_peipsi_nina': { id: 'arhiiv_peipsi_nina', cid: '', name: 'Peipsi Nina', group: 'peipsi-nina', link: '', bind: 'nina', location: [58.598889, 27.209722] },
-            'arhiiv_peipsi_rapina': { id: 'arhiiv_peipsi_rapina', cid: '', name: 'Peipsi Räpina', group: 'peipsi-rapina', link: '', bind: 'rapina', location: [58.129341, 27.529451] },
-            /*'mnt_tartu':{id:'mnt_tartu',cid:',name:'Tartu MNT',group:'jarv',link:'',bind:'',location:[58.380756, 26.723452]},*/
-            'mnt_tamme': { id: 'mnt_tamme', cid: '', name: 'V-Rakke MNT', group: 'vortsjarv', link: '', bind: 'tamme', location: [58.331664, 26.187807] },
-             'mnt_rapina': { id: 'mnt_rapina', cid: '', name: 'Räpina MNT', group: 'peipsi', link: '', bind: 'rapina', location: [58.124988, 27.530086] },
-            'mnt_uhmardu': { id: 'mnt_uhmardu', cid: '', name: 'Uhmardu MNT', group: 'koht', link: '', bind: 'uhmardu', location: [58.640605, 26.791860] },
-            'mnt_jogeva': { id: 'mnt_jogeva', cid: '', name: 'Jõgeva MNT', group: 'koht', link: '', bind: 'jogeva', location: [58.764849, 26.404618] },
-            'emhi_mustvee': { id: 'emhi_mustvee', cid: 'mustvee', name: 'Mustvee EMHI', group: 'peipsi', link: '', bind: 'mustvee', location: [58.847650, 26.951025] },
-            'emhi_pirita': { id: 'emhi_pirita', cid: 'pirita', name: 'Pirita EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'pirita', location: [59.471562, 24.825608] },
-            'emhi_rohuneeme': { id: 'emhi_rohuneeme', cid: 'rohuneeme', name: 'Rohuneeme EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'rohuneeme', location: [59.551945, 24.794094] },
-            'emhi_haapsalu': { id: 'emhi_haapsalu', previd: 'emhi_topu', cid: 'haapsalu-sadam', name: 'Haapsalu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haapsalu', location: [58.9578, 23.4901] },
-            'emhi_parnu': { id: 'emhi_parnu', cid: 'parnu', name: 'Pärnu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'parnu', location: [58.365958, 24.526257] },
-            'emhi_haademeeste': { id: 'emhi_haademeeste', cid: 'haademeeste', name: 'Häädemeeste EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haademeeste', location: [58.071644, 24.478816] },
-            'emhi_sorve': { id: 'emhi_sorve', cid: 'sorve', name: 'Sõrve EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'sorve', location: [57.909984, 22.055313] },
-            'emhi_ristna': { id: 'emhi_ristna', cid: 'ristna-2', name: 'Ristna EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'ristna', location: [58.927304, 22.041023] },
-            'emhi_loksa': { id: 'emhi_loksa', cid: 'loksa', name: 'Loksa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'loksa', location: [59.5872, 25.6943] },
-            'emhi_dirhami': { id: 'emhi_dirhami', cid: 'dirhami', name: 'Dirhami EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'dirhami', location: [59.2133, 23.5031] },
-            'emhi_paatsalu': { id: 'emhi_paatsalu', cid: 'virtsu', name: 'Virtsu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'paatsalu', location: [58.508902, 23.663027] },
+            flydog_aksi: { id: 'flydog_aksi', name: 'Saadjärv Äksi', cid: '', group: 'saadjarv-aksi', link: '/saadjarve/', bind: 'aksi', location: [58.523056, 26.668889] },
+            emu: { id: 'emu', name: 'Tartu EMU', cid: '', group: 'tartu', link: '/weather', bind: 'tartu', location: [58.388575, 26.694013] },
+            ut_tartu: { id: 'ut_tartu', cid: '', name: 'Tartu UT', group: 'koht', link: '', bind: 'tartu', location: [58.365945, 26.690791] },
+            arhiiv_vortsjarv_tamme: { id: 'arhiiv_vortsjarv_tamme', cid: '', name: 'Võrtsjärv Tamme', group: 'vortsjarv-tamme', link: '', bind: 'tamme', location: [58.271306, 26.134923] },
+            arhiiv_vortsjarv_joesuu: { id: 'arhiiv_vortsjarv_joesuu', cid: '', name: 'Võrtsjärv Jõesuu', group: 'vortsjarv-joesuu', link: '', bind: 'joesuu', location: [58.386441, 26.131942] },
+            arhiiv_peipsi_nina: { id: 'arhiiv_peipsi_nina', cid: '', name: 'Peipsi Nina', group: 'peipsi-nina', link: '', bind: 'nina', location: [58.598889, 27.209722] },
+            arhiiv_peipsi_rapina: { id: 'arhiiv_peipsi_rapina', cid: '', name: 'Peipsi Räpina', group: 'peipsi-rapina', link: '', bind: 'rapina', location: [58.129341, 27.529451] },
+            /*mnt_tartu:{id:'mnt_tartu',cid:',name:'Tartu MNT',group:'jarv',link:'',bind:'',location:[58.380756, 26.723452]},*/
+            mnt_tamme: { id: 'mnt_tamme', cid: '', name: 'V-Rakke MNT', group: 'vortsjarv', link: '', bind: 'tamme', location: [58.331664, 26.187807] },
+            mnt_rapina: { id: 'mnt_rapina', cid: '', name: 'Räpina MNT', group: 'peipsi', link: '', bind: 'rapina', location: [58.124988, 27.530086] },
+            mnt_uhmardu: { id: 'mnt_uhmardu', cid: '', name: 'Uhmardu MNT', group: 'koht', link: '', bind: 'uhmardu', location: [58.640605, 26.791860] },
+            mnt_jogeva: { id: 'mnt_jogeva', cid: '', name: 'Jõgeva MNT', group: 'koht', link: '', bind: 'jogeva', location: [58.764849, 26.404618] },
+            emhi_mustvee: { id: 'emhi_mustvee', cid: 'mustvee', name: 'Mustvee EMHI', group: 'peipsi', link: '', bind: 'mustvee', location: [58.847650, 26.951025] },
+            emhi_pirita: { id: 'emhi_pirita', cid: 'pirita', name: 'Pirita EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'pirita', location: [59.471562, 24.825608] },
+            emhi_rohuneeme: { id: 'emhi_rohuneeme', cid: 'rohuneeme', name: 'Rohuneeme EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'rohuneeme', location: [59.551945, 24.794094] },
+            emhi_haapsalu: { id: 'emhi_haapsalu', previd: 'emhi_topu', cid: 'haapsalu-sadam', name: 'Haapsalu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haapsalu', location: [58.9578, 23.4901] },
+            emhi_parnu: { id: 'emhi_parnu', cid: 'parnu', name: 'Pärnu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'parnu', location: [58.365958, 24.526257] },
+            emhi_haademeeste: { id: 'emhi_haademeeste', cid: 'haademeeste', name: 'Häädemeeste EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haademeeste', location: [58.071644, 24.478816] },
+            emhi_sorve: { id: 'emhi_sorve', cid: 'sorve', name: 'Sõrve EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'sorve', location: [57.909984, 22.055313] },
+            emhi_ristna: { id: 'emhi_ristna', cid: 'ristna-2', name: 'Ristna EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'ristna', location: [58.927304, 22.041023] },
+            emhi_loksa: { id: 'emhi_loksa', cid: 'loksa', name: 'Loksa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'loksa', location: [59.5872, 25.6943] },
+            emhi_dirhami: { id: 'emhi_dirhami', cid: 'dirhami', name: 'Dirhami EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'dirhami', location: [59.2133, 23.5031] },
+            emhi_paatsalu: { id: 'emhi_paatsalu', cid: 'virtsu', name: 'Virtsu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'paatsalu', location: [58.508902, 23.663027] }
         };
         this.addDst = this.isDst();
         this.lastdate = this.getTime(); //-(4*24*3600);
@@ -219,7 +220,7 @@ var ilm = (function(my) {
             responsive: {
                 rules: {
                     condition: {
-                        minWidth: 450,
+                        minWidth: 450
                     }
                 }
             }
@@ -228,7 +229,9 @@ var ilm = (function(my) {
         this.months = ['Jaanuar', 'Veebruar', 'Märts', 'Aprill', 'Mai', 'Juuni', 'Juuli', 'August', 'September', 'Oktoober', 'November', 'Detsember'];
         this.weekdays = ['Pühapäev', 'Esmaspäev', 'Teisipäev', 'Kolmapäev', 'Neljapäev', 'Reede', 'Laupäev'];
         this.shortweekdays = ['P', 'E', 'T', 'K', 'N', 'R', 'L'];
-        if (loc.hash) this.hash_data();
+        if (loc.hash) {
+            this.hash_data();
+        }
     }
 
     App.prototype = {
@@ -450,7 +453,7 @@ var ilm = (function(my) {
                 var orig_gridorder = Object.keys(this.curplaces);
                 var sorted_orig_gridorder = Array.prototype.slice.call(orig_gridorder).sort();
                 var sorted_gridorder = Array.prototype.slice.call(gridorder).sort();
-                if (sorted_gridorder != sorted_orig_gridorder) {
+                if (sorted_gridorder !== sorted_orig_gridorder) {
                     gridorder = orig_gridorder;
                     self.state.set({ gridorder: gridorder });
                 }
@@ -510,8 +513,8 @@ var ilm = (function(my) {
                     s += '</div>';
                     s += '<div style="position:absolute;z-index:10000;right:35px;top:5px;">';
                     s += (self.samplemode === 'table') ? ('<span class="night-chart label label-default" name="' + (self.fcshownight ? 'fcsnf' : 'fcsnt') + '"> ' + (self.fcshownight ? '-' : '+') + 'Ööd</span>&nbsp;') : '&nbsp;';
-                    s += '<span class="sample-chart label label-default" name="' + (self.samplemode == 'table' ? 'graph' : 'table') + '">Näita ' + (self.samplemode == 'table' ? 'Graafikut' : 'Tabelit') + '</span>&nbsp;';
-                    s += (self.viewmode !== 'cur' || xlarge) ? ('<span class="long-chart label label-default" name="' + (self.sampletype == 'long' ? 'detail' : 'long') + '">Näita ' + (self.sampletype == 'long' ? 'Detailset' : 'Pikaajalist') + '</span>&nbsp;') : '&nbsp;';
+                    s += '<span class="sample-chart label label-default" name="' + (self.samplemode === 'table' ? 'graph' : 'table') + '">Näita ' + (self.samplemode === 'table' ? 'Graafikut' : 'Tabelit') + '</span>&nbsp;';
+                    s += (self.viewmode !== 'cur' || xlarge) ? ('<span class="long-chart label label-default" name="' + (self.sampletype === 'long' ? 'detail' : 'long') + '">Näita ' + (self.sampletype === 'long' ? 'Detailset' : 'Pikaajalist') + '</span>&nbsp;') : '&nbsp;';
                     s += '</div>';
                     s += '</div>';
                     el.html(s);
@@ -544,7 +547,7 @@ var ilm = (function(my) {
                         $('span.change-chart[name="' + self.viewmode + '"]').addClass('label-primary');
                         $('.change-chart').on('click', function(e) {
                             var a = $(this).attr('name');
-                            if (a == my.viewmode) return false;
+                            if (a === my.viewmode) return false;
                             self.loadGraph(e, a);
                         });
                     } else {
@@ -553,17 +556,17 @@ var ilm = (function(my) {
                     }
                     $('.long-chart').on('click', function(e) {
                         var a = $(this).attr('name');
-                        if (a == my.sampletype) return false;
+                        if (a === my.sampletype) return false;
                         self.loadGraph(e, a);
                     });
                     $('.sample-chart').on('click', function(e) {
                         var a = $(this).attr('name');
-                        if (a == my.samplemode) return false;
+                        if (a === my.samplemode) return false;
                         self.loadGraph(e, a);
                     });
                     $('.night-chart').on('click', function(e) {
                         var a = $(this).attr('name');
-                        if (('fcsnf' == a && !my.fcshownight) || ('fcsnt' == a && my.fcshownight)) return false;
+                        if (('fcsnf' === a && !my.fcshownight) || ('fcsnt' === a && my.fcshownight)) return false;
                         self.loadGraph(e, a);
                     });
                     return false;
@@ -583,7 +586,7 @@ var ilm = (function(my) {
                 $('.long-chart').off('click');
                 self.changed = 'sampletype';
             } else if (/(fcsnt|fcsnf)$/.test(name)) {
-                self.fcshownight = name == 'fcsnt' ? true : false;
+                self.fcshownight = name === 'fcsnt' ? true : false;
                 self.state.set({ fcshownight: self.fcshownight });
                 modechanged = true;
                 $('.night-chart').off('click');
@@ -603,7 +606,7 @@ var ilm = (function(my) {
                 }
                 _.each($('.chart-box'), function(a) { a.remove(); });
                 _.each($('.chartbox'), function(a) { a.remove(); });
-                if (o == self.curplace && !modechanged) {
+                if (o === self.curplace && !modechanged) {
                     _.each($('.data-menu-row'), function(a) { a.style['background-color'] = 'white'; });
                     self.loadMap();
                     return false;
@@ -690,7 +693,7 @@ var ilm = (function(my) {
                                 if (obj) {
                                     var deferred = false,
                                         time = self.getTimeStr(obj.time).split(/\s/),
-                                        idx = n.name.lastIndexOf(" "),
+                                        idx = n.name.lastIndexOf(' '),
                                         first = n.name.substring(0, idx + 1),
                                         last = n.name.substring(idx + 1, n.name.length);
                                     if (now.getTime() - obj.time > 6 * 3600000) { deferred = true; }
@@ -909,7 +912,7 @@ var ilm = (function(my) {
             i = i || null;
             return (el && el.clientWidth) ? el.clientWidth : (w.innerWidth) ? w.innerWidth :
                 (doc.documentElement && doc.documentElement.clientWidth) ? doc.documentElement.clientWidth :
-                (doc.body && doc.body.clientWidth) ? doc.body.clientWidth : i;
+                    (doc.body && doc.body.clientWidth) ? doc.body.clientWidth : i;
         },
         wdavg: function(wd, ws) {
             if (Object.prototype.toString.call(wd) !== '[object Array]') {
@@ -1018,7 +1021,7 @@ var ilm = (function(my) {
                 return 'emu_data/' + self.setTxtFileName(d);
             } else {
                 return place.replace(/^(ut|zoig|emhi|mnt|arhiiv|flydog|)_(.*)$/, function(match, dir, name) {
-                    return dir + (dir == 'arhiiv' ? '' : '_data') + '/' + name + '/' + self.setTxtFileName(d);
+                    return dir + (dir === 'arhiiv' ? '' : '_data') + '/' + name + '/' + self.setTxtFileName(d);
                 });
             }
             place = place.replace(/arhiiv_/, '');
@@ -1036,7 +1039,7 @@ var ilm = (function(my) {
             var self = w.ilm,
                 fc = self.fcsources;
             if (fc.indexOf(fn) < 0) return false;
-            if (fn != self.fcsource) {
+            if (fn !== self.fcsource) {
                 self.fcsource = fn;
                 self.state.set({ fcsource: fn });
                 w.ilm.reloadest();
@@ -1157,7 +1160,7 @@ var ilm = (function(my) {
         setFcAsTable: function(value) {
             if (/(0|false)/.test(value)) value = 'graph';
             if (/(1|true)/.test(value)) value = 'table';
-            if (this.samplemode != value) {
+            if (this.samplemode !== value) {
                 this.samplemode = value;
                 this.state.set({ samplemode: this.samplemode });
                 this.reloadest();
@@ -1167,7 +1170,7 @@ var ilm = (function(my) {
         setFcShowNight: function(value) {
             if (/(0|false)/.test(value)) value = false;
             if (/(1|true)/.test(value)) value = true;
-            if (this.fcshownight != value) {
+            if (this.fcshownight !== value) {
                 this.fcshownight = value;
                 this.state.set({ fcshownight: this.fcshownight });
                 this.reloadest();
@@ -1290,7 +1293,7 @@ var ilm = (function(my) {
                     }).disableSelection();
                 }
                 if (w.ilm.linksasmenu) $('#linksasmenu').attr({ 'checked': 'checked' });
-                if (w.ilm.samplemode == 'table') $('#samplemode').attr({ 'checked': 'checked' });
+                if (w.ilm.samplemode === 'table') $('#samplemode').attr({ 'checked': 'checked' });
             }
             return html;
         },
@@ -1307,7 +1310,7 @@ var ilm = (function(my) {
                     prev = obj;
                     obj = my.rowParser(place, b);
                     obj.trend = !prev ? '' : prev.ws_avg > obj.ws_avg ? 'd' : prev.ws_avg < obj.ws_avg ? 'u' : 's';
-                    if (!last || k == i) fn(obj, j, i);
+                    if (!last || k === i) fn(obj, j, i);
                     //});
                 }
                 if (j) {
@@ -1336,7 +1339,7 @@ var ilm = (function(my) {
                                 prev = obj;
                                 obj = my.rowParser(place, c, d, e);
                                 obj.trend = !prev ? '' : prev.avg_ws > obj.avg_ws ? 'd' : prev.avg_ws < obj.avg_ws ? 'u' : prev.max_ws > obj.max_ws ? 'd' : prev.max_ws < obj.max_ws ? 'u' : 's';
-                                if (!last || k == i) fn(obj, j, i);
+                                if (!last || k === i) fn(obj, j, i);
                             }
                         }
                     }
@@ -1454,7 +1457,7 @@ temp 5 <td class="number">9,8</td>
 10wd 10 <td class="number">225</td>
 </tr>
 */
-                    c[5] = (c[5] == null || c[5] == undefined || c[5] < -49) ? null : c[5];
+                    c[5] = (c[5] === null || c[5] === undefined || c[5] < -49) ? null : c[5];
                     c[8] = (c[8] && (c[8] < 0 || c[8] > 49)) ? null : c[8];
                     if (e) e[8] = (e[8] && (e[8] < 0 || e[8] > 49)) ? null : e[8];
                     c[9] = (c[9] && (c[9] < 0 || c[9] > 49)) ? null : c[9];
@@ -1466,7 +1469,7 @@ temp 5 <td class="number">9,8</td>
                     r.avg_wtemp = my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4]);
                     r.avg_wl = my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2]);
                 } else if (/mnt/.test(place)) {
-                    c[2] = (c[2] == null || c[2] == undefined || c[2] < -49) ? null : c[2];
+                    c[2] = (c[2] === null || c[2] === undefined || c[2] < -49) ? null : c[2];
                     c[8] = (c[8] && (c[8] < 0 || c[8] > 49)) ? null : c[8];
                     if (e) e[8] = (e[8] && (e[8] < 0 || e[8] > 49)) ? null : e[8];
                     c[6] = (c[6] && (c[6] < 0 || c[6] > 49)) ? null : c[6];
@@ -1496,13 +1499,13 @@ temp 5 <td class="number">9,8</td>
         var touch = event.changedTouches[0];
         var simulatedEvent = document.createEvent('MouseEvent');
         simulatedEvent.initMouseEvent({
-                touchstart: 'mousedown',
-                touchmove: 'mousemove',
-                touchend: 'mouseup'
-            }[event.type], true, true, window, 1,
-            touch.screenX, touch.screenY,
-            touch.clientX, touch.clientY, false,
-            false, false, false, 0, null);
+            touchstart: 'mousedown',
+            touchmove: 'mousemove',
+            touchend: 'mouseup'
+        }[event.type], true, true, window, 1,
+        touch.screenX, touch.screenY,
+        touch.clientX, touch.clientY, false,
+        false, false, false, 0, null);
         touch.target.dispatchEvent(simulatedEvent);
         event.preventDefault();
     }
@@ -1522,290 +1525,290 @@ temp 5 <td class="number">9,8</td>
     }
 
     var googleMapStyles1 = [{
-            'elementType': 'geometry',
-            'stylers': [{
-                'color': '#f5f5f5'
-            }]
-        },
-        {
-            'elementType': 'labels.icon',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'elementType': 'labels.text.fill',
-            'stylers': [{
-                'color': '#616161'
-            }]
-        },
-        {
-            'elementType': 'labels.text.stroke',
-            'stylers': [{
-                'color': '#f5f5f5'
-            }]
-        },
-        {
-            'featureType': 'administrative.country',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'administrative.land_parcel',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'administrative.land_parcel',
-            'elementType': 'labels',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'administrative.land_parcel',
-            'elementType': 'labels.text.fill',
-            'stylers': [{
-                'color': '#bdbdbd'
-            }]
-        },
-        {
-            'featureType': 'administrative.neighborhood',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'administrative.province',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'landscape.man_made',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'landscape.natural.landcover',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'landscape.natural.terrain',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'poi',
-            'elementType': 'geometry',
-            'stylers': [{
-                'color': '#eeeeee'
-            }]
-        },
-        {
-            'featureType': 'poi',
-            'elementType': 'labels.text',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'poi',
-            'elementType': 'labels.text.fill',
-            'stylers': [{
-                'color': '#757575'
-            }]
-        },
-        {
-            'featureType': 'poi.attraction',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'poi.business',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'poi.government',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'poi.medical',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'poi.park',
-            'elementType': 'geometry',
-            'stylers': [{
-                'color': '#e5e5e5'
-            }]
-        },
-        {
-            'featureType': 'poi.park',
-            'elementType': 'labels.text',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'poi.park',
-            'elementType': 'labels.text.fill',
-            'stylers': [{
-                'color': '#9e9e9e'
-            }]
-        },
-        {
-            'featureType': 'poi.place_of_worship',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'poi.school',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'poi.sports_complex',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'road',
-            'elementType': 'geometry',
-            'stylers': [{
-                'color': '#ffffff'
-            }]
-        },
-        {
-            'featureType': 'road.arterial',
-            'elementType': 'labels',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'road.arterial',
-            'elementType': 'labels.text.fill',
-            'stylers': [{
-                'color': '#757575'
-            }]
-        },
-        {
-            'featureType': 'road.highway',
-            'stylers': [{
-                'visibility': 'simplified'
-            }]
-        },
-        {
-            'featureType': 'road.highway',
-            'elementType': 'geometry',
-            'stylers': [{
-                'color': '#dadada'
-            }]
-        },
-        {
-            'featureType': 'road.highway',
-            'elementType': 'labels',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'road.highway',
-            'elementType': 'labels.text.fill',
-            'stylers': [{
-                'color': '#616161'
-            }]
-        },
-        {
-            'featureType': 'road.highway.controlled_access',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'road.local',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'road.local',
-            'elementType': 'labels',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'road.local',
-            'elementType': 'labels.text.fill',
-            'stylers': [{
-                'color': '#9e9e9e'
-            }]
-        },
-        {
-            'featureType': 'transit.line',
-            'stylers': [{
-                'visibility': 'simplified'
-            }]
-        },
-        {
-            'featureType': 'transit.line',
-            'elementType': 'geometry',
-            'stylers': [{
-                'color': '#e5e5e5'
-            }]
-        },
-        {
-            'featureType': 'transit.line',
-            'elementType': 'labels.text.fill',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'transit.station',
-            'stylers': [{
-                'visibility': 'off'
-            }]
-        },
-        {
-            'featureType': 'transit.station',
-            'elementType': 'geometry',
-            'stylers': [{
-                'color': '#eeeeee'
-            }]
-        },
-        {
-            'featureType': 'water',
-            'elementType': 'geometry',
-            'stylers': [{
-                'color': '#c9c9c9'
-            }]
-        },
-        {
-            'featureType': 'water',
-            'elementType': 'labels.text.fill',
-            'stylers': [{
-                'color': '#9e9e9e'
-            }]
-        }
+        'elementType': 'geometry',
+        'stylers': [{
+            'color': '#f5f5f5'
+        }]
+    },
+    {
+        'elementType': 'labels.icon',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'elementType': 'labels.text.fill',
+        'stylers': [{
+            'color': '#616161'
+        }]
+    },
+    {
+        'elementType': 'labels.text.stroke',
+        'stylers': [{
+            'color': '#f5f5f5'
+        }]
+    },
+    {
+        'featureType': 'administrative.country',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'administrative.land_parcel',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'administrative.land_parcel',
+        'elementType': 'labels',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'administrative.land_parcel',
+        'elementType': 'labels.text.fill',
+        'stylers': [{
+            'color': '#bdbdbd'
+        }]
+    },
+    {
+        'featureType': 'administrative.neighborhood',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'administrative.province',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'landscape.man_made',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'landscape.natural.landcover',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'landscape.natural.terrain',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'poi',
+        'elementType': 'geometry',
+        'stylers': [{
+            'color': '#eeeeee'
+        }]
+    },
+    {
+        'featureType': 'poi',
+        'elementType': 'labels.text',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'poi',
+        'elementType': 'labels.text.fill',
+        'stylers': [{
+            'color': '#757575'
+        }]
+    },
+    {
+        'featureType': 'poi.attraction',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'poi.business',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'poi.government',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'poi.medical',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'poi.park',
+        'elementType': 'geometry',
+        'stylers': [{
+            'color': '#e5e5e5'
+        }]
+    },
+    {
+        'featureType': 'poi.park',
+        'elementType': 'labels.text',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'poi.park',
+        'elementType': 'labels.text.fill',
+        'stylers': [{
+            'color': '#9e9e9e'
+        }]
+    },
+    {
+        'featureType': 'poi.place_of_worship',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'poi.school',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'poi.sports_complex',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'road',
+        'elementType': 'geometry',
+        'stylers': [{
+            'color': '#ffffff'
+        }]
+    },
+    {
+        'featureType': 'road.arterial',
+        'elementType': 'labels',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'road.arterial',
+        'elementType': 'labels.text.fill',
+        'stylers': [{
+            'color': '#757575'
+        }]
+    },
+    {
+        'featureType': 'road.highway',
+        'stylers': [{
+            'visibility': 'simplified'
+        }]
+    },
+    {
+        'featureType': 'road.highway',
+        'elementType': 'geometry',
+        'stylers': [{
+            'color': '#dadada'
+        }]
+    },
+    {
+        'featureType': 'road.highway',
+        'elementType': 'labels',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'road.highway',
+        'elementType': 'labels.text.fill',
+        'stylers': [{
+            'color': '#616161'
+        }]
+    },
+    {
+        'featureType': 'road.highway.controlled_access',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'road.local',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'road.local',
+        'elementType': 'labels',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'road.local',
+        'elementType': 'labels.text.fill',
+        'stylers': [{
+            'color': '#9e9e9e'
+        }]
+    },
+    {
+        'featureType': 'transit.line',
+        'stylers': [{
+            'visibility': 'simplified'
+        }]
+    },
+    {
+        'featureType': 'transit.line',
+        'elementType': 'geometry',
+        'stylers': [{
+            'color': '#e5e5e5'
+        }]
+    },
+    {
+        'featureType': 'transit.line',
+        'elementType': 'labels.text.fill',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'transit.station',
+        'stylers': [{
+            'visibility': 'off'
+        }]
+    },
+    {
+        'featureType': 'transit.station',
+        'elementType': 'geometry',
+        'stylers': [{
+            'color': '#eeeeee'
+        }]
+    },
+    {
+        'featureType': 'water',
+        'elementType': 'geometry',
+        'stylers': [{
+            'color': '#c9c9c9'
+        }]
+    },
+    {
+        'featureType': 'water',
+        'elementType': 'labels.text.fill',
+        'stylers': [{
+            'color': '#9e9e9e'
+        }]
+    }
     ];
 
 
@@ -1843,10 +1846,10 @@ window.$(function() {
             // Create the canvas
             $(container).append(
                 $(document.createElementNS('http://www.w3.org/2000/svg', 'svg'))
-                .attr({
-                    height: 2 * arrowWidth,
-                    width: 2 * arrowWidth
-                })
+                    .attr({
+                        height: 2 * arrowWidth,
+                        width: 2 * arrowWidth
+                    })
             );
             $('svg', container).append(document.createElementNS('http://www.w3.org/2000/svg', 'defs'));
             $('defs', container).append($(document.createElementNS('http://www.w3.org/2000/svg', 'clipPath')).attr('id', 'clip'));

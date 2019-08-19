@@ -2,8 +2,14 @@ cgi-bin
 mirrors
 prev
 .well-known
+empg_data/*
+*/empg_data/*
 emu_data/*
 */emu_data/*
+ut_data/*
+*/ut_data/*
+flydog_data/*
+*/flydog_data/*
 emhi_data/*
 */emhi_data/*
 wg_data/*
@@ -19,3 +25,4 @@ arhiiv/*
 node_modules
 bin/jaamconf.php
 validation-*.json
+package-lock.json
