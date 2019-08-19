@@ -257,7 +257,7 @@ left: 50%;
 @media (max-width: 1400px) {
 .two-lg {
 	width:100%;
-	floa:none;
+	float:none;
 }
 }
 @media (max-width: 992px) {
@@ -343,3 +343,33 @@ left: 50%;
 .chart-frame1 .table {
 	margin-bottom: 0;
 }
+.arrow {
+	display: inline-block;
+	margin:0 5px;
+	opacity: .68;
+}
+.arrow:after {
+      content: "";
+      width: 0;
+      height: 0;
+      border-left: 2px solid transparent;
+      border-right: 2px solid transparent;
+      border-bottom: 8px solid #274b6d;
+      display: block;
+    }
+.ssw { transform: rotate(22.5deg); }
+.sw { transform: rotate(45deg); }
+.wsw { transform: rotate(67.5deg); }
+.w { transform: rotate(90deg); }
+.wnw { transform: rotate(112.5deg); }
+.nw { transform: rotate(135deg); }
+.nnw { transform: rotate(157.5deg); }
+.n { transform: rotate(180deg); }
+.nne { transform: rotate(202.5deg); }
+.ne { transform: rotate(-135deg); }
+.ene { transform: rotate(-114.5deg); }
+.e { transform: rotate(-90deg); }
+.ese { transform: rotate(-69.5deg); }
+.se { transform: rotate(-45deg); }
+.sse { transform: rotate(-24.5deg);}
+

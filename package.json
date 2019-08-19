@@ -1,7 +1,7 @@
 {
   "name": "ilmcharts",
   "description": "Domestic weather application http://ilm.majasa.ee",
-  "version": "1.1.14.5",
+  "version": "1.1.14.6",
   "language": "et",
   "charset": "utf-8",
   "keywords": [
@@ -45,7 +45,8 @@
     "jquery-ui": "^1.12.1",
     "load-grunt-tasks": "^4.0.0",
     "suncalc": "*",
-    "underscore": "~1.6.0"
+    "underscore": "~1.6.0",
+    "weather-icons2": "^2.0.10"
   },
   "dependencies": {
     "cheerio": "^0.22.0",

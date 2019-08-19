@@ -506,6 +506,7 @@
                     var opt = {
                         time: self.getTimeStr(dn),
                         night:(sun.altitude<0),
+                        dn:self.dirs(dt.wd_series.data[i][1]),
                         wscolor:has.ws?self.colorasbf(dt.ws_series.data[i][1]).color:'',
                         wgcolor:has.wg?self.colorasbf(dt.wg_series.data[i][1]).color:'',
                         day:self.getDayLetter(dn),
