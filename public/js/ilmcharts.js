@@ -1,5 +1,5 @@
 /*!
- * Ilmcharts v1.1.14.0 (http://ilm.majasa.ee)
+ * Ilmcharts v1.1.14.1 (http://ilm.majasa.ee)
  * Copyright 2012-2019 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
@@ -125,7 +125,7 @@ var ilm = (function(my) {
                 'flydog': 'databuoys.sensornest.com'
             },
             this.fcplaces = {
-                'tartu': { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: 'Tartumaa/Tartu', emlink: '795', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
+                'tartu': { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: 'Tartumaa/Tartu', emlink: '793', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
                 'aksi': { id: 'aksi', name: 'Saadjärv Äksi', wglink: '266923', yrlink: 'Tartumaa/Äksi', emlink: '9748', group: 'saadjarv-aksi', bind: 'flydog_aksi', location: [58.523056, 26.668889] },
                 'uhmardu': { id: 'uhmardu', name: 'Uhmardu', yrlink: 'Jõgevamaa/Uhmardu', emlink: '8629', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
                 'jogeva': { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: 'Jõgevamaa/Jõgeva', emlink: '2262', link: '', 'bind': 'mnt_jogeva', location: [58.764849, 26.404618] },
@@ -155,7 +155,7 @@ var ilm = (function(my) {
             'arhiiv_peipsi_rapina': { id: 'arhiiv_peipsi_rapina', cid: '', name: 'Peipsi Räpina', group: 'peipsi-rapina', link: '', bind: 'rapina', location: [58.129341, 27.529451] },
             /*'mnt_tartu':{id:'mnt_tartu',cid:',name:'Tartu MNT',group:'jarv',link:'',bind:'',location:[58.380756, 26.723452]},*/
             'mnt_tamme': { id: 'mnt_tamme', cid: '', name: 'V-Rakke MNT', group: 'vortsjarv', link: '', bind: 'tamme', location: [58.331664, 26.187807] },
-            'mnt_rapina': { id: 'mnt_rapina', cid: '', name: 'Räpina MNT', group: 'peipsi', link: '', bind: 'rapina', location: [58.124988, 27.530086] },
+             'mnt_rapina': { id: 'mnt_rapina', cid: '', name: 'Räpina MNT', group: 'peipsi', link: '', bind: 'rapina', location: [58.124988, 27.530086] },
             'mnt_uhmardu': { id: 'mnt_uhmardu', cid: '', name: 'Uhmardu MNT', group: 'koht', link: '', bind: 'uhmardu', location: [58.640605, 26.791860] },
             'mnt_jogeva': { id: 'mnt_jogeva', cid: '', name: 'Jõgeva MNT', group: 'koht', link: '', bind: 'jogeva', location: [58.764849, 26.404618] },
             'emhi_mustvee': { id: 'emhi_mustvee', cid: 'mustvee', name: 'Mustvee EMHI', group: 'peipsi', link: '', bind: 'mustvee', location: [58.847650, 26.951025] },
@@ -1059,7 +1059,7 @@ var ilm = (function(my) {
                 j = {},
                 i, reload = '';
             if (name === 'fcplace' && d) {
-                if (d === 'tartu' || d === 'saadjarv') d = 'aksi';
+                if (d === 'saadjarv') d = 'aksi';
                 else if (d === 'vortsjarv') d = 'tamme';
                 //else if(d==='haapsalu') d='topu';
                 else if (d === 'tallinn') d = 'pirita';
