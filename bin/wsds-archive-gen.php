@@ -34,7 +34,7 @@ require("jaamconf.php");
 header("Content-Type:text/plain");
 
 //* mitmed konfi asjad siin
-$jaamad = array('vortsjarv_tamme','vortsjarv_joesuu','peipsi_nina');
+$jaamad = array('vortsjarv_tamme','vortsjarv_joesuu','peipsi_nina', 'peipsi_rapina');
 $sisendjaam = "";
 $sisendaeg = 0;
 $ajaraam = "";
@@ -149,6 +149,7 @@ for($k=0,$l=count($jaamad);$k<$l;++$k){
 	if($jaamastr=='vortsjarv_tamme') $jstr="TammeSurf";
 	else if($jaamastr=='vortsjarv_joesuu') $jstr="Joesuu";
 	else if($jaamastr=='peipsi_nina') $jstr="MobileSurf";
+	else if($jaamastr=='peipsi_rapina') $jstr="Rapinasurf";
 	else $jstr = $jaam;
 	$query = "select time, $fstr from wsds where station_id='$jstr'$aeg order by time asc";
 	//$query = "select aeg, ti, ilm.to as 'to', hi, ho, dp, wc, ws, wd, rt, r1, r24, pr, pa, wf, wt, ccalt, wg from ilm where jaam=$jaam$aeg order by aeg asc";

@@ -1,5 +1,5 @@
 /*!
- * Ilmcharts v1.1.13.9 (http://ilm.majasa.ee)
+ * Ilmcharts v1.1.14.0 (http://ilm.majasa.ee)
  * Copyright 2012-2019 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
@@ -131,9 +131,9 @@ var ilm = (function(my) {
                 'jogeva': { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: 'Jõgevamaa/Jõgeva', emlink: '2262', link: '', 'bind': 'mnt_jogeva', location: [58.764849, 26.404618] },
                 'tamme': { id: 'tamme', name: 'Võrtsjärv Tamme', 'wglink': 192609, yrlink: 'Tartumaa/Tamme', emlink: '8094', group: 'vortsjarv-tamme', bind: 'arhiiv_vortsjarv_tamme', location: [58.271306, 26.134923] },
                 'joesuu': { id: 'joesuu', name: 'Võrtsjärv Jõesuu', 'wglink': 692681, yrlink: 'Viljandimaa/Jõesuu', emlink: '8864', group: 'vortsjarv-joesuu', bind: 'arhiiv_vortsjarv_joesuu', location: [58.386441, 26.131942] },
-                'rapina': { id: 'rapina', name: 'Peipsi Räpina', 'wglink': 183648, yrlink: 'Põlvamaa/Võõpsu', emlink: '7216', group: 'peipsi', bind: 'mnt_rapina', location: [58.124988, 27.530086] },
+                'rapina': { id: 'rapina', name: 'Peipsi Räpina', 'wglink': 183648, yrlink: 'Põlvamaa/Võõpsu', emlink: '7216', group: 'peipsi', bind: 'arhiiv_peipsi_rapina', location: [58.124988, 27.530086] },
+                'nina': { id: 'nina', name: 'Peipsi Nina', 'wglink': 20401, yrlink: 'Tartumaa/Nina', emlink: '5427', group: 'peipsi', bind: 'arhiiv_peipsi_nina', location: [58.598889, 27.209722] },
                 'mustvee': { id: 'mustvee', name: 'Peipsi Mustvee', 'wglink': 104337, yrlink: 'Jõgevamaa/Mustvee', emlink: '5097', group: 'peipsi', bind: 'emhi_mustvee', location: [58.847500, 26.951111] },
-                'nina': { id: 'nina', name: 'Peipsi Nina', 'wglink': 20401, yrlink: 'Tartumaa/Nina', emlink: '5427', group: 'peipsi', bind: 'emhi_nina', location: [58.598889, 27.209722] },
                 'pirita': { id: 'pirita', name: 'Tallinn Pirita', 'wglink': 125320, yrlink: 'Harjumaa/Pirita~798565', emlink: '596', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
                 'rohuneeme': { id: 'rohuneeme', name: 'Rohuneeme', 'wglink': 70524, yrlink: 'Harjumaa/Rohuneeme', emlink: '7039', group: 'meri', bind: 'emhi_rohuneeme', location: [59.551945, 24.794094] },
                 'haapsalu': { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', 'wglink': 245713, yrlink: 'Läänemaa/Haapsalu_Laht', emlink: '183', group: 'meri', bind: 'emhi_haapsalu', location: [58.9578, 23.4901] },
@@ -152,6 +152,7 @@ var ilm = (function(my) {
             'arhiiv_vortsjarv_tamme': { id: 'arhiiv_vortsjarv_tamme', cid: '', name: 'Võrtsjärv Tamme', group: 'vortsjarv-tamme', link: '', bind: 'tamme', location: [58.271306, 26.134923] },
             'arhiiv_vortsjarv_joesuu': { id: 'arhiiv_vortsjarv_joesuu', cid: '', name: 'Võrtsjärv Jõesuu', group: 'vortsjarv-joesuu', link: '', bind: 'joesuu', location: [58.386441, 26.131942] },
             'arhiiv_peipsi_nina': { id: 'arhiiv_peipsi_nina', cid: '', name: 'Peipsi Nina', group: 'peipsi-nina', link: '', bind: 'nina', location: [58.598889, 27.209722] },
+            'arhiiv_peipsi_rapina': { id: 'arhiiv_peipsi_rapina', cid: '', name: 'Peipsi Räpina', group: 'peipsi-rapina', link: '', bind: 'rapina', location: [58.129341, 27.529451] },
             /*'mnt_tartu':{id:'mnt_tartu',cid:',name:'Tartu MNT',group:'jarv',link:'',bind:'',location:[58.380756, 26.723452]},*/
             'mnt_tamme': { id: 'mnt_tamme', cid: '', name: 'V-Rakke MNT', group: 'vortsjarv', link: '', bind: 'tamme', location: [58.331664, 26.187807] },
             'mnt_rapina': { id: 'mnt_rapina', cid: '', name: 'Räpina MNT', group: 'peipsi', link: '', bind: 'rapina', location: [58.124988, 27.530086] },
