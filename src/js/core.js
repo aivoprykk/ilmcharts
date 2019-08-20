@@ -119,7 +119,7 @@ var ilm = (function(my) {
         };
         this.fcplaces = {
             tartu: { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: 'Tartumaa/Tartu', emlink: '793', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
-            aksi: { id: 'aksi', name: 'Äksi Saadjärv', wglink: '266923', yrlink: 'Tartumaa/Äksi', emlink: '9748', group: 'saadjarv-aksi', bind: 'flydog_aksi', location: [58.523056, 26.668889] },
+            aksi: { id: 'aksi', name: 'Äksi Saadjärv', wglink: '266923', yrlink: 'Tartumaa/Äksi', emlink: '9748', group: 'saadjarv-aksi', bind: 'flydog_aksi', location: [58.534918, 26.643429] },
             uhmardu: { id: 'uhmardu', name: 'Uhmardu', yrlink: 'Jõgevamaa/Uhmardu', emlink: '8629', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
             jogeva: { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: 'Jõgevamaa/Jõgeva', emlink: '2262', link: '', bind: 'mnt_jogeva', location: [58.764849, 26.404618] },
             tamme: { id: 'tamme', name: 'Tamme Võrtsjärv', wglink: 192609, yrlink: 'Tartumaa/Tamme', emlink: '8094', group: 'vortsjarv-tamme', bind: 'arhiiv_vortsjarv_tamme', location: [58.271306, 26.134923] },
@@ -139,16 +139,16 @@ var ilm = (function(my) {
             paatsalu: { id: 'paatsalu', name: 'Paatsalu', wglink: 479054, yrlink: 'Pärnumaa/Paatsalu', emlink: '5801', group: 'meri', bind: 'emhi_paatsalu', location: [58.508902, 23.663027] }
         };
         this.curplaces = {
-            flydog_aksi: { id: 'flydog_aksi', name: 'Äksi Saadjärv', cid: '', group: 'saadjarv-aksi', link: '/saadjarve/', bind: 'aksi', location: [58.523056, 26.668889] },
+            flydog_aksi: { id: 'flydog_aksi', name: 'Äksi Saadjärv', cid: '', group: 'saadjarv-aksi', link: '/saadjarve/', bind: 'aksi', location: [58.534918, 26.643429] },
             emu: { id: 'emu', name: 'EMU Tartu', cid: '', group: 'tartu', link: '/weather', bind: 'tartu', location: [58.388575, 26.694013] },
             ut_tartu: { id: 'ut_tartu', cid: '', name: 'UT Tartu', group: 'koht', link: '', bind: 'tartu', location: [58.365945, 26.690791] },
             arhiiv_vortsjarv_tamme: { id: 'arhiiv_vortsjarv_tamme', cid: '', name: 'Tamme Võrtsjärv', group: 'vortsjarv-tamme', link: '', bind: 'tamme', location: [58.271306, 26.134923] },
             arhiiv_vortsjarv_joesuu: { id: 'arhiiv_vortsjarv_joesuu', cid: '', name: 'Jõesuu Võrtsjärv', group: 'vortsjarv-joesuu', link: '', bind: 'joesuu', location: [58.386441, 26.131942] },
             arhiiv_peipsi_nina: { id: 'arhiiv_peipsi_nina', cid: '', name: 'Nina Peipsi', group: 'peipsi-nina', link: '', bind: 'nina', location: [58.598889, 27.209722] },
-            arhiiv_peipsi_rapina: { id: 'arhiiv_peipsi_rapina', cid: '', name: 'Räpina Peipsi', group: 'peipsi-rapina', link: '', bind: 'rapina', location: [58.129341, 27.529451] },
+            arhiiv_peipsi_rapina: { id: 'arhiiv_peipsi_rapina', cid: '', name: 'Räpina Peipsi', group: 'peipsi-rapina', link: '', bind: 'rapina', location: [58.124988, 27.530086] },
             /*mnt_tartu:{id:'mnt_tartu',cid:',name:'Tartu MNT',group:'jarv',link:'',bind:'',location:[58.380756, 26.723452]},*/
             mnt_tamme: { id: 'mnt_tamme', cid: '', name: 'V-Rakke MNT', group: 'vortsjarv', link: '', bind: 'tamme', location: [58.331664, 26.187807] },
-            mnt_rapina: { id: 'mnt_rapina', cid: '', name: 'Räpina MNT', group: 'peipsi', link: '', bind: 'rapina', location: [58.124988, 27.530086] },
+            mnt_rapina: { id: 'mnt_rapina', cid: '', name: 'Räpina MNT', group: 'peipsi', link: '', bind: 'rapina', location: [57.957275, 27.626020] },
             mnt_uhmardu: { id: 'mnt_uhmardu', cid: '', name: 'Uhmardu MNT', group: 'koht', link: '', bind: 'uhmardu', location: [58.640605, 26.791860] },
             mnt_jogeva: { id: 'mnt_jogeva', cid: '', name: 'Jõgeva MNT', group: 'koht', link: '', bind: 'jogeva', location: [58.764849, 26.404618] },
             emhi_mustvee: { id: 'emhi_mustvee', cid: 'mustvee', name: 'Mustvee EMHI', group: 'peipsi', link: '', bind: 'mustvee', location: [58.847650, 26.951025] },
@@ -377,6 +377,124 @@ var ilm = (function(my) {
         },
         map: null,
         markers: {},
+        markertype: 'custom',
+        markerclass: null,
+        googleMarkerClassCreate: function () {
+            var map = w.google.maps;
+            function gmp(position, obj) {
+                this.c = {};
+                var c = this.c;
+                this.label = { text:'', color:'gray', fontSize:'100%', wd:0 };
+                this.icon = {strokeColor: 'gray'};
+                this.position = position;
+                this.title = obj && obj.title ? obj.title : '';
+
+                c.label = document.createElement('span');
+                c.label.classList.add('compass-label');
+
+                c.arrow = document.createElement('span');
+                c.arrow.classList.add('compass-arrow');
+
+                var bg = document.createElement('span');
+                bg.classList.add('compass-bg');
+
+                // This zero-height div is positioned at the bottom of the tip.
+                c.div = document.createElement('span');
+                c.div.classList.add('compass');
+                c.div.classList.add('compass-container');
+                c.div.appendChild(c.label);
+                c.div.appendChild(c.arrow);
+                c.div.appendChild(bg);
+                c.container = document.createElement('div');
+                c.container.classList.add('compass-bubble');
+                c.container.appendChild(c.div);
+                w.google.maps.OverlayView.preventMapHitsAndGesturesFrom(c.container);
+                // Optionally stop clicks, etc., from bubbling up to the map.
+            }
+
+            // ES5 magic to extend google.maps.OverlayView.
+            gmp.prototype = Object.create(map.OverlayView.prototype);
+
+            /** Called when the popup is added to the map. */
+            gmp.prototype.onAdd = function() {
+                this.getPanes().floatPane.appendChild(this.c.container);
+            };
+
+            /** Called when the popup is removed from the map. */
+            gmp.prototype.onRemove = function() {
+                if (this.c.container.parentElement) {
+                    this.c.container.parentElement.removeChild(this.c.container);
+                }
+            };
+
+            /** Called each frame when the popup needs to draw itself. */
+            gmp.prototype.draw = function() {
+                var divPosition = this.getProjection().fromLatLngToDivPixel(this.position);
+
+                // Hide the popup when it is far out of view.
+                var display =
+        Math.abs(divPosition.x) < 4000 && Math.abs(divPosition.y) < 4000 ?
+            'block' :
+            'none';
+
+                if (display === 'block') {
+                    this.c.container.style.left = divPosition.x + 'px';
+                    this.c.container.style.top = divPosition.y + 'px';
+                }
+                if (this.c.container.style.display !== display) {
+                    this.c.container.style.display = display;
+                }
+            };
+            gmp.prototype.setLabel = function(data) {
+                if(data) {
+                    if(data.text) {
+                        this.label.text = data.text;
+                    }
+                    if(data.wd) {
+                        this.label.wd = data.wd;
+                        this.c.arrow.style.transform = 'rotate(' + (data.wd-180)+'deg)';
+                    }
+                    if(data.color) {
+                        this.label.color = data.color;
+                        this.c.label.style.color = data.color;
+                    }
+                    if(data.fontSize) {
+                        this.label.fontSize = data.fontSize;
+                        this.c.label.style.fontSize = data.fontSize;
+                    }
+                    this.c.label.innerHTML = data.text||'0';
+                }
+            };
+            gmp.prototype.getLabel = function () {
+                return this.label;
+            };
+
+            gmp.prototype.setIcon = function(obj) {
+                if(obj && obj.strokeColor) {
+                    if(/rgb/.test(obj.strokeColor)) {
+                        this.icon.strokeColor = obj.strokeColor.replace(/rgba?\(([0-9]+),(?:\s+)?([0-9]+),(?:\s+)?([0-9]+).+$/, 'rgba($1,$2,$3,0.75)');
+                    } else {
+                        this.icon.strokeColor=obj.strokeColor;
+                    }
+                    this.c.div.style.borderColor = this.icon.strokeColor;
+                }
+            };
+
+            gmp.prototype.getIcon = function() {
+                return this.icon;
+            };
+
+            gmp.prototype.addListener = function(name,cb) {
+                var self = this;
+                //return w.google.maps.event.addListener(self.c.container, name, cb);
+                return self.c.container.addEventListener(name,cb);
+            };
+            gmp.prototype.getPosition = function() {
+                return this.position;
+            };
+
+            return gmp;
+        },
         googleMarkerIcon: function(ws) {
             ws = ws || 5;
             return {
@@ -392,18 +510,28 @@ var ilm = (function(my) {
             var self = this,
                 marker;
             id = id || 'none';
-            if (self.markers[id]) marker = self.markers[id];
+            if (self.markers[id]) {
+                marker = self.markers[id];
+            }
             else {
-                marker = new w.google.maps.Marker({
-                    position: pos,
-                    icon: self.googleMarkerIcon(ws),
-                    title: title || null,
-                    labelInBackground: false,
-                });
+                if(self.markertype==='custom') {
+                    if(!self.markerclass) {
+                        self.markerclass = self.googleMarkerClassCreate();
+                    }
+                    marker = new self.markerclass(new w.google.maps.LatLng(pos.lat, pos.lng),{title:title});
+                }
+                else {
+                    marker = new w.google.maps.Marker({
+                        position: pos,
+                        icon: self.googleMarkerIcon(ws),
+                        title: title || null,
+                        labelInBackground: false,
+                    });
+                }
                 self.markers[id] = marker;
             }
             if (ws && map) {
-                marker.setLabel({ text: ws + '', color: 'black' });
+                marker.setLabel({ text: ws + '', color: 'black', wd: '0' });
             }
             marker.setMap(map);
         },
@@ -666,7 +794,8 @@ var ilm = (function(my) {
                         if (!(/error|timeout/).test(type)) {
                             var attachMarkerMessage = function(marker, message) {
                                 var infowindow = new w.google.maps.InfoWindow({
-                                    content: message
+                                    content: message,
+                                    zIndex: 5000
                                 });
                                 var isOpen = function(w) {
                                     var map = w.getMap();
@@ -721,6 +850,7 @@ var ilm = (function(my) {
                                             label.text = obj.avg_ws ? '' + obj.avg_ws : '0';
                                             label.color = wsbf.label.style.color || 'gray';
                                             label.fontSize = '80%';
+                                            label.wd = obj.avg_wd ? obj.avg_wd : 0;
                                             self.markers[n.id].setLabel(label);
                                         }
 

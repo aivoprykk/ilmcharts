@@ -18,7 +18,7 @@ ldir="$dir"
 (
 cd "$ldir";
 rsync -a$dry$kstr$estr root@$host:"$dir/public/"*_data "$ldir/public/"
-rsync -a$dry$kstr$est root@$host:"$dir/public/"arhiiv "$ldir/public/"
+rsync -a$dry$kstr$estr root@$host:"$dir/public/"arhiiv "$ldir/public/"
 rsync -a$hdry$kstr$estr "$ldir/public"/*_data $ldir/public/arhiiv root@$host:"$dir/public/"
 bash bin/manage_old_data.sh
 )
