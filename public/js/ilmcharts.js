@@ -1,5 +1,5 @@
 /*!
- * Ilmcharts v1.1.14.7 (http://ilm.majasa.ee)
+ * Ilmcharts v1.1.14.8 (http://ilm.majasa.ee)
  * Copyright 2012-2019 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
@@ -480,7 +480,7 @@ var ilm = (function(my) {
             gmp.prototype.setIcon = function(obj) {
                 if(obj && obj.strokeColor) {
                     if(/rgb/.test(obj.strokeColor)) {
-                        this.icon.strokeColor = obj.strokeColor.replace(/rgba?\(([0-9]+),(?:\s+)?([0-9]+),(?:\s+)?([0-9]+).+$/, 'rgba($1,$2,$3,0.75)');
+                        this.icon.strokeColor = obj.strokeColor.replace(/rgba?\(([0-9]+),(?:\s+)?([0-9]+),(?:\s+)?([0-9]+).+$/, 'rgba($1,$2,$3,0.6)');
                     } else {
                         this.icon.strokeColor=obj.strokeColor;
                     }
