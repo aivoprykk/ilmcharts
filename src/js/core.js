@@ -1154,8 +1154,8 @@ var ilm = (function(my) {
                     return dir + (dir === 'arhiiv' ? '' : '_data') + '/' + name + '/' + self.setTxtFileName(d);
                 });
             }
-            place = place.replace(/arhiiv_/, '');
-            return 'arhiiv/' + place + '/' + self.setTxtFileName(d);
+            //place = place.replace(/arhiiv_/, '');
+            //return 'arhiiv/' + place + '/' + self.setTxtFileName(d);
         },
         setCurPlace: function(d, persist, load) {
             this.setPlace(d, 'curplace', persist, load);
@@ -1310,9 +1310,18 @@ var ilm = (function(my) {
         setDate: function(d, load) {
             load = load || 'ja';
             var ret = 0,
+                dd = '',
                 cur = this.getTime();
-            if (d && (/^\d*-\d*-\d*/).test(d)) {
-                d = d.split(/[\sT]/)[0] + ' 23:59:59';
+            if (d && (/^\d*[-.]\d*[-.]\d*/).test(d)) {
+                dd = d.split(/[\sT]/)[0];
+                dd = dd.split(/[-.]/,3);
+                if(dd[0].length===4) {
+                    d=dd[0]+'-'+dd[1]+'-'+dd[2];
+                }
+                else {
+                    d=dd[2]+'-'+dd[1]+'-'+dd[0];
+                }
+                d += 'T23:59:59';
                 ret = this.getTime(d);
             } else if (d && (/^\d+$/).test(d)) {
                 ret = this.getTime() - (Number(d) * 1000);

@@ -1,5 +1,7 @@
 #!/bin/bash
 PATH=$PATH:/usr/local/bin
+export NVM_DIR="/root/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 lab=0
 force=0
 test=0
