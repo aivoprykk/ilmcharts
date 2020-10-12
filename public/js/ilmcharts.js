@@ -1,6 +1,6 @@
 /*!
  * Ilmcharts v1.1.14.9 (http://ilm.majasa.ee)
- * Copyright 2012-2019 Aivo Pruekk
+ * Copyright 2012-2020 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
 
@@ -59,7 +59,8 @@ var ilm = (function(my) {
             if (!opt) {
                 return this;
             }
-            var changed = false, a;
+            var changed = false,
+                a;
             for (a in this.attr) {
                 if (a !== 'id' && (opt[a] || typeof opt[a] === 'boolean') && opt[a] !== this.attr[a]) {
                     this.attr[a] = (opt[a] === 'none') ? '' : opt[a];
@@ -76,13 +77,14 @@ var ilm = (function(my) {
             return this.attr[name] || null;
         },
         destroy: function() {
-            if (localStorage) {localStorage.removeItem(this.id);}
+            if (localStorage) { localStorage.removeItem(this.id); }
             return this;
         },
         toJSON: function() {
-            var ret = {}, a;
+            var ret = {},
+                a;
             for (a in this.attr) {
-                if (a !== 'id') {ret[a] = this.attr[a];}
+                if (a !== 'id') { ret[a] = this.attr[a]; }
             }
             return ret;
         }
@@ -163,6 +165,7 @@ var ilm = (function(my) {
             emhi_pirita: { id: 'emhi_pirita', cid: 'pirita', name: 'Pirita EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'pirita', location: [59.471562, 24.825608] },
             emhi_rohuneeme: { id: 'emhi_rohuneeme', cid: 'rohuneeme', name: 'Rohuneeme EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'rohuneeme', location: [59.551945, 24.794094] },
             emhi_haapsalu: { id: 'emhi_haapsalu', previd: 'emhi_topu', cid: 'haapsalu-sadam', name: 'Haapsalu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haapsalu', location: [58.9578, 23.4901] },
+            arhiiv_parnu_aloha: { id: 'arhiiv_parnu_aloha', cid: '', name: 'Pärnu Aloha', group: 'meri', link: '', bind: 'parnu', location: [58.371146, 24.508807] },
             emhi_parnu: { id: 'emhi_parnu', cid: 'parnu', name: 'Pärnu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'parnu', location: [58.365958, 24.526257] },
             emhi_haademeeste: { id: 'emhi_haademeeste', cid: 'haademeeste', name: 'Häädemeeste EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haademeeste', location: [58.071644, 24.478816] },
             emhi_sorve: { id: 'emhi_sorve', cid: 'sorve', name: 'Sõrve EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'sorve', location: [57.909984, 22.055313] },
@@ -387,13 +390,14 @@ var ilm = (function(my) {
         markers: {},
         markertype: 'custom',
         markerclass: null,
-        googleMarkerClassCreate: function () {
+        googleMarkerClassCreate: function() {
             var map = w.google.maps;
+
             function gmp(position, obj) {
                 this.c = {};
                 var c = this.c;
-                this.label = { text:'', color:'gray', fontSize:'100%', wd:0 };
-                this.icon = {strokeColor: 'gray'};
+                this.label = { text: '', color: 'gray', fontSize: '100%', wd: 0 };
+                this.icon = { strokeColor: 'gray' };
                 this.position = position;
                 this.title = obj && obj.title ? obj.title : '';
 
@@ -441,9 +445,9 @@ var ilm = (function(my) {
 
                 // Hide the popup when it is far out of view.
                 var display =
-        Math.abs(divPosition.x) < 4000 && Math.abs(divPosition.y) < 4000 ?
-            'block' :
-            'none';
+                    Math.abs(divPosition.x) < 4000 && Math.abs(divPosition.y) < 4000 ?
+                    'block' :
+                    'none';
 
                 if (display === 'block') {
                     this.c.container.style.left = divPosition.x + 'px';
@@ -454,35 +458,35 @@ var ilm = (function(my) {
                 }
             };
             gmp.prototype.setLabel = function(data) {
-                if(data) {
-                    if(data.text) {
+                if (data) {
+                    if (data.text) {
                         this.label.text = data.text;
                     }
-                    if(data.wd) {
+                    if (data.wd) {
                         this.label.wd = data.wd;
-                        this.c.arrow.style.transform = 'rotate(' + (data.wd-180)+'deg)';
+                        this.c.arrow.style.transform = 'rotate(' + (data.wd - 180) + 'deg)';
                     }
-                    if(data.color) {
+                    if (data.color) {
                         this.label.color = data.color;
                         this.c.label.style.color = data.color;
                     }
-                    if(data.fontSize) {
+                    if (data.fontSize) {
                         this.label.fontSize = data.fontSize;
                         this.c.label.style.fontSize = data.fontSize;
                     }
-                    this.c.label.innerHTML = data.text||'0';
+                    this.c.label.innerHTML = data.text || '0';
                 }
             };
-            gmp.prototype.getLabel = function () {
+            gmp.prototype.getLabel = function() {
                 return this.label;
             };
 
             gmp.prototype.setIcon = function(obj) {
-                if(obj && obj.strokeColor) {
-                    if(/rgb/.test(obj.strokeColor)) {
+                if (obj && obj.strokeColor) {
+                    if (/rgb/.test(obj.strokeColor)) {
                         this.icon.strokeColor = obj.strokeColor.replace(/rgba?\(([0-9]+),(?:\s+)?([0-9]+),(?:\s+)?([0-9]+).+$/, 'rgba($1,$2,$3,0.6)');
                     } else {
-                        this.icon.strokeColor=obj.strokeColor;
+                        this.icon.strokeColor = obj.strokeColor;
                     }
                     this.c.div.style.borderColor = this.icon.strokeColor;
                 }
@@ -492,10 +496,10 @@ var ilm = (function(my) {
                 return this.icon;
             };
 
-            gmp.prototype.addListener = function(name,cb) {
+            gmp.prototype.addListener = function(name, cb) {
                 var self = this;
                 //return w.google.maps.event.addListener(self.c.container, name, cb);
-                return self.c.container.addEventListener(name,cb);
+                return self.c.container.addEventListener(name, cb);
             };
             gmp.prototype.getPosition = function() {
                 return this.position;
@@ -520,15 +524,13 @@ var ilm = (function(my) {
             id = id || 'none';
             if (self.markers[id]) {
                 marker = self.markers[id];
-            }
-            else {
-                if(self.markertype==='custom') {
-                    if(!self.markerclass) {
+            } else {
+                if (self.markertype === 'custom') {
+                    if (!self.markerclass) {
                         self.markerclass = self.googleMarkerClassCreate();
                     }
-                    marker = new self.markerclass(new w.google.maps.LatLng(pos.lat, pos.lng),{title:title});
-                }
-                else {
+                    marker = new self.markerclass(new w.google.maps.LatLng(pos.lat, pos.lng), { title: title });
+                } else {
                     marker = new w.google.maps.Marker({
                         position: pos,
                         icon: self.googleMarkerIcon(ws),
@@ -1050,7 +1052,7 @@ var ilm = (function(my) {
             i = i || null;
             return (el && el.clientWidth) ? el.clientWidth : (w.innerWidth) ? w.innerWidth :
                 (doc.documentElement && doc.documentElement.clientWidth) ? doc.documentElement.clientWidth :
-                    (doc.body && doc.body.clientWidth) ? doc.body.clientWidth : i;
+                (doc.body && doc.body.clientWidth) ? doc.body.clientWidth : i;
         },
         wdavg: function(wd, ws) {
             if (Object.prototype.toString.call(wd) !== '[object Array]') {
@@ -1322,12 +1324,11 @@ var ilm = (function(my) {
                 cur = this.getTime();
             if (d && (/^\d*[-.]\d*[-.]\d*/).test(d)) {
                 dd = d.split(/[\sT]/)[0];
-                dd = dd.split(/[-.]/,3);
-                if(dd[0].length===4) {
-                    d=dd[0]+'-'+dd[1]+'-'+dd[2];
-                }
-                else {
-                    d=dd[2]+'-'+dd[1]+'-'+dd[0];
+                dd = dd.split(/[-.]/, 3);
+                if (dd[0].length === 4) {
+                    d = dd[0] + '-' + dd[1] + '-' + dd[2];
+                } else {
+                    d = dd[2] + '-' + dd[1] + '-' + dd[0];
                 }
                 d += 'T23:59:59';
                 ret = this.getTime(d);
@@ -1646,13 +1647,13 @@ temp 5 <td class="number">9,8</td>
         var touch = event.changedTouches[0];
         var simulatedEvent = document.createEvent('MouseEvent');
         simulatedEvent.initMouseEvent({
-            touchstart: 'mousedown',
-            touchmove: 'mousemove',
-            touchend: 'mouseup'
-        }[event.type], true, true, window, 1,
-        touch.screenX, touch.screenY,
-        touch.clientX, touch.clientY, false,
-        false, false, false, 0, null);
+                touchstart: 'mousedown',
+                touchmove: 'mousemove',
+                touchend: 'mouseup'
+            }[event.type], true, true, window, 1,
+            touch.screenX, touch.screenY,
+            touch.clientX, touch.clientY, false,
+            false, false, false, 0, null);
         touch.target.dispatchEvent(simulatedEvent);
         event.preventDefault();
     }
@@ -1672,290 +1673,290 @@ temp 5 <td class="number">9,8</td>
     }
 
     var googleMapStyles1 = [{
-        'elementType': 'geometry',
-        'stylers': [{
-            'color': '#f5f5f5'
-        }]
-    },
-    {
-        'elementType': 'labels.icon',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'elementType': 'labels.text.fill',
-        'stylers': [{
-            'color': '#616161'
-        }]
-    },
-    {
-        'elementType': 'labels.text.stroke',
-        'stylers': [{
-            'color': '#f5f5f5'
-        }]
-    },
-    {
-        'featureType': 'administrative.country',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'administrative.land_parcel',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'administrative.land_parcel',
-        'elementType': 'labels',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'administrative.land_parcel',
-        'elementType': 'labels.text.fill',
-        'stylers': [{
-            'color': '#bdbdbd'
-        }]
-    },
-    {
-        'featureType': 'administrative.neighborhood',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'administrative.province',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'landscape.man_made',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'landscape.natural.landcover',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'landscape.natural.terrain',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'poi',
-        'elementType': 'geometry',
-        'stylers': [{
-            'color': '#eeeeee'
-        }]
-    },
-    {
-        'featureType': 'poi',
-        'elementType': 'labels.text',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'poi',
-        'elementType': 'labels.text.fill',
-        'stylers': [{
-            'color': '#757575'
-        }]
-    },
-    {
-        'featureType': 'poi.attraction',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'poi.business',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'poi.government',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'poi.medical',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'poi.park',
-        'elementType': 'geometry',
-        'stylers': [{
-            'color': '#e5e5e5'
-        }]
-    },
-    {
-        'featureType': 'poi.park',
-        'elementType': 'labels.text',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'poi.park',
-        'elementType': 'labels.text.fill',
-        'stylers': [{
-            'color': '#9e9e9e'
-        }]
-    },
-    {
-        'featureType': 'poi.place_of_worship',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'poi.school',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'poi.sports_complex',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'road',
-        'elementType': 'geometry',
-        'stylers': [{
-            'color': '#ffffff'
-        }]
-    },
-    {
-        'featureType': 'road.arterial',
-        'elementType': 'labels',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'road.arterial',
-        'elementType': 'labels.text.fill',
-        'stylers': [{
-            'color': '#757575'
-        }]
-    },
-    {
-        'featureType': 'road.highway',
-        'stylers': [{
-            'visibility': 'simplified'
-        }]
-    },
-    {
-        'featureType': 'road.highway',
-        'elementType': 'geometry',
-        'stylers': [{
-            'color': '#dadada'
-        }]
-    },
-    {
-        'featureType': 'road.highway',
-        'elementType': 'labels',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'road.highway',
-        'elementType': 'labels.text.fill',
-        'stylers': [{
-            'color': '#616161'
-        }]
-    },
-    {
-        'featureType': 'road.highway.controlled_access',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'road.local',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'road.local',
-        'elementType': 'labels',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'road.local',
-        'elementType': 'labels.text.fill',
-        'stylers': [{
-            'color': '#9e9e9e'
-        }]
-    },
-    {
-        'featureType': 'transit.line',
-        'stylers': [{
-            'visibility': 'simplified'
-        }]
-    },
-    {
-        'featureType': 'transit.line',
-        'elementType': 'geometry',
-        'stylers': [{
-            'color': '#e5e5e5'
-        }]
-    },
-    {
-        'featureType': 'transit.line',
-        'elementType': 'labels.text.fill',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'transit.station',
-        'stylers': [{
-            'visibility': 'off'
-        }]
-    },
-    {
-        'featureType': 'transit.station',
-        'elementType': 'geometry',
-        'stylers': [{
-            'color': '#eeeeee'
-        }]
-    },
-    {
-        'featureType': 'water',
-        'elementType': 'geometry',
-        'stylers': [{
-            'color': '#c9c9c9'
-        }]
-    },
-    {
-        'featureType': 'water',
-        'elementType': 'labels.text.fill',
-        'stylers': [{
-            'color': '#9e9e9e'
-        }]
-    }
+            'elementType': 'geometry',
+            'stylers': [{
+                'color': '#f5f5f5'
+            }]
+        },
+        {
+            'elementType': 'labels.icon',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'elementType': 'labels.text.fill',
+            'stylers': [{
+                'color': '#616161'
+            }]
+        },
+        {
+            'elementType': 'labels.text.stroke',
+            'stylers': [{
+                'color': '#f5f5f5'
+            }]
+        },
+        {
+            'featureType': 'administrative.country',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'administrative.land_parcel',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'administrative.land_parcel',
+            'elementType': 'labels',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'administrative.land_parcel',
+            'elementType': 'labels.text.fill',
+            'stylers': [{
+                'color': '#bdbdbd'
+            }]
+        },
+        {
+            'featureType': 'administrative.neighborhood',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'administrative.province',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'landscape.man_made',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'landscape.natural.landcover',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'landscape.natural.terrain',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'poi',
+            'elementType': 'geometry',
+            'stylers': [{
+                'color': '#eeeeee'
+            }]
+        },
+        {
+            'featureType': 'poi',
+            'elementType': 'labels.text',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'poi',
+            'elementType': 'labels.text.fill',
+            'stylers': [{
+                'color': '#757575'
+            }]
+        },
+        {
+            'featureType': 'poi.attraction',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'poi.business',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'poi.government',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'poi.medical',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'poi.park',
+            'elementType': 'geometry',
+            'stylers': [{
+                'color': '#e5e5e5'
+            }]
+        },
+        {
+            'featureType': 'poi.park',
+            'elementType': 'labels.text',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'poi.park',
+            'elementType': 'labels.text.fill',
+            'stylers': [{
+                'color': '#9e9e9e'
+            }]
+        },
+        {
+            'featureType': 'poi.place_of_worship',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'poi.school',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'poi.sports_complex',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'road',
+            'elementType': 'geometry',
+            'stylers': [{
+                'color': '#ffffff'
+            }]
+        },
+        {
+            'featureType': 'road.arterial',
+            'elementType': 'labels',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'road.arterial',
+            'elementType': 'labels.text.fill',
+            'stylers': [{
+                'color': '#757575'
+            }]
+        },
+        {
+            'featureType': 'road.highway',
+            'stylers': [{
+                'visibility': 'simplified'
+            }]
+        },
+        {
+            'featureType': 'road.highway',
+            'elementType': 'geometry',
+            'stylers': [{
+                'color': '#dadada'
+            }]
+        },
+        {
+            'featureType': 'road.highway',
+            'elementType': 'labels',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'road.highway',
+            'elementType': 'labels.text.fill',
+            'stylers': [{
+                'color': '#616161'
+            }]
+        },
+        {
+            'featureType': 'road.highway.controlled_access',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'road.local',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'road.local',
+            'elementType': 'labels',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'road.local',
+            'elementType': 'labels.text.fill',
+            'stylers': [{
+                'color': '#9e9e9e'
+            }]
+        },
+        {
+            'featureType': 'transit.line',
+            'stylers': [{
+                'visibility': 'simplified'
+            }]
+        },
+        {
+            'featureType': 'transit.line',
+            'elementType': 'geometry',
+            'stylers': [{
+                'color': '#e5e5e5'
+            }]
+        },
+        {
+            'featureType': 'transit.line',
+            'elementType': 'labels.text.fill',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'transit.station',
+            'stylers': [{
+                'visibility': 'off'
+            }]
+        },
+        {
+            'featureType': 'transit.station',
+            'elementType': 'geometry',
+            'stylers': [{
+                'color': '#eeeeee'
+            }]
+        },
+        {
+            'featureType': 'water',
+            'elementType': 'geometry',
+            'stylers': [{
+                'color': '#c9c9c9'
+            }]
+        },
+        {
+            'featureType': 'water',
+            'elementType': 'labels.text.fill',
+            'stylers': [{
+                'color': '#9e9e9e'
+            }]
+        }
     ];
 
 
@@ -1993,10 +1994,10 @@ window.$(function() {
             // Create the canvas
             $(container).append(
                 $(document.createElementNS('http://www.w3.org/2000/svg', 'svg'))
-                    .attr({
-                        height: 2 * arrowWidth,
-                        width: 2 * arrowWidth
-                    })
+                .attr({
+                    height: 2 * arrowWidth,
+                    width: 2 * arrowWidth
+                })
             );
             $('svg', container).append(document.createElementNS('http://www.w3.org/2000/svg', 'defs'));
             $('defs', container).append($(document.createElementNS('http://www.w3.org/2000/svg', 'clipPath')).attr('id', 'clip'));
@@ -2100,7 +2101,8 @@ window.$(function() {
     };
     window.WindBarbArrowHandler = window.WindBarbArrowHandler || WindBarbArrowHandler;
     //WindBarbArrowHandler.WindArrow(30, 45, $("#windBarbArrow"), 40);
-});;
+});
+;
 (function (my) {
     'use strict';
     var w = window, $ = w.$, _ = w._,
