@@ -34,7 +34,7 @@ require("jaamconf.php");
 header("Content-Type:text/plain");
 
 //* mitmed konfi asjad siin
-$jaamad = array('vortsjarv_tamme','vortsjarv_joesuu','peipsi_nina', 'peipsi_rapina', 'parnu_aloha');
+$jaamad = array('vortsjarv_tamme','vortsjarv_joesuu','peipsi_nina', 'peipsi_rapina', 'parnu_aloha', 'saadjarv_saadjarve');
 $sisendjaam = "";
 $sisendaeg = 0;
 $ajaraam = "";
@@ -124,6 +124,7 @@ if($sisendaeg!='koik'){
 if($verbose){
 	echo "Sisendaeg: ".$sisendaeg."\n";
 	echo "Ajaraam: ".$ajaraam."\n";
+	echo "Jaam: ".$sisendjaam."\n";
 }
 
 // Umbes nii toimetab:
@@ -143,14 +144,15 @@ if(!$sql){
 $fieldnames = array("temperature", "heat_index", "dewpoint", "wind_direction", "wind_speed", "wind_gust", "humidity", "pressure");
 $fstr = join(", ",$fieldnames);
 for($k=0,$l=count($jaamad);$k<$l;++$k){
-	if($sisendjaam!=FALSE && $k!=$sisendjaam) continue;
 	$jaam=$k;
 	$jaamastr = $jaamad[$jaam];
+	if($sisendjaam!=FALSE && ($k!=$sisendjaam && $jaamastr!=$sisendjaam)) continue;
 	if($jaamastr=='vortsjarv_tamme') $jstr="TammeSurf";
 	else if($jaamastr=='vortsjarv_joesuu') $jstr="Joesuu";
 	else if($jaamastr=='peipsi_nina') $jstr="MobileSurf";
 	else if($jaamastr=='peipsi_rapina') $jstr="Rapinasurf";
 	else if($jaamastr=='parnu_aloha') $jstr="AlohaParnu";
+	else if($jaamastr=='saadjarv_saadjarve') $jstr="Saadjarv";
 	else $jstr = $jaam;
 	$query = "select time, $fstr from wsds where station_id='$jstr'$aeg order by time asc";
 	//$query = "select aeg, ti, ilm.to as 'to', hi, ho, dp, wc, ws, wd, rt, r1, r24, pr, pa, wf, wt, ccalt, wg from ilm where jaam=$jaam$aeg order by aeg asc";
@@ -190,6 +192,7 @@ for($k=0,$l=count($jaamad);$k<$l;++$k){
 	$nowdate = "";
 	$prevdate = "";
 	$rowscount = 0;
+	$delta=0;
 	//$lastdata = "";
 	for($o=0;$o<$count;++$o){
 		if($sql) {
@@ -226,7 +229,12 @@ for($k=0,$l=count($jaamad);$k<$l;++$k){
 		$nowdatestr = $mc[2].$mc[3].$mc[4]." ".$mc[5];
 		$nowstamp = strtotime($row[0]);
 
-		$delta = abs($nowminute-$prevminute);
+		if($verbose) {
+			echo "Prevmin: ".$prevminute."\n";
+			echo "Nowmin: ".$nowminute."\n";
+		}
+		if($prevminute)
+			$delta = abs($nowminute-$prevminute);
 		$flush = ($prevminute!="" && testm($nowminute) && (!testm($prevminute) || $delta>4)) ? ($flush ? 2 : 1) : FALSE;
 		if($flush==2 && $delta>4) $flush=1;
 		if($verbose) {
@@ -448,6 +456,7 @@ function addContent($path,$data,$mode='a'){
 //* 0/5/10 minuti test
 function testm($m){
 	//if(!$m) return FALSE;
+	if($m==="") return FALSE;
 	return ($m % 5 == 0 || $m % 10 == 0 || $m == 0);
 }
 //* kasutusjuhend

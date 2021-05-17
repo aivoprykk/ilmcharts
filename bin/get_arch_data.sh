@@ -12,7 +12,7 @@ temp=""
 dir=`dirname $0`
 meinfo='//ilm.majasa.ee/'
 echo "$dir" | grep -q '^/' || dir=`pwd`/$dir
-path=`echo "$dir"|sed -e 's/\/\?bin//'`
+path=`echo "$dir"|sed -e 's:/*bin::'`
 [ x"$path" = x"" ] && path="." || path=$path
 [ -d $path ] || { echo $path not found; exit; }
 while [ $# -ge 1 ]; do
