@@ -247,7 +247,7 @@ function getData(time) {
                 if (json.timestamp && !json.error) {
                     var wd = timestr(fromFlydogTimeStr(json.timestamp));
                     if (!xdata[wd[0]]) xdata[wd[0]] = [];
-                    if (debug) console.log(json.timestamp+" "+JSON.stringify(json.data));
+                    if (debug) console.log(json.timestamp+' '+JSON.stringify(json.data));
                     xdata[wd[0]].push(
                         [wd[3], //time
                             json.data.air_temp, //temp
@@ -312,9 +312,15 @@ function getAllData(first, last) {
     setTimeout(finish, 60 * 1000 * 10); //10 minutes max allowed.
 }
 
-
 function parse() {
-    var json = require(path);
+    var rawdata = fs.readFileSync(path);
+    var json = null;
+    try {
+        json = JSON.parse(rawdata);
+    } catch(e) {
+        // oops! invalid json found; take possible actions here
+        if (debug) console.log('oops! invalid json found; take possible actions here, file: ' + path);
+    }
     if (json) {
         var last = fromFlydogTimeStr(json['data-to']),
             d = last,
