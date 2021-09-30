@@ -296,6 +296,7 @@ a {
 .two-lg {
 	width: 50%;
 	float: left;
+	position: relative;
 }
 
 @media (max-width:1400px) {
@@ -556,4 +557,32 @@ a {
 
 .avg_wd, .time, .grid-em {
 	white-space: nowrap;
+}
+
+th .fchead {
+	position: absolute;
+	right: 2em;
+	font-weight: 600;
+}
+tr.fcontainer {
+	position: relative;
+}
+#graph-timeframe-control .fchead {
+	margin-right:2em;
+}
+
+.fckhead {
+	position: absolute;
+	top: -1em;
+}
+.fckhead.fcleft {
+	left: 2em;
+}
+.fckhead.fcright {
+	right: 2em;
+}
+@media (max-width: 1400px) {
+.fckhead.fcright {
+	left:13em;
+}
 }

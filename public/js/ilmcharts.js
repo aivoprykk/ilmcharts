@@ -1,5 +1,5 @@
 /*!
- * Ilmcharts v1.1.16 (http://ilm.majasa.ee)
+ * Ilmcharts v1.2.1 (http://ilm.majasa.ee)
  * Copyright 2012-2021 Aivo Pruekk
  * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
  */
@@ -14,7 +14,8 @@ var ilm = (function(my) {
         $ = w.$,
         _ = w._,
         console = w.console,
-        SunCalc = w.SunCalc;
+        SunCalc = w.SunCalc,
+        fcmax=72;
 
     function State(opt) {
         opt = opt || {};
@@ -35,7 +36,7 @@ var ilm = (function(my) {
             samplemode: opt.samplemode || 'table',
             sampletype: opt.sampletype || 'detail',
             fcsource: opt.fcsource || 'wg',
-            fcmax: opt.fcmax || 48,
+            fcmax: opt.fcmax || fcmax,
             fcshownight: opt.fcshownight || false
         };
         this.id = defaults.id;
@@ -91,6 +92,7 @@ var ilm = (function(my) {
     };
 
     function App(placeholder) {
+        this.deffcmax=fcmax;
         this.state = new State().load();
         this.placeholder = placeholder || '#container';
         this.dataurl = '/cgi-bin/cpp/ilm/image.cgi?t=json';
@@ -99,7 +101,7 @@ var ilm = (function(my) {
         this.fcsources = this.state.attr.fcsources;
         this.fcsources_available = ['yr', 'wg', 'em'];
         this.fcsource = this.state.attr.fcsource || 'wg';
-        this.fcmax = this.state.attr.fcmax || 48;
+        this.fcmax = this.state.attr.fcmax || this.deffcmax;
         this.fcshownight = this.state.attr.fcshownight || false;
         this.samplemode = this.state.attr.samplemode || 'table';
         this.sampletype = this.state.attr.sampletype || 'detail';
@@ -114,7 +116,7 @@ var ilm = (function(my) {
         this.linksasmenu = this.state.attr.linksasmenu;
         this.chartorder = this.state.attr.chartorder;
         this.fcsourcesdata = {
-            yr: { name: 'Yr', url: 'http://www.yr.no', datadir: 'yr_data', fc_file: 'forecast_hour_by_hour.xml', datatype: 'xml' },
+            yr: { name: 'Yr', url: 'http://www.yr.no', datadir: 'yr_data2', fc_file: 'yr_forecast.json', datatype: 'json' },
             wg: { name: 'WindGuru', url: 'http://www.windguru.cz', datadir: 'wg_data', fc_file: 'windguru_forecast.json', datatype: 'json' },
             em: { name: 'Ilmateenistus', url: 'http://www.ilmateenistus.ee', datadir: 'empg_data', fc_file: 'empg_forecast.json', datatype: 'json' }
         };
@@ -128,25 +130,26 @@ var ilm = (function(my) {
             flydog: 'databuoys.sensornest.com'
         };
         this.fcplaces = {
-            tartu: { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: 'Tartumaa/Tartu', emlink: '793', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
-            aksi: { id: 'aksi', name: 'Äksi Saadjärv', wglink: '266923', yrlink: 'Tartumaa/Äksi', emlink: '9748', group: 'saadjarv', bind: 'arhiiv_saadjarv_saadjarve', location: [58.534918, 26.643429] },
-            uhmardu: { id: 'uhmardu', name: 'Uhmardu', yrlink: 'Jõgevamaa/Uhmardu', emlink: '8629', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
-            jogeva: { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: 'Jõgevamaa/Jõgeva', emlink: '2262', link: '', bind: 'mnt_jogeva', location: [58.764849, 26.404618] },
-            tamme: { id: 'tamme', name: 'Tamme Võrtsjärv', wglink: 192609, yrlink: 'Tartumaa/Tamme', emlink: '8094', group: 'vortsjarv-tamme', bind: 'arhiiv_vortsjarv_tamme', location: [58.271306, 26.134923] },
-            joesuu: { id: 'joesuu', name: 'Jõesuu Võrtsjärv', wglink: 692681, yrlink: 'Viljandimaa/Jõesuu', emlink: '8864', group: 'vortsjarv-joesuu', bind: 'arhiiv_vortsjarv_joesuu', location: [58.386441, 26.131942] },
-            rapina: { id: 'rapina', name: 'Räpina Peipsi', wglink: 183648, yrlink: 'Põlvamaa/Võõpsu', emlink: '7216', group: 'peipsi', bind: 'arhiiv_peipsi_rapina', location: [58.124988, 27.530086] },
-            nina: { id: 'nina', name: 'Nina Peipsi', wglink: 20401, yrlink: 'Tartumaa/Nina', emlink: '5427', group: 'peipsi', bind: 'arhiiv_peipsi_nina', location: [58.598889, 27.209722] },
-            mustvee: { id: 'mustvee', name: 'Mustvee Peipsi', wglink: 104337, yrlink: 'Jõgevamaa/Mustvee', emlink: '5097', group: 'peipsi', bind: 'emhi_mustvee', location: [58.847500, 26.951111] },
-            pirita: { id: 'pirita', name: 'Pirita Tallinn', wglink: 125320, yrlink: 'Harjumaa/Pirita~798565', emlink: '596', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
-            rohuneeme: { id: 'rohuneeme', name: 'Rohuneeme Viimsi', wglink: 70524, yrlink: 'Harjumaa/Rohuneeme', emlink: '7039', group: 'meri', bind: 'emhi_rohuneeme', location: [59.551945, 24.794094] },
-            haapsalu: { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', wglink: 245713, yrlink: 'Läänemaa/Haapsalu_Laht', emlink: '183', group: 'meri', bind: 'emhi_haapsalu', location: [58.9578, 23.4901] },
-            parnu: { id: 'parnu', name: 'Pärnu', wglink: 92781, yrlink: 'Pärnumaa/Pärnu', emlink: '624', group: 'meri', bind: 'emhi_parnu', location: [58.365958, 24.526257] },
-            haademeeste: { id: 'haademeeste', name: 'Häädemeeste', wglink: 246420, yrlink: 'Pärnumaa/Häädemeeste', emlink: '1957', group: 'meri', bind: 'emhi_haademeeste', location: [58.071644, 24.478816] },
-            sorve: { id: 'sorve', name: 'Sõrve Saaremaa', wglink: 108163, yrlink: 'Saaremaa/Sõrve_Tuletorn', emlink: '7950', group: 'meri', bind: 'emhi_sorve', location: [57.909984, 22.055313] },
-            ristna: { id: 'ristna', name: 'Ristna Hiiumaa', wglink: 96592, yrlink: 'Hiiumaa/Ristna', emlink: '2561', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
-            loksa: { id: 'loksa', name: 'Loksa', wglink: 108851, yrlink: 'Harjumaa/Loksa', emlink: '4471', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
-            dirhami: { id: 'dirhami', name: 'Dirhami', wglink: 261785, yrlink: 'Läänemaa/Dirhami', emlink: '1505', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
-            paatsalu: { id: 'paatsalu', name: 'Paatsalu', wglink: 479054, yrlink: 'Pärnumaa/Paatsalu', emlink: '5801', group: 'meri', bind: 'emhi_paatsalu', location: [58.508902, 23.663027] }
+            tartu: { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: '2-588335', emlink: '793', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
+            aksi: { id: 'aksi', name: 'Äksi Saadjärv', wglink: '266923', yrlink: '2-592574', emlink: '9748', group: 'saadjarv', bind: 'arhiiv_saadjarv_saadjarve', location: [58.534918, 26.643429] },
+            uhmardu: { id: 'uhmardu', name: 'Uhmardu', yrlink: '2-793979', emlink: '8629', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
+            jogeva: { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: '2-591902', emlink: '2262', link: '', bind: 'mnt_jogeva', location: [58.764849, 26.404618] },
+            tamme: { id: 'tamme', name: 'Tamme Võrtsjärv', wglink: 192609, yrlink: '2-588397', emlink: '8094', group: 'vortsjarv-tamme', bind: 'arhiiv_vortsjarv_tamme', location: [58.271306, 26.134923] },
+            joesuu: { id: 'joesuu', name: 'Jõesuu Võrtsjärv', wglink: 692681, yrlink: '2-591907', emlink: '8864', group: 'vortsjarv-joesuu', bind: 'arhiiv_vortsjarv_joesuu', location: [58.386441, 26.131942] },
+            rapina: { id: 'rapina', name: 'Räpina Peipsi', wglink: 183648, yrlink: '2-587468', emlink: '7216', group: 'peipsi', bind: 'arhiiv_peipsi_rapina', location: [58.124988, 27.530086] },
+            nina: { id: 'nina', name: 'Nina Peipsi', wglink: 20401, yrlink: '2-589982', emlink: '5427', group: 'peipsi', bind: 'arhiiv_peipsi_nina', location: [58.598889, 27.209722] },
+            mustvee: { id: 'mustvee', name: 'Mustvee Peipsi', wglink: 104337, yrlink: '2-590067', emlink: '5097', group: 'peipsi', bind: 'emhi_mustvee', location: [58.847500, 26.951111] },
+            pirita: { id: 'pirita', name: 'Pirita Tallinn', wglink: 125320, yrlink: '2-10123592', emlink: '596', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
+            rohuneeme: { id: 'rohuneeme', name: 'Rohuneeme Viimsi', wglink: 70524, yrlink: '2-588984', emlink: '7039', group: 'meri', bind: 'emhi_rohuneeme', location: [59.551945, 24.794094] },
+            haapsalu: { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', wglink: 245713, yrlink: '2-794885', emlink: '183', group: 'meri', bind: 'emhi_haapsalu', location: [58.9578, 23.4901] },
+            parnu: { id: 'parnu', name: 'Pärnu', wglink: 92781, yrlink: '2-589580', emlink: '624', group: 'meri', bind: 'emhi_parnu', location: [58.365958, 24.526257] },
+            haademeeste: { id: 'haademeeste', name: 'Häädemeeste', wglink: 246420, yrlink: '2-592232', emlink: '1957', group: 'meri', bind: 'emhi_haademeeste', location: [58.071644, 24.478816] },
+            sorve: { id: 'sorve', name: 'Sõrve Saaremaa', wglink: 108163, yrlink: '2-794645', emlink: '7950', group: 'meri', bind: 'emhi_sorve', location: [57.909984, 22.055313] },
+            orjaku: { id: 'orjaku', name: 'Orjaku Hiiumaa', wglink: 92777, yrlink: '2-794840', emlink: '7950', group: 'meri', bind: 'emhi_orjaku', location: [58.76252573432038, 22.799324608581074] },
+            ristna: { id: 'ristna', name: 'Ristna Hiiumaa', wglink: 96592, yrlink: '2-589003', emlink: '2561', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
+            loksa: { id: 'loksa', name: 'Loksa', wglink: 108851, yrlink: '2-587445', emlink: '4471', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
+            dirhami: { id: 'dirhami', name: 'Dirhami', wglink: 261785, yrlink: '2-796115', emlink: '1505', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
+            paatsalu: { id: 'paatsalu', name: 'Paatsalu', wglink: 479054, yrlink: '2-589749', emlink: '5801', group: 'meri', bind: 'emhi_paatsalu', location: [58.508902, 23.663027] }
         };
         this.curplaces = {
             arhiiv_saadjarv_saadjarve: { id: 'arhiiv_saadjarv_saadjarve', cid: '', name: 'Saadjärve Saadjärv', group: 'saadjarv', link: '', bind: 'aksi', location: [58.54048, 26.68177] },
@@ -169,7 +172,8 @@ var ilm = (function(my) {
             arhiiv_parnu_aloha: { id: 'arhiiv_parnu_aloha', cid: '', name: 'Pärnu Aloha', group: 'meri', link: '', bind: 'parnu', location: [58.371146, 24.508807] },
             emhi_parnu: { id: 'emhi_parnu', cid: 'parnu', name: 'Pärnu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'parnu', location: [58.365958, 24.526257] },
             emhi_haademeeste: { id: 'emhi_haademeeste', cid: 'haademeeste', name: 'Häädemeeste EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haademeeste', location: [58.071644, 24.478816] },
-            emhi_sorve: { id: 'emhi_sorve', cid: 'sorve', name: 'Sõrve EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'sorve', location: [57.909984, 22.055313] },
+            emhi_orjaku: { id: 'emhi_orjaku', cid: 'heltermaa', name: 'Heltermaa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'orjaku', location: [58.866845079804946, 23.04607326381741] },
+            emhi_sorve: { id: 'emhi_sorve', cid: 'montu', name: 'Sõrve EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'sorve', location: [57.909984, 22.055313] },
             emhi_ristna: { id: 'emhi_ristna', cid: 'ristna-2', name: 'Ristna EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'ristna', location: [58.927304, 22.041023] },
             emhi_loksa: { id: 'emhi_loksa', cid: 'loksa', name: 'Loksa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'loksa', location: [59.5872, 25.6943] },
             emhi_dirhami: { id: 'emhi_dirhami', cid: 'dirhami', name: 'Dirhami EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'dirhami', location: [59.2133, 23.5031] },
@@ -600,12 +604,12 @@ var ilm = (function(my) {
                     n = this.curplaces[gridorder[i]];
                     if (n) {
                         html += '<tr id="' + co + n.id + '" name="' + n.id + '" class="data-menu-row" style="background-color:white">';
-                        html += '<td class="sortable-is-active hide">-</td><td colspan="6">' + n.name + '</td>';
+                        html += '<td class="sortable-is-active hide">-</td><td colspan="8">' + n.name + '</td>';
                         html += '</tr>';
                     }
                 }
                 html += '</tbody>';
-                el.innerHTML = '<div>&nbsp;</div>' + _.template(self.dataTableTemplate, { classes: 'table sortable-table', thead: self.gridHeadTemplate, tbody: html });
+                el.innerHTML = '<div>&nbsp;</div>' + _.template(self.dataTableTemplate)({ classes: 'table sortable-table', thead: self.gridHeadTemplate, tbody: html });
                 self.ready(doc, function() {
                     clearInterval(self.gridintval);
                     self.fillGridLast(self);
@@ -644,13 +648,15 @@ var ilm = (function(my) {
                     s += '<div class="chart-control-box" style="width:100%;position:relative;font-size:80%;">&nbsp;';
                     if (self.samplemode !== 'table' && self.viewmode === 'cur') {
                         s += '<div id="graph-timeframe-control" style="position:absolute;z-index:10000;top:-7px;left:8px;">';
-                        s += '<span class="hist-length label label-default" name="4"> 4h </span>&nbsp;<span class="hist-length label label-default" name="6"> 6h </span>&nbsp;<span class="hist-length label label-default" name="12"> 12h </span>&nbsp;<span class="hist-length label label-default" name="24"> 24h </span>&nbsp;<span class="hist-length label label-default" name="48"> 2p </span>&nbsp;<span class="hist-length label label-default" name="72"> 3p </span>';
+                        //s += '<span class="fchead label label-default"> '+n.name+' </span>';
+                        s += '&nbsp;<span class="hist-length label label-default" name="4"> 4h </span>&nbsp;<span class="hist-length label label-default" name="6"> 6h </span>&nbsp;<span class="hist-length label label-default" name="12"> 12h </span>&nbsp;<span class="hist-length label label-default" name="24"> 24h </span>&nbsp;<span class="hist-length label label-default" name="48"> 2p </span>&nbsp;<span class="hist-length label label-default" name="72"> 3p </span>';
                         s += '</div>';
                     }
                     s += '<div style="position:absolute;z-index:10000;left:5px;top:5px;">';
                     s += '<span class="title-chart"></span>&nbsp;<span class="change-chart label label-default" name="cur">Ajalugu</span>&nbsp;<span class="change-chart label label-default" name="est">Prognoos</span>';
                     s += '</div>';
                     s += '<div style="position:absolute;z-index:10000;right:35px;top:5px;">';
+                    //s += (self.samplemode !== 'table') ? '<span class="fchead label label-default"> '+my.fcplaces[n.bind].name+' </span>&nbsp;' : '';
                     s += (self.samplemode === 'table') ? ('<span class="night-chart label label-default" name="' + (self.fcshownight ? 'fcsnf' : 'fcsnt') + '"> ' + (self.fcshownight ? '-' : '+') + 'Ööd</span>&nbsp;') : '&nbsp;';
                     s += '<span class="sample-chart label label-default" name="' + (self.samplemode === 'table' ? 'graph' : 'table') + '">Näita ' + (self.samplemode === 'table' ? 'Graafikut' : 'Tabelit') + '</span>&nbsp;';
                     s += (self.viewmode !== 'cur' || xlarge) ? ('<span class="long-chart label label-default" name="' + (self.sampletype === 'long' ? 'detail' : 'long') + '">Näita ' + (self.sampletype === 'long' ? 'Detailset' : 'Pikaajalist') + '</span>&nbsp;') : '&nbsp;';
@@ -664,9 +670,13 @@ var ilm = (function(my) {
                         else if (v < 600) self.timeframe = 12 * 3600 * 1000;
                         else self.timeframe = 24 * 3600 * 1000;
                     }
-                    s = '<div class="float two-lg"><div class="meta"></div></div>';
+                    s = '<div class="float two-lg"><div class="meta"></div><div class="fckhead fcright">';
+                    if (self.samplemode !== 'table') s += '<span class="label label-info"> '+n.name+'</span>';
+                    s += '</div></div>';
                     if (xlarge) {
-                        s += '<div class="float two-lg"><div class="meta"></div></div>';
+                        s += '<div class="float two-lg"><div class="meta"></div><div class="fckhead fcleft">';
+                        if (self.samplemode !== 'table') s += '<span class="label label-info"> '+my.fcplaces[n.bind].name+'</span>';
+                        s += '</div></div>';
                     }
                     u = $(el).find('.chartbox');
                     u.append(s);
@@ -781,7 +791,7 @@ var ilm = (function(my) {
         histRowTemplate: '<tr class="item <%=night?"night":""%>" id="<%=d.time%>"><td><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class="hide-edge"><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td><td><span class="grid-cell-title">Tuul:&nbsp;</span><span class="grid-em"><span class="avg_ws" style="color:<%=wscolor%>"><%=d.avg_ws%></span>/<span class="max_ws" style="color:<%=wgcolor%>"><%=d.max_ws%></span></span></td><td class="avg_wd" title="<%=dn%>"><span class="grid-cell-title">Suund:&nbsp;</span><span class="arrow <%=dn%>"></span><span class="grid-em"><%=d.avg_wd%></span></td><td class="avg_temp"><span class="grid-cell-title">Temp:&nbsp;</span><span class="grid-em"><%=d.avg_temp%></span></td><td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td><td class="avg_wtemp hide-lg"><span class="grid-cell-title">Veetemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td><td class="hide-edge-xs avg_rain"><span class="grid-cell-title">Sademed:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td></tr>',
         gridHeadTemplate: '<thead><tr style="background-color:white"><th><span class="data-menu-order change label label-default" style="position:absolute;display:inline-block;background-color:white;border-radius:5px;color:black">+</span></th><th class="sortable-is-active hide"></th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Vesi</th><th class="hide-lg">Veetemp</th><th class="hide-edge">Sademed</th><th class="hide-edge-xs">Aeg</th></tr></thead>',
         gridRowTemplate: '<td class="sortable-is-active hide">-</td><td><span class="grid-em"><%=first%><span class="hide-edge-xs">&nbsp;<%=last%></span></span></td><td><span class="grid-cell-title">Tuul:&nbsp;</span><span class="trend"><%=d.trend=="u"?"&uarr;":d.trend=="d"?"&darr;":"&nbsp;"%>&nbsp;</span><span class="grid-em" style="color:<%=wscolor%>"><span class="avg_ws"><%=d.avg_ws%></span>/<span class="max_ws" style="color:<%=wgcolor%>"><%=d.max_ws%></span></span></td><td class="avg_wd" title="<%=dn%>"><span class="grid-cell-title">Suund:&nbsp;</span><span class="arrow <%=dn%>"></span><span class="grid-em"><%=d.avg_wd%></span></td><td class="avg_temp"><span class="grid-cell-title">Temp:&nbsp;</span><span class="grid-em"><%=d.avg_temp%></span></td><td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td><td class="avg_wtemp hide-lg"><span class="grid-cell-title">Veetemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td><td class="avg_rain hide-edge"><span class="grid-cell-title">Sademed:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td><td class="time hide-edge-xs"><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class="hide-edge hide-edge-lg"><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td>',
-        chartContainerTemplate: '<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="curplace" class="btn btn-default btn-xs navbar-btn">Andmed <b><%=title%></b></a><a id="curtime" class="btn btn-default btn-xs navbar-btn"><%=date%></a><a id="cursel" style="" data-toggle="dropdown" class="btn btn-default btn-xs navbar-btn dropdown-toggle"><span class="caret"></span></a><ul id="curmenu" role="menu" class="curmenu dropdown-menu"><li><a href="#" name="arhiiv_saadjarv_saadjarve" class="curplace-select active">Saadjärve Saadjärv</a></li><li><a href="#" name="flydog_aksi" class="curplace-select active">Saadjärv Äksi</a></li><li><a href="#" name="emu" class="curplace-select active">Tartu EMU</a></li><li><a href="#" name="ut_tartu" class="curplace-select">Tartu UT</a></li><li><a href="#" name="arhiiv_vortsjarv_joesuu" class="curplace-select">Võrtsjärv Jõesuu</a></li><li><a href="#" name="arhiiv_vortsjarv_tamme" class="curplace-select">Võrtsjärv Tamme</a></li><li><a href="#" name="mnt_tamme" class="curplace-select">V-Rakke MNT</a></li><li><a href="#" name="mnt_rapina" class="curplace-select">Räpina MNT</a></li><li><a href="#" name="mnt_uhmardu" class="curplace-select">Uhmardu MNT</a></li><li><a href="#" name="mnt_jogeva" class="curplace-select">Jõgeva MNT</a></li><li><a href="#" name="emhi_mustvee" class="curplace-select">Mustvee EMHI</a></li><li><a href="#" name="emhi_pirita" class="curplace-select">Pirita EMHI</a></li><li><a href="#" name="emhi_rohuneeme" class="curplace-select">Püünsi EMHI</a></li><li><a href="#" name="emhi_haapsalu" class="curplace-select">Haapsalu EMHI</a></li><li><a href="#" name="emhi_parnu" class="curplace-select">Pärnu EMHI</a></li><li><a href="#" name="emhi_haademeeste" class="curplace-select">Häädemeeste EMHI</a></li><li><a href="#" name="emhi_sorve" class="curplace-select">Sõrve EMHI</a></li><li><a href="#" name="emhi_ristna" class="curplace-select">Ristna EMHI</a></li></ul></div><input id="datepicker" type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0" class="hasDatepicker"><div class="meta"><div id="curmeta" class="ilm-meta"></div></div></div>',
+        chartContainerTemplate: '<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="curplace" class="btn btn-default btn-xs navbar-btn">Andmed <b><%=title%></b></a><a id="curtime" class="btn btn-default btn-xs navbar-btn"><%=date%></a><a id="cursel" style="" data-toggle="dropdown" class="btn btn-default btn-xs navbar-btn dropdown-toggle"><span class="caret"></span></a><ul id="curmenu" role="menu" class="curmenu dropdown-menu"><li><a href="#" name="arhiiv_saadjarv_saadjarve" class="curplace-select active">Saadjärve Saadjärv</a></li><li><a href="#" name="flydog_aksi" class="curplace-select active">Saadjärv Äksi</a></li><li><a href="#" name="emu" class="curplace-select active">Tartu EMU</a></li><li><a href="#" name="ut_tartu" class="curplace-select">Tartu UT</a></li><li><a href="#" name="arhiiv_vortsjarv_joesuu" class="curplace-select">Võrtsjärv Jõesuu</a></li><li><a href="#" name="arhiiv_vortsjarv_tamme" class="curplace-select">Võrtsjärv Tamme</a></li><li><a href="#" name="mnt_tamme" class="curplace-select">V-Rakke MNT</a></li><li><a href="#" name="mnt_rapina" class="curplace-select">Räpina MNT</a></li><li><a href="#" name="mnt_uhmardu" class="curplace-select">Uhmardu MNT</a></li><li><a href="#" name="mnt_jogeva" class="curplace-select">Jõgeva MNT</a></li><li><a href="#" name="emhi_mustvee" class="curplace-select">Mustvee EMHI</a></li><li><a href="#" name="emhi_pirita" class="curplace-select">Pirita EMHI</a></li><li><a href="#" name="emhi_rohuneeme" class="curplace-select">Püünsi EMHI</a></li><li><a href="#" name="emhi_haapsalu" class="curplace-select">Haapsalu EMHI</a></li><li><a href="#" name="emhi_parnu" class="curplace-select">Pärnu EMHI</a></li><li><a href="#" name="emhi_haademeeste" class="curplace-select">Häädemeeste EMHI</a></li><li><a href="#" name="emhi_sorve" class="curplace-select">Sõrve EMHI</a></li><li><a href="#" name="emhi_ristna" class="curplace-select">Ristna EMHI</a></li><li><a href="#" name="emhi_heltermaa" class="curplace-select">Heltermaa EMHI</a></li></ul></div><input id="datepicker" type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0" class="hasDatepicker"><div class="meta"><div id="curmeta" class="ilm-meta"></div></div></div>',
         chart2Container: '<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="fctitle" class="btn btn-default btn-xs navbar-btn"><%=title%></a><a id="fcsel" data-toggle="dropdown" class="btn btn-default btn-xs navbar-btn dropdown-toggle"><%=date%><span class="caret"></span></a><ul id="fcmenu" role="menu" class="fcmenu dropdown-menu"></ul></div><div class="meta"><div id="yrmeta" class="ilm-meta"><a href="http://www.yr.no/place/Estonia/Tartumaa/Äksi/hour_by_hour.html" onclick="window.open(this.href);return false;">Yr.no</a> andmed viimati uuendatud: 26.07.2017 22:32, Järgmine uuendus: 27.07.2017 11:00</div><div id="wgmeta" class="ilm-meta"><a href="http://www.windguru.cz/ee/?go=1&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: 27.07.2017 01:24, Järgmine uuendus: 27.07.2017 01:24</div></div></div>',
         gridintval: 0,
         getDayLetter: function(date) {
@@ -841,7 +851,7 @@ var ilm = (function(my) {
                                     else $e.removeClass('deferred');
                                     var wsbf = self.bfscale(obj.avg_ws),
                                         wgbf = self.bfscale(obj.max_ws);
-                                    $e.html(_.template(self.gridRowTemplate, {
+                                    $e.html(_.template(self.gridRowTemplate)({
                                         d: obj,
                                         first: first,
                                         last: last,
@@ -2231,7 +2241,7 @@ window.$(function() {
             gridLineWidth: 0,
             title: {
                 text: null
-            },		    	
+            },
             min: 0,
             max: 360,
             tickInterval: 45,
@@ -2370,14 +2380,13 @@ window.$(function() {
         donetable: function(json) {
             var self=my, d, s = {};
             //var table = $('<div>&nbsp;</div><table class="table" style="background-color:white;font-size:80%"><thead></thead><tbody class="tbody"></tbody></table>');
-            var hlinks = '<tr><th colspan="5"><span class="hist-length" name="4"> 4h </span>&nbsp;<span class="hist-length" name="6"> 6h </span>&nbsp;<span class="hist-length" name="12"> 12h </span>&nbsp;<span class="hist-length" name="24"> 24h </span>&nbsp;<span class="hist-length" name="48"> 2p </span>&nbsp;<span class="hist-length" name="72"> 3p </span></th></tr>';
             var html = '<tbody>';
             my.lastdate = my.normalizeData(my.curplace, json, function(obj,count,i){
                 //if(count-i>20) return false;
                 var loc = my.curplaces[my.curplace].location,
                     sun = SunCalc.getPosition(new Date(obj.time), loc[0], loc[1]);
                 var time = self.getTimeStr(obj.time).split(/\s/);
-                html += _.template(my.histRowTemplate,{
+                html += _.template(my.histRowTemplate)({
                     d:obj,
                     day:self.getDayLetter(obj.time),
                     date:time[0],
@@ -2391,11 +2400,13 @@ window.$(function() {
             html += '</tbody>';
             var $html = $(html);
             //var rev = _.filter($html.children('.item').get().reverse(),function(a,i){return i<15;});
+            var ln = my.curplaces[my.curplace].name;
+            var hlinks = '<tr class="fcontainer"><th colspan="7"><span class="hist-length" name="4"> 4h </span>&nbsp;<span class="hist-length" name="6"> 6h </span>&nbsp;<span class="hist-length" name="12"> 12h </span>&nbsp;<span class="hist-length" name="24"> 24h </span>&nbsp;<span class="hist-length" name="48"> 2p </span>&nbsp;<span class="hist-length" name="72"> 3p </span><span class="fchead right">'+ln+'</span></th></tr>';
             var rev = $html.children('.item').get().reverse();
             $html.html(rev);
             d = new Date(my.lastdate);
             var where = $('#'+my.chartorder[0]+'1');
-            where.html(_.template(self.dataTableTemplate,{classes:'table',thead:_.template(self.histHeadTemplate,{inforows:hlinks}),tbody:$html.html()}));
+            where.html(_.template(self.dataTableTemplate)({classes:'table',thead:_.template(self.histHeadTemplate)({inforows:hlinks}),tbody:$html.html()}));
             where.css('height','100%');
             var where2 = where.find('.table')[0];
             $('#'+my.chartorder[1]+'1').hide();
@@ -2434,7 +2445,7 @@ window.$(function() {
 			#8d4653 - pruun,
 			#91e8e1 - sinine2(hele)
 			*/
-            var d, s = {};			
+            var d, s = {};
             //windspeed
             s.avg_ws_series = $.extend(true, {}, d_series, {name: 'Keskmine',color:'#7cb5ec', lineWidth: 2});//1
             s.max_ws_series = $.extend(true, {}, d_series, {name: 'Max', color: '#910000', lineWidth: 2, dashStyle: 'shortdot'});//2
@@ -2456,11 +2467,11 @@ window.$(function() {
 
             my.lastdate = my.normalizeData(my.curplace, json, function(o){
                 var x = Object.keys(s)[0];
-                if(!x || !s[x].data || !s[x].data.length) get.datalen[0]=o.time; 
-                else get.datalen[1]=o.time; 
+                if(!x || !s[x].data || !s[x].data.length) get.datalen[0]=o.time;
+                else get.datalen[1]=o.time;
                 my.rowToSeries(o, s);
             }, 0, my.start);
-			
+
             options.wind_speed.series = null;
             options.wind_speed.series = [];
             options.wind_speed.series.push(s.min_ws_series);
@@ -2470,7 +2481,7 @@ window.$(function() {
 				options.wind_speed.yAxis[0].min=0;
 			}
 			else delete options.wind_speed.yAxis[0].min;*/
-			
+
             d = new Date(my.lastdate);
             /*$("#ajaraam").html(
 				'<div class="row-fix" style="float:right;"><a href="#" onclick="return ilm.showLinks();">Lingid</a>'
@@ -2499,14 +2510,14 @@ window.$(function() {
             //console.log('width '+v);
             if(v>450) {
                 if (s.avg_ws_series.data.length) {
-                    options.wind_speed.title.text = 
+                    options.wind_speed.title.text =
 				' Tuule kiirus'+(!my.historyactive? ' [ <b>' + s.avg_ws_series.data[s.avg_ws_series.data.length - 1][1] + '</b> m/s' +
 					' (pagid: <b>' + (s.max_ws_series.data[s.max_ws_series.data.length - 1]||['','-'])[1] + '</b> m/s) ]':'');
                 } else {
                     options.wind_speed.title.text = 'Tuule kiiruse andmed puuduvad';
                 }
                 if (s.avg_wd_series.data.length) {
-                    options.wind_dir.title.text = 
+                    options.wind_dir.title.text =
 				' Tuule suund'+(!my.historyactive? ' [ <b>' + s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1] + '</b> ° ' +
 					'(<b>' + my.dirs(s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1]) + '</b>) ]':'');
                 } else {
@@ -2530,7 +2541,7 @@ window.$(function() {
 
             options.wind_dir.series = null;
             options.wind_dir.series = [];
-			
+
             options.wind_dir.series.push(s.min_wd_series);
             options.wind_dir.series.push(s.max_wd_series);
             options.wind_dir.series.push(s.avg_wd_series);
@@ -2545,14 +2556,14 @@ window.$(function() {
             options.temp.series.push(s.avg_press_series);
             options.temp.series.push(s.avg_wl_series);
             options.temp.series.push(s.avg_wtemp_series);
-			
+
             //console.log(JSON.stringify(options));
-			
-			
+
+
             options.wind_speed.chart.renderTo = 'wind_speed1';
             options.wind_dir.chart.renderTo = 'wind_dir1';
             options.temp.chart.renderTo = 'temp1';
-			
+
             if(my.chartorder.indexOf('wind_speed') >= 0) my.charts[0] = new Highcharts.Chart(options.wind_speed);
             if(my.chartorder.indexOf('wind_dir') >= 0)  my.charts[1] = new Highcharts.Chart(options.wind_dir);
             if(my.chartorder.indexOf('temp') >= 0)  my.charts[2] = new Highcharts.Chart(options.temp);
@@ -2568,7 +2579,7 @@ window.$(function() {
 
             /*$('#curmeta').html(
 				'<a href="http://' + host + my.curplaces[my.curplace].link  +
-					'" onclick="window.open(this.href);return false;">'+host.charAt(0).toUpperCase() + host.slice(1)+'</a>, andmed viimati uuendatud: ' + 
+					'" onclick="window.open(this.href);return false;">'+host.charAt(0).toUpperCase() + host.slice(1)+'</a>, andmed viimati uuendatud: ' +
 					//new Date(my.lastdate).toLocaleString() +
 					my.getTimeStr(my.lastdate) +
 					', Järgmine uuendus: ' +
@@ -2603,7 +2614,7 @@ window.$(function() {
     	},
     	histlink: function(fc,last,next) {
     		var cid= my.curplaces[fc],link=cid.link,fcid=cid.cid;
-            var base = /emhi/.test(fc) ? 'emhi' : 
+            var base = /emhi/.test(fc) ? 'emhi' :
                 /emu/.test(fc) ? 'emu' :
                     /flydog/.test(fc) ? 'flydog' :
                         /^ut/.test(fc) ? 'ut' :
@@ -2614,7 +2625,7 @@ window.$(function() {
             var t = '<a onclick="window.open(this.href);return false;" href="<%=url%>"><%=title%><%if(last){%> <%=last%><%}if(next){%>, järgmine <%=next%><%}%></a>';
             //var meta = '';
             var xurl = 'http://' + url + link + (base==='emhi' ? fcid+'/': '');
-            return _.template(t, {title:title,url:xurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
+            return _.template(t)({title:title,url:xurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
         },
         dohmeta: function(box,data){
             var cnt = $('#curmeta'), cntn=null;
@@ -2652,7 +2663,7 @@ window.$(function() {
         };
         cb(d-my.timeframe);
     };
-    
+
     /*function afterSetExtremes(e) {
         //var url;
         var currentExtremes, range, self=this;
@@ -2674,16 +2685,16 @@ window.$(function() {
             intval = setInterval(my.loadCur, interval);
     	}
     };
-    
+
     my.reload = function () {
     	my.loadInt();
     };
-   
+
     return my;
 
 })(ilm || {});
 ;(function (my) {
-	'use strict';
+    'use strict';
     var w = window,
         $ = w.$,
         _ = w._,
@@ -2691,7 +2702,7 @@ window.$(function() {
         SunCalc = w.SunCalc,
         updateinterval = 600000,
         options = {};
-	
+
     Highcharts.setOptions({
         global: {
             useUTC : false
@@ -2743,7 +2754,7 @@ window.$(function() {
             linkedTo: 0,
             title: {
                 text: null
-            },		    	
+            },
             min: 0,
             max: 360,
             tickInterval: 45,
@@ -2830,7 +2841,7 @@ window.$(function() {
             backgroundColor: '#FFFFFF'
         }
     });
-	
+
     function addPlotLine(chart, ts) {
         if(chart.xAxis!==undefined)
             chart.xAxis[0].addPlotLine({
@@ -2848,7 +2859,7 @@ window.$(function() {
         if(chart.xAxis!==undefined)
             chart.xAxis[0].removePlotLine('nowline');
     }
-	
+
     function intPlotLine(chart, intval) {
         var interval = 60000;
         var now = my.getTime();
@@ -2954,7 +2965,7 @@ window.$(function() {
                 type: 'get',
                 url: fc.datadir + '/' + place  + '/' + fcfile + '?' + get.now,
             };
-            if(fc.datatype==='json') {
+            if(fc.datatype==='json' && fcid!=='yr') {
                 ajaxopt.dataType = 'jsonp';
                 ajaxopt.jsonp =  'callback';
                 ajaxopt.jsonpCallback = fcid==='wg' ? fcid+'_data' : 'callback';
@@ -2972,7 +2983,7 @@ window.$(function() {
                     dt.press_series = $.extend(true, {}, press_series, {name: fc.name+' rõhk', color: colors.press[fcidx], lineWidth: 1});
                     dt.rain_series = $.extend(true, {}, rain_series, {name: fc.name+' sademed', color: colors.rain[fcidx], type: 'column', lineWidth: 0});
                     dt.humid_series = $.extend(true, {}, humid_series, {name: fc.name+' niiskus', color: colors.humid[fcidx], lineWidth: 1});
-					
+
                     if(fillfn) fillfn(data, dt, fcid);
 
                     if(my.samplemode==='graph') {
@@ -2983,7 +2994,7 @@ window.$(function() {
                         if(dt.rain_series.data.length) temp_options.series.push(dt.rain_series);
                         if(dt.press_series.data.length) temp_options.series.push(dt.press_series);
                         if(dt.temp_series.data.length) temp_options.series.push(dt.temp_series);
-                    } 
+                    }
                     var metadata = get.fclink(fcid,fc.url,my.fcplaces[place][fcid+'link'],fc.name,dt.last,dt.next);
                     get.dometa(fcid, metadata);
                 }
@@ -3017,12 +3028,12 @@ window.$(function() {
                         break;
                     }
                 }
-            }			
-            var fcurl = fc==='em' ? url + '/asukoha-prognoos/?id=' + placeid : 
-                fc==='yr' ? url+'/place/Estonia/'+placeid+'/'+(my.sampletype==='long' ? 'long' :'hour_by_hour')+'.html' :
+            }
+            var fcurl = fc==='em' ? url + '/asukoha-prognoos/?coordinates=' + placeid :
+                fc==='yr' ? url+'/en/details/table/'+placeid+'/' :
                     fc==='wg' ? url + '/' + placeid : url + placeid ;
 
-            return _.template(t, {title:placename,url:fcurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
+            return _.template(t)({title:placename,url:fcurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
         },
         do_em: function(data,dt,fcid){
             var fcmax=get.getmax();
@@ -3056,12 +3067,12 @@ window.$(function() {
         },
         getmax: function(hours){
             if(my.sampletype==='long') return 0;
-            hours = hours||my.fcmax||72;
+            hours = hours||my.fcmax||my.deffcmax;
             return (get.now||new Date().getTime())+hours*3600000;
         },
         do_wg: function(data,dt,fcid){
             var fcmax=get.getmax();
-            var wg = data.fcst.fcst[3], 
+            var wg = data.fcst.fcst[3],
                 wg_get_time = function(xd) {
                     return (function (d) {
                         return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
@@ -3095,9 +3106,9 @@ window.$(function() {
                 if(date>get.datalen[1] || !get.datalen[1])get.datalen[1] = date;
             }
         },
-        do_yr: function(data,dt,fcid){
+        do_yr0: function(data,dt,fcid){
             var fcmax=get.getmax();
-            var $xml = $(data), d, 
+            var $xml = $(data), d,
                 yr_get_time = function(xml,name) {
                     var attr = xml.find ? xml.find(name).text() : xml.getAttribute(name);
                     return (function (d) {
@@ -3124,6 +3135,39 @@ window.$(function() {
             dt.next = yr_get_time($xml,'nextupdate').getTime();
             last_time = dt.last;
         },
+        do_yr: function(data,dt,fcid){
+            var fcmax=get.getmax();
+            var yr = data.properties.timeseries,
+                yr_get_time = function(xd) {
+                    return new Date(xd);
+                },
+                offset = 0*3600000, d = (yr_get_time((yr[0]||{}).time).getTime()) + offset, //+ 1800000,
+                t = 0, i = 0, j = yr.length, k = j-1, lo, o, op;
+
+            for (; i < j; ++i) {
+                lo = yr[i];
+                t = yr_get_time((lo||{}).time).getTime()+offset;
+                if(i===0||i===k||(fcmax&&t>fcmax)) get.update_len(t,i===0?1:i===k||(fcmax&&t>fcmax)?2:0);
+                if (fcmax&&t>fcmax) { break; }
+                o = lo.data.instant.details;
+                dt.ws_series.data.push([t, my.ntof2p(o.wind_speed)]);
+                dt.wg_series.data.push([t, my.ntof2p(o.wind_speed_of_gust)]);
+                dt.wd_series.data.push([t, my.ntof2p(o.wind_from_direction)]);
+                dt.temp_series.data.push([t, my.ntof2p(o.air_temperature)]);
+                dt.press_series.data.push([t, my.ntof2p(o.air_pressure_at_sea_level)]);
+                dt.humid_series.data.push([t, my.ntof2p(o.relative_humidity)]);
+                if(my.samplemode!=='graph') {
+                    o = lo.data.next_1_hours||lo.data.next_6_hours||lo.data.next_12_hours;
+                    if(o) {
+                        op = o.details.precipitation_amount_max>0 ? o.details.precipitation_amount_min+'-'+o.details.precipitation_amount_max : o.details.precipitation_amount;
+                        dt.rain_series.data.push([t, op]);
+                    }
+                }
+            }
+
+            dt.last = (yr_get_time(data.properties.meta.updated_at).getTime()) + offset;
+            last_time = dt.last;
+        },
         dometa: function(box,data){
             var cnt = $('#'+box+'meta'), cntn=null;
             if(cnt && cnt.length) cnt.html(data);
@@ -3136,8 +3180,8 @@ window.$(function() {
         done: function() {
             ajax_done = 0;
             var self=my, i1, i2, i3, i=0,j=0,dn=null,
-                dtf = Object.keys(get.dataseries)[0], 
-                dtp = get.dataseries[my.fcsource||my.fcsources[0]]||get.dataseries[dtf],  
+                dtf = Object.keys(get.dataseries)[0],
+                dtp = get.dataseries[my.fcsource||my.fcsources[0]]||get.dataseries[dtf],
                 dt = dtp[my.fcplace]||{},
                 fc=my.fcplaces[my.fcplace],
                 loc=fc.location, sun = {},
@@ -3149,7 +3193,7 @@ window.$(function() {
                     rain: (dt.rain_series && dt.rain_series.data.length),
                     press: (dt.press_series && dt.press_series.data.length),
                     temp: (dt.temp_series && dt.temp_series.data.length)
-                }, 
+                },
                 dbase = has.ws ? dt.ws_series.data : has.temp ? dt.temp_series.data : has.wd ? dt.wd_series.data : [],
                 k=0, l=0, kn='', night=false, nightplot=[], doplot=false;
 
@@ -3179,8 +3223,8 @@ window.$(function() {
                 //var htempl = '<tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Sademed</th><th class="hide-edge-xs">Rõhk</th></tr>';
                 //var templ = '<tr class="<%=night?"night hide":""%>"><td><span class="day hide"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="hide-edge-xs"><%=press?press:""%></td></tr>';
                 var str='';
-                var hlinks = '<tr><th colspan="5"><span class="fc-source" name="em">Ilmateenistus</span>&nbsp;<span class="fc-source" name="wg">Windguru.cz</span>&nbsp;<span class="fc-source" name="yr">Yr.no</span></th></tr>';
-                var keys = Object.keys(has),tnow=new Date().getTime();
+                var hlinks = '<tr class="fcontainer"><th colspan="6"><span class="fc-source" name="em">Ilmateenistus</span>&nbsp;<span class="fc-source" name="wg">Windguru.cz</span>&nbsp;<span class="fc-source" name="yr">Yr.no</span><span class="right fchead">'+fc.name+'</span></th></tr>';
+                var keys = Object.keys(has),tnow=new Date().getTime(),o;
 
                 for(i=0,j=dbase.length;i<j;++i) {
                     dn=dbase[i][0]||0;
@@ -3198,14 +3242,15 @@ window.$(function() {
                     };
                     for(k=0,l=keys.length;k<l;++k) {
                         kn = keys[k];
-                        opt[kn] = (has[kn]) ? dt[kn+'_series'].data[i][1] : null;
+                        o=(has[kn]) ? dt[kn+'_series'].data[i] : null;
+                        opt[kn] = (o) ? o[1] : null;
                     }
-                    str += _.template(self.fcRowTemplate,opt);
+                    str += _.template(self.fcRowTemplate)(opt);
                 }
 
                 var where = $('#'+my.chartorder[0]+'2');
                 if(where) {
-                    where.html(_.template(self.dataTableTemplate,{classes:'table',thead:_.template(self.fcHeadTemplate,{inforows:hlinks}),tbody:str}));
+                    where.html(_.template(self.dataTableTemplate)({classes:'table',thead:_.template(self.fcHeadTemplate)({inforows:hlinks}),tbody:str}));
                     where.css('height','100%');
                 }
                 $('#'+my.chartorder[1]+'2').hide();
@@ -3320,6 +3365,7 @@ window.$(function() {
                         { href: '125320', title: 'Tallinn', id: 'windguru_tallinn' },
                         { href: '108163', title: 'Saaremaa Sõrve', id: 'windguru_sorve' },
                         { href: '96592', title: 'Hiiumaa Ristna', id: 'windguru_ristna' },
+                        { href: '92777', title: 'Hiiumaa Orjaku', id: 'windguru_orjaku' },
                         { href: '479054', title: 'Pärnumaa Paatsalu', id: 'windguru_paatsalu' },
                         { href: '?set=143499', title: 'Eesti Meri', id: 'windguru_meri' },
                         { href: '?set=143439', title: 'Sisej&auml;rved', id: 'windguru_jarved' }
@@ -3327,17 +3373,26 @@ window.$(function() {
                 },
                 {
                     name: 'YR.no',
-                    url: 'http://www.yr.no/place/Estonia/',
+                    url: 'https://www.yr.no/en/details/table/',
                     list: [
-                        { href: 'Tartumaa/Tartu/hour_by_hour.html', title: 'Tartu', id: 'yr_tartu' },
-                        { href: 'Tartumaa/Äksi/hour_by_hour.html', title: 'Saadjärv', id: 'yr_aksi' },
-                        { href: 'Tartumaa/Tamme/hour_by_hour.html', title: 'Võrtsjärv Tamme', id: 'yr_tamme' },
-                        { href: 'Pärnumaa/Pärnu/hour_by_hour.html', title: 'Pärnu', id: 'yr_parnu' },
-                        { href: 'Pärnumaa/Häädemeeste/hour_by_hour.html', title: 'Häädemeeste', id: 'yr_parnu' },
-                        { href: 'Harjumaa/Tallinn/hour_by_hour.html', title: 'Tallinn', id: 'yr_tallinn' },
-                        { href: 'Saaremaa/Sõrve_Tuletorn/hour_by_hour.html', title: 'Saaremaa Sõrve', id: 'yr_sorve' },
-                        { href: 'Hiiumaa/Ristna/hour_by_hour.html', title: 'Hiiumaa Ristna', id: 'yr_ristna' },
-                        { href: 'Pärnumaa/Paatsalu/hour_by_hour.html', title: 'Pärnumaa Paatsalu', id: 'yr_paatsalu' }
+                        { href: '2-588335', title: 'Tartu', id: 'yr_tartu' },
+                        { href: '2-592574', title: 'Saadjärv', id: 'yr_aksi' },
+                        { href: '2-588397', title: 'Võrtsjärv Tamme', id: 'yr_tamme' },
+                        { href: '2-591907', title: 'Võrtsjärv Jõesuu', id: 'yr_joesuu' },
+                        { href: '2-587468', title: 'Peipsi Räpina', id: 'yr_rapina' },
+                        { href: '2-589982', title: 'Peipsi Nina', id: 'yr_nina' },
+                        { href: '2-590067', title: 'Peipsi Mustvee', id: 'yr_mustvee' },
+                        { href: '2-589580', title: 'Pärnu', id: 'yr_parnu' },
+                        { href: '2-592232', title: 'Häädemeeste', id: 'yr_parnu' },
+                        { href: '2-10123592', title: 'Tallinn Pirita', id: 'yr_pirita' },
+                        { href: '2-588984', title: 'Tallinn Rohuneeme', id: 'yr_rohuneeme' },
+                        { href: '2-794645', title: 'Saaremaa Sõrve', id: 'yr_sorve' },
+                        { href: '2-589003', title: 'Hiiumaa Ristna', id: 'yr_ristna' },
+                        { href: '2-794840', title: 'Hiiumaa Orjaku', id: 'yr_orjaku' },
+                        { href: '2-796115', title: 'Dirhami', id: 'yr_dirhami' },
+                        { href: '2-589749', title: 'Pärnumaa Paatsalu', id: 'yr_paatsalu' },
+                        { href: '2-794885', title: 'Topu', id: 'yr_topu' },
+                        { href: '2-587445', title: 'Võsu', id: 'yr_vosu' }
                     ]
                 },
                 {
@@ -3355,9 +3410,10 @@ window.$(function() {
                         { href: '&row=199&col=297', title: 'Tallinn', id: 'meteopl_pirita' },
                         { href: '&row=248&col=262', title: 'Saaremaa Sõrve', id: 'meteopl_sorve' },
                         { href: '&row=220&col=262', title: 'Hiiumaa Ristna', id: 'meteopl_ristna' },
+                        { href: '&row=220&col=269', title: 'Hiiumaa Orjaku', id: 'meteopl_orjaku' },
                         { href: '&row=213&col=283', title: 'Dirhami', id: 'meteopl_dirhami' },
                         { href: '&row=227&col=283', title: 'Virtsu', id: 'meteopl_paatsalu' },
-                        { href: '&row=220&col=276', title: 'Haapsalu', id: 'meteopl_haapsalu' },
+                        { href: '&row=220&col=276', title: 'Topu', id: 'meteopl_topu' },
                         { href: '&row=199&col=304', title: 'Loksa', id: 'meteopl_loksa' }
                     ]
                 },
@@ -3390,7 +3446,8 @@ window.$(function() {
                     name: 'Muud',
                     url: 'http://',
                     list: [
-                        {href: 'www.meteo.lt/en/weather-forecast#windDirectionDesc', title: 'Meteo.LT', id: 'meteolt' },
+                        { href: 'www.meteo.lt/en/weather-forecast#windDirectionDesc', title: 'Meteo.LT', id: 'meteolt' },
+                        { href: 'maps.meteo.pl', title: 'Meteo.PL Maps', id: 'meteoplmaps' },
                         { href: 'on-line.msi.ttu.ee/meretase/', title: 'MSI Meretase', id: 'msi-ttu' },
                         { href: 'd.naerata.eu/', title: 'Naerata.eu', id: 'naerata' },
                         { href: 'teeinfo.evenet.ee/?mapdatatype=9', title: 'Teeinfo', id: 'teeinfo' },
@@ -3458,7 +3515,8 @@ window.$(function() {
 
     return my;
 
-})(ilm || {});;(function (w) {
+})(ilm || {});
+;(function (w) {
     'use strict';
     var $ = w.$,
         d = document,

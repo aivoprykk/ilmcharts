@@ -5,26 +5,26 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Domestic weather application http://ilm.majasa.ee">
-    <link rel="stylesheet" href="css/ilmcharts.css?1.1.16" media="screen">
+    <link rel="stylesheet" href="css/ilmcharts.css?1.2.1" media="screen">
     <link rel="shortcut icon" type="image/x-icon" href="css/images/favicon.ico">
     <!-- [if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
   </head>
-  <body style="padding-top:30px" class="sans">
+  <body class="sans" style="padding-top:30px">
     <div id="header">
       <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="container-fluid">
           <div class="navbar-header">
-            <button type="button" data-toggle="collapse" data-target="#ilm-navbar-collapse-1" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a id="pagelogo" href="/" class="ilm-pagelogo navbar-brand">Ilm</a>
+            <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#ilm-navbar-collapse-1"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a class="ilm-pagelogo navbar-brand" id="pagelogo" href="/">Ilm</a>
           </div>
-          <div id="ilm-navbar-collapse-1" class="collapse navbar-collapse">
+          <div class="collapse navbar-collapse" id="ilm-navbar-collapse-1">
             <ul class="nav navbar-nav navbar-right">
-              <li class="dropdown"><a id="ilm-seaded" href="#" data-toggle="dropdown" class="dropdown-toggle">Seaded</a>
-                <div id="ilm-seaded-dropdown" style="padding: 15px" class="dropdown-menu"></div>
+              <li class="dropdown"><a class="dropdown-toggle" id="ilm-seaded" href="#" data-toggle="dropdown">Seaded</a>
+                <div class="dropdown-menu" id="ilm-seaded-dropdown" style="padding: 15px"></div>
               </li>
-              <li class="dropdown"><a id="ilm-viited" href="#" data-toggle="dropdown" class="dropdown-toggle">Viited</a>
-                <div style="padding: 15px" class="ilm-viited-dropdown dropdown-menu"></div>
+              <li class="dropdown"><a class="dropdown-toggle" id="ilm-viited" href="#" data-toggle="dropdown">Viited</a>
+                <div class="ilm-viited-dropdown dropdown-menu" style="padding: 15px"></div>
               </li>
-              <li class="dropdown"><a href="#" data-toggle="dropdown" class="dropdown-toggle">Info</a>
+              <li class="dropdown"><a class="dropdown-toggle" href="#" data-toggle="dropdown">Info</a>
                 <ul class="dropdown-menu">
                   <li><a href="http://balticroads.net/">Maanteeinfo</a></li>
                   <li><a href="http://ilmateenistus.ee/">Ilmateenistus</a></li>
@@ -44,28 +44,28 @@
         </div>
       </div>
     </div>
-    <div id="backgr" class="ilm-backgr"><img src="css/images/ranna-001.jpg" alt="Peipsi pilt"></div>
-    <div id="bghide" class="ilm-bghide"></div>
-    <div id="dots" class="ilm-dots"></div>
-    <div id="sisu" class="ilm-sisu nopadding">
+    <div class="ilm-backgr" id="backgr"><img src="css/images/ranna-001.jpg" alt="Peipsi pilt"></div>
+    <div class="ilm-bghide" id="bghide"></div>
+    <div class="ilm-dots" id="dots"></div>
+    <div class="ilm-sisu nopadding" id="sisu">
       <div class="container-fluid col-lg-12">
         <div class="menu col-lg-5 col-sm-6 col-xs-12">
           <div id="menu-container"></div>
         </div>
         <div class="chart col-lg-7 col-sm-6 col-xs-12">
-          <div id="container" class="chart-container col-lg-12"></div>
+          <div class="chart-container col-lg-12" id="container"></div>
         </div>
       </div>
     </div>
-    <div id="popup" style="display:none;" class="ilm-popup panel panel-primary">
-      <div id="popup_in" class="panel-heading"><b class="panel-title"><a id="sl" href="#" onclick="return ilm.Popup.render();" class="ilm-sl">Sulge</a></b></div>
-      <div id="lingid" class="panel-body"></div>
+    <div class="ilm-popup panel panel-primary" id="popup" style="display:none;">
+      <div class="panel-heading" id="popup_in"><b class="panel-title"><a class="ilm-sl" id="sl" href="#" onclick="return ilm.Popup.render();">Sulge</a></b></div>
+      <div class="panel-body" id="lingid"></div>
     </div>
-    <div id="ilm-modal" aria-hidden="true" role="dialog" class="modal ilm-modal fade">
-      <div role="document" class="modal-dialog modal-lg">
+    <div class="modal ilm-modal fade" id="ilm-modal" aria-hidden="true" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" data-dismiss="modal" aria-label="Sulge" class="close"><span aria-hidden="true">&times;</span></button>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Sulge"><span aria-hidden="true">&times;</span></button>
             <h5 class="modal-title popup-title">Pealkiri</h5>
           </div>
           <div class="modal-body">
@@ -75,7 +75,7 @@
       </div>
     </div>
     <script src="js/libs.js"></script>
-    <script src="js/ilmcharts.js?1.1.16"></script>
+    <script src="js/ilmcharts.js?1.2.1"></script>
     <script async="" defer="" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBKPcJDwBUmu-xio9gPQsi-FjWtY_9XQmg&amp;callback=ilm.loadMap"></script>
   </body>
 </html>

@@ -6,7 +6,8 @@ var ilm = (function(my) {
         $ = w.$,
         _ = w._,
         console = w.console,
-        SunCalc = w.SunCalc;
+        SunCalc = w.SunCalc,
+        fcmax=72;
 
     function State(opt) {
         opt = opt || {};
@@ -27,7 +28,7 @@ var ilm = (function(my) {
             samplemode: opt.samplemode || 'table',
             sampletype: opt.sampletype || 'detail',
             fcsource: opt.fcsource || 'wg',
-            fcmax: opt.fcmax || 48,
+            fcmax: opt.fcmax || fcmax,
             fcshownight: opt.fcshownight || false
         };
         this.id = defaults.id;
@@ -83,6 +84,7 @@ var ilm = (function(my) {
     };
 
     function App(placeholder) {
+        this.deffcmax=fcmax;
         this.state = new State().load();
         this.placeholder = placeholder || '#container';
         this.dataurl = '/cgi-bin/cpp/ilm/image.cgi?t=json';
@@ -91,7 +93,7 @@ var ilm = (function(my) {
         this.fcsources = this.state.attr.fcsources;
         this.fcsources_available = ['yr', 'wg', 'em'];
         this.fcsource = this.state.attr.fcsource || 'wg';
-        this.fcmax = this.state.attr.fcmax || 48;
+        this.fcmax = this.state.attr.fcmax || this.deffcmax;
         this.fcshownight = this.state.attr.fcshownight || false;
         this.samplemode = this.state.attr.samplemode || 'table';
         this.sampletype = this.state.attr.sampletype || 'detail';
@@ -106,7 +108,7 @@ var ilm = (function(my) {
         this.linksasmenu = this.state.attr.linksasmenu;
         this.chartorder = this.state.attr.chartorder;
         this.fcsourcesdata = {
-            yr: { name: 'Yr', url: 'http://www.yr.no', datadir: 'yr_data', fc_file: 'forecast_hour_by_hour.xml', datatype: 'xml' },
+            yr: { name: 'Yr', url: 'http://www.yr.no', datadir: 'yr_data2', fc_file: 'yr_forecast.json', datatype: 'json' },
             wg: { name: 'WindGuru', url: 'http://www.windguru.cz', datadir: 'wg_data', fc_file: 'windguru_forecast.json', datatype: 'json' },
             em: { name: 'Ilmateenistus', url: 'http://www.ilmateenistus.ee', datadir: 'empg_data', fc_file: 'empg_forecast.json', datatype: 'json' }
         };
@@ -120,25 +122,26 @@ var ilm = (function(my) {
             flydog: 'databuoys.sensornest.com'
         };
         this.fcplaces = {
-            tartu: { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: 'Tartumaa/Tartu', emlink: '793', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
-            aksi: { id: 'aksi', name: 'Äksi Saadjärv', wglink: '266923', yrlink: 'Tartumaa/Äksi', emlink: '9748', group: 'saadjarv', bind: 'arhiiv_saadjarv_saadjarve', location: [58.534918, 26.643429] },
-            uhmardu: { id: 'uhmardu', name: 'Uhmardu', yrlink: 'Jõgevamaa/Uhmardu', emlink: '8629', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
-            jogeva: { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: 'Jõgevamaa/Jõgeva', emlink: '2262', link: '', bind: 'mnt_jogeva', location: [58.764849, 26.404618] },
-            tamme: { id: 'tamme', name: 'Tamme Võrtsjärv', wglink: 192609, yrlink: 'Tartumaa/Tamme', emlink: '8094', group: 'vortsjarv-tamme', bind: 'arhiiv_vortsjarv_tamme', location: [58.271306, 26.134923] },
-            joesuu: { id: 'joesuu', name: 'Jõesuu Võrtsjärv', wglink: 692681, yrlink: 'Viljandimaa/Jõesuu', emlink: '8864', group: 'vortsjarv-joesuu', bind: 'arhiiv_vortsjarv_joesuu', location: [58.386441, 26.131942] },
-            rapina: { id: 'rapina', name: 'Räpina Peipsi', wglink: 183648, yrlink: 'Põlvamaa/Võõpsu', emlink: '7216', group: 'peipsi', bind: 'arhiiv_peipsi_rapina', location: [58.124988, 27.530086] },
-            nina: { id: 'nina', name: 'Nina Peipsi', wglink: 20401, yrlink: 'Tartumaa/Nina', emlink: '5427', group: 'peipsi', bind: 'arhiiv_peipsi_nina', location: [58.598889, 27.209722] },
-            mustvee: { id: 'mustvee', name: 'Mustvee Peipsi', wglink: 104337, yrlink: 'Jõgevamaa/Mustvee', emlink: '5097', group: 'peipsi', bind: 'emhi_mustvee', location: [58.847500, 26.951111] },
-            pirita: { id: 'pirita', name: 'Pirita Tallinn', wglink: 125320, yrlink: 'Harjumaa/Pirita~798565', emlink: '596', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
-            rohuneeme: { id: 'rohuneeme', name: 'Rohuneeme Viimsi', wglink: 70524, yrlink: 'Harjumaa/Rohuneeme', emlink: '7039', group: 'meri', bind: 'emhi_rohuneeme', location: [59.551945, 24.794094] },
-            haapsalu: { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', wglink: 245713, yrlink: 'Läänemaa/Haapsalu_Laht', emlink: '183', group: 'meri', bind: 'emhi_haapsalu', location: [58.9578, 23.4901] },
-            parnu: { id: 'parnu', name: 'Pärnu', wglink: 92781, yrlink: 'Pärnumaa/Pärnu', emlink: '624', group: 'meri', bind: 'emhi_parnu', location: [58.365958, 24.526257] },
-            haademeeste: { id: 'haademeeste', name: 'Häädemeeste', wglink: 246420, yrlink: 'Pärnumaa/Häädemeeste', emlink: '1957', group: 'meri', bind: 'emhi_haademeeste', location: [58.071644, 24.478816] },
-            sorve: { id: 'sorve', name: 'Sõrve Saaremaa', wglink: 108163, yrlink: 'Saaremaa/Sõrve_Tuletorn', emlink: '7950', group: 'meri', bind: 'emhi_sorve', location: [57.909984, 22.055313] },
-            ristna: { id: 'ristna', name: 'Ristna Hiiumaa', wglink: 96592, yrlink: 'Hiiumaa/Ristna', emlink: '2561', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
-            loksa: { id: 'loksa', name: 'Loksa', wglink: 108851, yrlink: 'Harjumaa/Loksa', emlink: '4471', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
-            dirhami: { id: 'dirhami', name: 'Dirhami', wglink: 261785, yrlink: 'Läänemaa/Dirhami', emlink: '1505', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
-            paatsalu: { id: 'paatsalu', name: 'Paatsalu', wglink: 479054, yrlink: 'Pärnumaa/Paatsalu', emlink: '5801', group: 'meri', bind: 'emhi_paatsalu', location: [58.508902, 23.663027] }
+            tartu: { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: '2-588335', emlink: '793', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
+            aksi: { id: 'aksi', name: 'Äksi Saadjärv', wglink: '266923', yrlink: '2-592574', emlink: '9748', group: 'saadjarv', bind: 'arhiiv_saadjarv_saadjarve', location: [58.534918, 26.643429] },
+            uhmardu: { id: 'uhmardu', name: 'Uhmardu', yrlink: '2-793979', emlink: '8629', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
+            jogeva: { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: '2-591902', emlink: '2262', link: '', bind: 'mnt_jogeva', location: [58.764849, 26.404618] },
+            tamme: { id: 'tamme', name: 'Tamme Võrtsjärv', wglink: 192609, yrlink: '2-588397', emlink: '8094', group: 'vortsjarv-tamme', bind: 'arhiiv_vortsjarv_tamme', location: [58.271306, 26.134923] },
+            joesuu: { id: 'joesuu', name: 'Jõesuu Võrtsjärv', wglink: 692681, yrlink: '2-591907', emlink: '8864', group: 'vortsjarv-joesuu', bind: 'arhiiv_vortsjarv_joesuu', location: [58.386441, 26.131942] },
+            rapina: { id: 'rapina', name: 'Räpina Peipsi', wglink: 183648, yrlink: '2-587468', emlink: '7216', group: 'peipsi', bind: 'arhiiv_peipsi_rapina', location: [58.124988, 27.530086] },
+            nina: { id: 'nina', name: 'Nina Peipsi', wglink: 20401, yrlink: '2-589982', emlink: '5427', group: 'peipsi', bind: 'arhiiv_peipsi_nina', location: [58.598889, 27.209722] },
+            mustvee: { id: 'mustvee', name: 'Mustvee Peipsi', wglink: 104337, yrlink: '2-590067', emlink: '5097', group: 'peipsi', bind: 'emhi_mustvee', location: [58.847500, 26.951111] },
+            pirita: { id: 'pirita', name: 'Pirita Tallinn', wglink: 125320, yrlink: '2-10123592', emlink: '596', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
+            rohuneeme: { id: 'rohuneeme', name: 'Rohuneeme Viimsi', wglink: 70524, yrlink: '2-588984', emlink: '7039', group: 'meri', bind: 'emhi_rohuneeme', location: [59.551945, 24.794094] },
+            haapsalu: { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', wglink: 245713, yrlink: '2-794885', emlink: '183', group: 'meri', bind: 'emhi_haapsalu', location: [58.9578, 23.4901] },
+            parnu: { id: 'parnu', name: 'Pärnu', wglink: 92781, yrlink: '2-589580', emlink: '624', group: 'meri', bind: 'emhi_parnu', location: [58.365958, 24.526257] },
+            haademeeste: { id: 'haademeeste', name: 'Häädemeeste', wglink: 246420, yrlink: '2-592232', emlink: '1957', group: 'meri', bind: 'emhi_haademeeste', location: [58.071644, 24.478816] },
+            sorve: { id: 'sorve', name: 'Sõrve Saaremaa', wglink: 108163, yrlink: '2-794645', emlink: '7950', group: 'meri', bind: 'emhi_sorve', location: [57.909984, 22.055313] },
+            orjaku: { id: 'orjaku', name: 'Orjaku Hiiumaa', wglink: 92777, yrlink: '2-794840', emlink: '7950', group: 'meri', bind: 'emhi_orjaku', location: [58.76252573432038, 22.799324608581074] },
+            ristna: { id: 'ristna', name: 'Ristna Hiiumaa', wglink: 96592, yrlink: '2-589003', emlink: '2561', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
+            loksa: { id: 'loksa', name: 'Loksa', wglink: 108851, yrlink: '2-587445', emlink: '4471', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
+            dirhami: { id: 'dirhami', name: 'Dirhami', wglink: 261785, yrlink: '2-796115', emlink: '1505', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
+            paatsalu: { id: 'paatsalu', name: 'Paatsalu', wglink: 479054, yrlink: '2-589749', emlink: '5801', group: 'meri', bind: 'emhi_paatsalu', location: [58.508902, 23.663027] }
         };
         this.curplaces = {
             arhiiv_saadjarv_saadjarve: { id: 'arhiiv_saadjarv_saadjarve', cid: '', name: 'Saadjärve Saadjärv', group: 'saadjarv', link: '', bind: 'aksi', location: [58.54048, 26.68177] },
@@ -161,7 +164,8 @@ var ilm = (function(my) {
             arhiiv_parnu_aloha: { id: 'arhiiv_parnu_aloha', cid: '', name: 'Pärnu Aloha', group: 'meri', link: '', bind: 'parnu', location: [58.371146, 24.508807] },
             emhi_parnu: { id: 'emhi_parnu', cid: 'parnu', name: 'Pärnu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'parnu', location: [58.365958, 24.526257] },
             emhi_haademeeste: { id: 'emhi_haademeeste', cid: 'haademeeste', name: 'Häädemeeste EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haademeeste', location: [58.071644, 24.478816] },
-            emhi_sorve: { id: 'emhi_sorve', cid: 'sorve', name: 'Sõrve EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'sorve', location: [57.909984, 22.055313] },
+            emhi_orjaku: { id: 'emhi_orjaku', cid: 'heltermaa', name: 'Heltermaa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'orjaku', location: [58.866845079804946, 23.04607326381741] },
+            emhi_sorve: { id: 'emhi_sorve', cid: 'montu', name: 'Sõrve EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'sorve', location: [57.909984, 22.055313] },
             emhi_ristna: { id: 'emhi_ristna', cid: 'ristna-2', name: 'Ristna EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'ristna', location: [58.927304, 22.041023] },
             emhi_loksa: { id: 'emhi_loksa', cid: 'loksa', name: 'Loksa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'loksa', location: [59.5872, 25.6943] },
             emhi_dirhami: { id: 'emhi_dirhami', cid: 'dirhami', name: 'Dirhami EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'dirhami', location: [59.2133, 23.5031] },
@@ -592,12 +596,12 @@ var ilm = (function(my) {
                     n = this.curplaces[gridorder[i]];
                     if (n) {
                         html += '<tr id="' + co + n.id + '" name="' + n.id + '" class="data-menu-row" style="background-color:white">';
-                        html += '<td class="sortable-is-active hide">-</td><td colspan="6">' + n.name + '</td>';
+                        html += '<td class="sortable-is-active hide">-</td><td colspan="8">' + n.name + '</td>';
                         html += '</tr>';
                     }
                 }
                 html += '</tbody>';
-                el.innerHTML = '<div>&nbsp;</div>' + _.template(self.dataTableTemplate, { classes: 'table sortable-table', thead: self.gridHeadTemplate, tbody: html });
+                el.innerHTML = '<div>&nbsp;</div>' + _.template(self.dataTableTemplate)({ classes: 'table sortable-table', thead: self.gridHeadTemplate, tbody: html });
                 self.ready(doc, function() {
                     clearInterval(self.gridintval);
                     self.fillGridLast(self);
@@ -636,13 +640,15 @@ var ilm = (function(my) {
                     s += '<div class="chart-control-box" style="width:100%;position:relative;font-size:80%;">&nbsp;';
                     if (self.samplemode !== 'table' && self.viewmode === 'cur') {
                         s += '<div id="graph-timeframe-control" style="position:absolute;z-index:10000;top:-7px;left:8px;">';
-                        s += '<span class="hist-length label label-default" name="4"> 4h </span>&nbsp;<span class="hist-length label label-default" name="6"> 6h </span>&nbsp;<span class="hist-length label label-default" name="12"> 12h </span>&nbsp;<span class="hist-length label label-default" name="24"> 24h </span>&nbsp;<span class="hist-length label label-default" name="48"> 2p </span>&nbsp;<span class="hist-length label label-default" name="72"> 3p </span>';
+                        //s += '<span class="fchead label label-default"> '+n.name+' </span>';
+                        s += '&nbsp;<span class="hist-length label label-default" name="4"> 4h </span>&nbsp;<span class="hist-length label label-default" name="6"> 6h </span>&nbsp;<span class="hist-length label label-default" name="12"> 12h </span>&nbsp;<span class="hist-length label label-default" name="24"> 24h </span>&nbsp;<span class="hist-length label label-default" name="48"> 2p </span>&nbsp;<span class="hist-length label label-default" name="72"> 3p </span>';
                         s += '</div>';
                     }
                     s += '<div style="position:absolute;z-index:10000;left:5px;top:5px;">';
                     s += '<span class="title-chart"></span>&nbsp;<span class="change-chart label label-default" name="cur">Ajalugu</span>&nbsp;<span class="change-chart label label-default" name="est">Prognoos</span>';
                     s += '</div>';
                     s += '<div style="position:absolute;z-index:10000;right:35px;top:5px;">';
+                    //s += (self.samplemode !== 'table') ? '<span class="fchead label label-default"> '+my.fcplaces[n.bind].name+' </span>&nbsp;' : '';
                     s += (self.samplemode === 'table') ? ('<span class="night-chart label label-default" name="' + (self.fcshownight ? 'fcsnf' : 'fcsnt') + '"> ' + (self.fcshownight ? '-' : '+') + 'Ööd</span>&nbsp;') : '&nbsp;';
                     s += '<span class="sample-chart label label-default" name="' + (self.samplemode === 'table' ? 'graph' : 'table') + '">Näita ' + (self.samplemode === 'table' ? 'Graafikut' : 'Tabelit') + '</span>&nbsp;';
                     s += (self.viewmode !== 'cur' || xlarge) ? ('<span class="long-chart label label-default" name="' + (self.sampletype === 'long' ? 'detail' : 'long') + '">Näita ' + (self.sampletype === 'long' ? 'Detailset' : 'Pikaajalist') + '</span>&nbsp;') : '&nbsp;';
@@ -656,9 +662,13 @@ var ilm = (function(my) {
                         else if (v < 600) self.timeframe = 12 * 3600 * 1000;
                         else self.timeframe = 24 * 3600 * 1000;
                     }
-                    s = '<div class="float two-lg"><div class="meta"></div></div>';
+                    s = '<div class="float two-lg"><div class="meta"></div><div class="fckhead fcright">';
+                    if (self.samplemode !== 'table') s += '<span class="label label-info"> '+n.name+'</span>';
+                    s += '</div></div>';
                     if (xlarge) {
-                        s += '<div class="float two-lg"><div class="meta"></div></div>';
+                        s += '<div class="float two-lg"><div class="meta"></div><div class="fckhead fcleft">';
+                        if (self.samplemode !== 'table') s += '<span class="label label-info"> '+my.fcplaces[n.bind].name+'</span>';
+                        s += '</div></div>';
                     }
                     u = $(el).find('.chartbox');
                     u.append(s);
@@ -773,7 +783,7 @@ var ilm = (function(my) {
         histRowTemplate: '<tr class="item <%=night?"night":""%>" id="<%=d.time%>"><td><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class="hide-edge"><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td><td><span class="grid-cell-title">Tuul:&nbsp;</span><span class="grid-em"><span class="avg_ws" style="color:<%=wscolor%>"><%=d.avg_ws%></span>/<span class="max_ws" style="color:<%=wgcolor%>"><%=d.max_ws%></span></span></td><td class="avg_wd" title="<%=dn%>"><span class="grid-cell-title">Suund:&nbsp;</span><span class="arrow <%=dn%>"></span><span class="grid-em"><%=d.avg_wd%></span></td><td class="avg_temp"><span class="grid-cell-title">Temp:&nbsp;</span><span class="grid-em"><%=d.avg_temp%></span></td><td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td><td class="avg_wtemp hide-lg"><span class="grid-cell-title">Veetemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td><td class="hide-edge-xs avg_rain"><span class="grid-cell-title">Sademed:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td></tr>',
         gridHeadTemplate: '<thead><tr style="background-color:white"><th><span class="data-menu-order change label label-default" style="position:absolute;display:inline-block;background-color:white;border-radius:5px;color:black">+</span></th><th class="sortable-is-active hide"></th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Vesi</th><th class="hide-lg">Veetemp</th><th class="hide-edge">Sademed</th><th class="hide-edge-xs">Aeg</th></tr></thead>',
         gridRowTemplate: '<td class="sortable-is-active hide">-</td><td><span class="grid-em"><%=first%><span class="hide-edge-xs">&nbsp;<%=last%></span></span></td><td><span class="grid-cell-title">Tuul:&nbsp;</span><span class="trend"><%=d.trend=="u"?"&uarr;":d.trend=="d"?"&darr;":"&nbsp;"%>&nbsp;</span><span class="grid-em" style="color:<%=wscolor%>"><span class="avg_ws"><%=d.avg_ws%></span>/<span class="max_ws" style="color:<%=wgcolor%>"><%=d.max_ws%></span></span></td><td class="avg_wd" title="<%=dn%>"><span class="grid-cell-title">Suund:&nbsp;</span><span class="arrow <%=dn%>"></span><span class="grid-em"><%=d.avg_wd%></span></td><td class="avg_temp"><span class="grid-cell-title">Temp:&nbsp;</span><span class="grid-em"><%=d.avg_temp%></span></td><td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td><td class="avg_wtemp hide-lg"><span class="grid-cell-title">Veetemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td><td class="avg_rain hide-edge"><span class="grid-cell-title">Sademed:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td><td class="time hide-edge-xs"><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class="hide-edge hide-edge-lg"><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td>',
-        chartContainerTemplate: '<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="curplace" class="btn btn-default btn-xs navbar-btn">Andmed <b><%=title%></b></a><a id="curtime" class="btn btn-default btn-xs navbar-btn"><%=date%></a><a id="cursel" style="" data-toggle="dropdown" class="btn btn-default btn-xs navbar-btn dropdown-toggle"><span class="caret"></span></a><ul id="curmenu" role="menu" class="curmenu dropdown-menu"><li><a href="#" name="arhiiv_saadjarv_saadjarve" class="curplace-select active">Saadjärve Saadjärv</a></li><li><a href="#" name="flydog_aksi" class="curplace-select active">Saadjärv Äksi</a></li><li><a href="#" name="emu" class="curplace-select active">Tartu EMU</a></li><li><a href="#" name="ut_tartu" class="curplace-select">Tartu UT</a></li><li><a href="#" name="arhiiv_vortsjarv_joesuu" class="curplace-select">Võrtsjärv Jõesuu</a></li><li><a href="#" name="arhiiv_vortsjarv_tamme" class="curplace-select">Võrtsjärv Tamme</a></li><li><a href="#" name="mnt_tamme" class="curplace-select">V-Rakke MNT</a></li><li><a href="#" name="mnt_rapina" class="curplace-select">Räpina MNT</a></li><li><a href="#" name="mnt_uhmardu" class="curplace-select">Uhmardu MNT</a></li><li><a href="#" name="mnt_jogeva" class="curplace-select">Jõgeva MNT</a></li><li><a href="#" name="emhi_mustvee" class="curplace-select">Mustvee EMHI</a></li><li><a href="#" name="emhi_pirita" class="curplace-select">Pirita EMHI</a></li><li><a href="#" name="emhi_rohuneeme" class="curplace-select">Püünsi EMHI</a></li><li><a href="#" name="emhi_haapsalu" class="curplace-select">Haapsalu EMHI</a></li><li><a href="#" name="emhi_parnu" class="curplace-select">Pärnu EMHI</a></li><li><a href="#" name="emhi_haademeeste" class="curplace-select">Häädemeeste EMHI</a></li><li><a href="#" name="emhi_sorve" class="curplace-select">Sõrve EMHI</a></li><li><a href="#" name="emhi_ristna" class="curplace-select">Ristna EMHI</a></li></ul></div><input id="datepicker" type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0" class="hasDatepicker"><div class="meta"><div id="curmeta" class="ilm-meta"></div></div></div>',
+        chartContainerTemplate: '<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="curplace" class="btn btn-default btn-xs navbar-btn">Andmed <b><%=title%></b></a><a id="curtime" class="btn btn-default btn-xs navbar-btn"><%=date%></a><a id="cursel" style="" data-toggle="dropdown" class="btn btn-default btn-xs navbar-btn dropdown-toggle"><span class="caret"></span></a><ul id="curmenu" role="menu" class="curmenu dropdown-menu"><li><a href="#" name="arhiiv_saadjarv_saadjarve" class="curplace-select active">Saadjärve Saadjärv</a></li><li><a href="#" name="flydog_aksi" class="curplace-select active">Saadjärv Äksi</a></li><li><a href="#" name="emu" class="curplace-select active">Tartu EMU</a></li><li><a href="#" name="ut_tartu" class="curplace-select">Tartu UT</a></li><li><a href="#" name="arhiiv_vortsjarv_joesuu" class="curplace-select">Võrtsjärv Jõesuu</a></li><li><a href="#" name="arhiiv_vortsjarv_tamme" class="curplace-select">Võrtsjärv Tamme</a></li><li><a href="#" name="mnt_tamme" class="curplace-select">V-Rakke MNT</a></li><li><a href="#" name="mnt_rapina" class="curplace-select">Räpina MNT</a></li><li><a href="#" name="mnt_uhmardu" class="curplace-select">Uhmardu MNT</a></li><li><a href="#" name="mnt_jogeva" class="curplace-select">Jõgeva MNT</a></li><li><a href="#" name="emhi_mustvee" class="curplace-select">Mustvee EMHI</a></li><li><a href="#" name="emhi_pirita" class="curplace-select">Pirita EMHI</a></li><li><a href="#" name="emhi_rohuneeme" class="curplace-select">Püünsi EMHI</a></li><li><a href="#" name="emhi_haapsalu" class="curplace-select">Haapsalu EMHI</a></li><li><a href="#" name="emhi_parnu" class="curplace-select">Pärnu EMHI</a></li><li><a href="#" name="emhi_haademeeste" class="curplace-select">Häädemeeste EMHI</a></li><li><a href="#" name="emhi_sorve" class="curplace-select">Sõrve EMHI</a></li><li><a href="#" name="emhi_ristna" class="curplace-select">Ristna EMHI</a></li><li><a href="#" name="emhi_heltermaa" class="curplace-select">Heltermaa EMHI</a></li></ul></div><input id="datepicker" type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0" class="hasDatepicker"><div class="meta"><div id="curmeta" class="ilm-meta"></div></div></div>',
         chart2Container: '<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="fctitle" class="btn btn-default btn-xs navbar-btn"><%=title%></a><a id="fcsel" data-toggle="dropdown" class="btn btn-default btn-xs navbar-btn dropdown-toggle"><%=date%><span class="caret"></span></a><ul id="fcmenu" role="menu" class="fcmenu dropdown-menu"></ul></div><div class="meta"><div id="yrmeta" class="ilm-meta"><a href="http://www.yr.no/place/Estonia/Tartumaa/Äksi/hour_by_hour.html" onclick="window.open(this.href);return false;">Yr.no</a> andmed viimati uuendatud: 26.07.2017 22:32, Järgmine uuendus: 27.07.2017 11:00</div><div id="wgmeta" class="ilm-meta"><a href="http://www.windguru.cz/ee/?go=1&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: 27.07.2017 01:24, Järgmine uuendus: 27.07.2017 01:24</div></div></div>',
         gridintval: 0,
         getDayLetter: function(date) {
@@ -833,7 +843,7 @@ var ilm = (function(my) {
                                     else $e.removeClass('deferred');
                                     var wsbf = self.bfscale(obj.avg_ws),
                                         wgbf = self.bfscale(obj.max_ws);
-                                    $e.html(_.template(self.gridRowTemplate, {
+                                    $e.html(_.template(self.gridRowTemplate)({
                                         d: obj,
                                         first: first,
                                         last: last,

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+now=$(date '+%Y%m%d%H%M%S')
 lab=0
 force=0
 test=0
@@ -7,11 +8,9 @@ dry=""
 last=""
 station=""
 max=200
-dir=`dirname $0`
+dir=$(dirname $0)
 meinfo='//ilm.majasa.ee/'
-echo "$dir" | grep -q '^/' || dir=`pwd`/$dir
-path=`echo "$dir"|sed -e 's/\/\?bin\/\?$//'`
-[ x"$path" = x"" ] && path="." || path=$path
+path=$(cd "$dir"; pwd|perl -ne 's!/?bin/?$!!;print')
 [ -d $path ] || { echo $path not found; exit; }
 while [ $# -ge 1 ]; do
         case "$1" in
@@ -40,6 +39,13 @@ while [ $# -ge 1 ]; do
         shift
 done
 
+if [ x$DRY != x ]; then
+  dry=1
+fi
+if [ x$LAB != x ]; then
+  lab=1
+fi
+
 rotate () {
   local ext=$1
   local dir=$2
@@ -62,7 +68,7 @@ rotate () {
     if [ x$c != x ]; then
       let 'd=d+1'
     else
-      d=$num 
+      d=$num
     fi
     if [ $num -gt $max ]; then continue; fi
     d=`printf "%03d" $d`;
@@ -113,6 +119,26 @@ print 0;
 exit 0;
 }'
 
+#Mon, 13 May 2013 16:55:00 +0000
+#"updated_at": "2021-09-30T13:53:30Z"
+yr2filter='$mtime=$gmtime=$time=time;
+%months=("Jan"=>1,"Feb"=>2,"Mar"=>3,"Apr"=>4,"May"=>5,"Jun"=>6,"Jul"=>7,"Aug"=>8,"Sep"=>9,"Oct"=>10,"Nov"=>11,"Dec"=>12);
+if(/updated_at/) {
+s/^.*updated_at":"([^\"]+)".*$/$1/;
+if($time0=~/^\w+, (\d{2}) (\w+) (\d{4}) (\d{2}):(\d{2}):(\d{2})/){
+$year=$3;$month=$months{$2};$mday=$1;$hour=$4;$min=$5;$sec=$6;
+$time=timegm($sec,$min,$hour,$mday,$month-1,$year-1900);
+}
+if(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/){
+$year=$1;$month=$2;$mday=$3;$hour=$4;$min=$5;$sec=$6;
+$gmtime=timegm($sec,$min,$hour+1,$mday,$month-1,$year-1900);
+print $time - $gmtime;
+exit 0;
+}
+print 0;
+exit 0;
+}'
+
 empgfilter='$ltime=$time=time;
 if(/forecast":\{"tabular/) {
 s/^.*forecast":\{"tabular":\{"time":\[\{".attributes":\{"from":"([^\"]+)".*$/$1/;
@@ -135,7 +161,8 @@ xtime () {
 	local nail=$p"nail"
 	local filter=$p"filter"
 	local time=-1;
-	[ -f ${dir}/${file} ] && time=$(cat ${dir}/${file} | perl -MTime::Local -ne "${!filter}")
+  local time0="$4"
+	[ -f ${dir}/${file} ] && time=$(cat ${dir}/${file} | perl -MTime::Local -ne "\$time0='$time0';${!filter}")
 	[ x"$time" = x"" ] && time=-1
 	echo $time
 }
@@ -153,8 +180,12 @@ IFS=:
 set $j
 place=$1
 title=$2
-names="wg:$3 yr:$4 emhi:$5 mnt:$6 zoig:${7} emu:${8} ut:${9} my:${10} empg:${11}";
+coord=$(echo "${13}"|tr -d '[:space:]');
+lat=${coord/,*/};
+lon=${coord/*,/};
+names="wg:$3 yr:$4 emhi:$5 mnt:$6 zoig:${7} emu:${8} ut:${9} my:${10} empg:${11} fld:${12} yr2:${coord}";
 IFS=' '
+  IFS=','; coord=($value); IFS=' ';
 
 (
 cd public
@@ -162,8 +193,8 @@ cd public
 [ $test -eq 0 ] || continue;
 [ x"$place" = x"" ] && continue;
 for x in $names; do
-name=${x/:*/};
-value=${x/*:/};
+name="${x/:*/}";
+value="${x/*:/}";
 
 #echo "$place $name $value";
 [ x"$value" = x"" ] && continue;
@@ -176,15 +207,14 @@ wg)
 	out=wg_data/$place
 	file=windguru_forecast.json
 	;;
-yr)
-  out=yr_data/$place
-  file=forecast_hour_by_hour.xml
-  file2=forecast.xml
-	url='http://www.yr.no/sted/Estland/'$value'/'$file
-  url2='http://www.yr.no/sted/Estland/'$value'/'$file2
+yr2)
+  out=yr_data2/$place
+	url="https://api.met.no/weatherapi/locationforecast/2.0/?lat=${lat}&lon=${lon}"
+  file=yr_forecast.json
 	;;
+
 empg)
-  url='http://www.ilmateenistus.ee/wp-content/themes/emhi2013/meteogram.php/?locationId='$value
+  url="https://www.ilmateenistus.ee/wp-content/themes/emhi2013/meteogram.php/?coordinates=${lat},${lon}"
   out=empg_data/$place
   file=empg_forecast.json
   ;;
@@ -196,7 +226,10 @@ esac
 
 #echo "$name $value $out"
 [ -d "${out}" ] || {  [ x"$out" != x"" ] && mkdir -p "${out}" || continue; }
-t=`xtime ${out} ${file} ${name}`;
+if [ "$name" = 'yr2' ]; then
+  t0="$(curl --head --silent $url|grep Last-Modified|sed -e 's/Last-Modified: //')"
+fi
+t=$(xtime ${out} ${file} ${name} "${t0}");
 if [ $lab -gt 0 ]; then
   echo "$name secs "$t
 fi
@@ -206,27 +239,34 @@ fi
 if [ $force -gt 0 -o $t -lt 0 ]; then
   #[ $name = "wg" ] && rotate json ${out} ${file}
   #[ $name = "yr" ] && rotate xml ${out} ${file}
-  if [ $lab -gt 0 ]; then
+  if [ $lab -gt 0 -o x$dry != x ]; then
     echo wget -U "$meinfo" -q -O ${out}/${file}.tmp "${url}"
   fi
   if [ x"$dry" = x"" ]; then
-    wget -U "$meinfo" -q -O ${out}/${file}.tmp "${url}"
+    wget -T10 --tries=1 -U "$meinfo" -q -O ${out}/${file}.tmp "${url}"
     if [ x"$file2" != x"" ]; then
-      wget -U "$meinfo" -q -O ${out}/${file2}.tmp "${url2}"
+      wget -T10 --tries=1 -U "$meinfo" -q -O ${out}/${file2}.tmp "${url2}"
     fi
   fi
   t=`xtime ${out} ${file}.tmp ${name}`
   if [ $lab -gt 0 ]; then
     echo "next update time: $t"
   fi
-  if [ $t -gt 0 ]; then
-    mv --backup=t -f ${out}/${file}.tmp ${out}/${file}
+  if [ x$dry = x ]; then
+    if [ -e "${out}/${file}" -a $t -lt 0 ]; then
+      mv "${out}/${file}" "${out}/${file}.${now}"
+    fi
+    mv -f "${out}/${file}.tmp" "${out}/${file}"
     if [ x"$file2" != x"" ]; then
-      mv --backup=t -f ${out}/${file2}.tmp ${out}/${file2}
+      if [ -e "${out}/${file2}"  -a $t -lt 0 ]; then
+        mv "${out}/${file2}" "${out}/${file2}.${now}"
+      fi
+      mv -f "${out}/${file2}.tmp" "${out}/${file2}"
     fi
     #rm -f ${out}/${file}.tmp
   fi
 fi
+
 done ##split conf
 )
 

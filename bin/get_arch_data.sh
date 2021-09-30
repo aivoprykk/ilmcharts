@@ -53,6 +53,9 @@ IFS=:
 set $j
 place=$1
 title=$2
+coord=$(echo "${13}"|tr -d '[:space:]');
+lat=${coord/,*/};
+lon=${coord/*,/};
 names="wg:$3 yr:$4 emhi:$5 mnt:$6 zoig:$7 emu:$8 ut:$9 my:${10} empg:${11} flydog:${12}";
 IFS=' '
 (
@@ -159,7 +162,7 @@ if [ $lab -gt 0 ]; then
 fi
 if [ x"$dry" = x"" ]; then
 	if [ x"$temp" != x"" ]; then
-	  wget -U "$meinfo" -q -O $out/$temp $url
+	  wget -T10 --tries=1 -U "$meinfo" -q -O $out/$temp $url
 	  [ -e $dir"/parse_$name.js" ] && node --trace-deprecation $dir"/parse_$name.js" $out/$temp $value $labstr
     x=`cat $out/last.txt|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}'|wc -l`
     if [ $x -gt 0 ]; then
@@ -168,7 +171,7 @@ if [ x"$dry" = x"" ]; then
     fi
 	  #rm -f $out"/"$temp
 	else
-	  wget -T40 -U "$meinfo" -q -O $out/$file $url
+	  wget -T10 --tries=1 -U "$meinfo" -q -O $out/$file $url
     x=`cat $out/$file|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}'|wc -l`
     if [ $x -gt 0 ]; then tail -6 $out/$file|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}' > $out/last.txt; fi
 	fi

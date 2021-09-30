@@ -1,5 +1,5 @@
 (function (my) {
-	'use strict';
+    'use strict';
     var w = window,
         $ = w.$,
         _ = w._,
@@ -7,7 +7,7 @@
         SunCalc = w.SunCalc,
         updateinterval = 600000,
         options = {};
-	
+
     Highcharts.setOptions({
         global: {
             useUTC : false
@@ -59,7 +59,7 @@
             linkedTo: 0,
             title: {
                 text: null
-            },		    	
+            },
             min: 0,
             max: 360,
             tickInterval: 45,
@@ -146,7 +146,7 @@
             backgroundColor: '#FFFFFF'
         }
     });
-	
+
     function addPlotLine(chart, ts) {
         if(chart.xAxis!==undefined)
             chart.xAxis[0].addPlotLine({
@@ -164,7 +164,7 @@
         if(chart.xAxis!==undefined)
             chart.xAxis[0].removePlotLine('nowline');
     }
-	
+
     function intPlotLine(chart, intval) {
         var interval = 60000;
         var now = my.getTime();
@@ -270,7 +270,7 @@
                 type: 'get',
                 url: fc.datadir + '/' + place  + '/' + fcfile + '?' + get.now,
             };
-            if(fc.datatype==='json') {
+            if(fc.datatype==='json' && fcid!=='yr') {
                 ajaxopt.dataType = 'jsonp';
                 ajaxopt.jsonp =  'callback';
                 ajaxopt.jsonpCallback = fcid==='wg' ? fcid+'_data' : 'callback';
@@ -288,7 +288,7 @@
                     dt.press_series = $.extend(true, {}, press_series, {name: fc.name+' rõhk', color: colors.press[fcidx], lineWidth: 1});
                     dt.rain_series = $.extend(true, {}, rain_series, {name: fc.name+' sademed', color: colors.rain[fcidx], type: 'column', lineWidth: 0});
                     dt.humid_series = $.extend(true, {}, humid_series, {name: fc.name+' niiskus', color: colors.humid[fcidx], lineWidth: 1});
-					
+
                     if(fillfn) fillfn(data, dt, fcid);
 
                     if(my.samplemode==='graph') {
@@ -299,7 +299,7 @@
                         if(dt.rain_series.data.length) temp_options.series.push(dt.rain_series);
                         if(dt.press_series.data.length) temp_options.series.push(dt.press_series);
                         if(dt.temp_series.data.length) temp_options.series.push(dt.temp_series);
-                    } 
+                    }
                     var metadata = get.fclink(fcid,fc.url,my.fcplaces[place][fcid+'link'],fc.name,dt.last,dt.next);
                     get.dometa(fcid, metadata);
                 }
@@ -333,12 +333,12 @@
                         break;
                     }
                 }
-            }			
-            var fcurl = fc==='em' ? url + '/asukoha-prognoos/?id=' + placeid : 
-                fc==='yr' ? url+'/place/Estonia/'+placeid+'/'+(my.sampletype==='long' ? 'long' :'hour_by_hour')+'.html' :
+            }
+            var fcurl = fc==='em' ? url + '/asukoha-prognoos/?coordinates=' + placeid :
+                fc==='yr' ? url+'/en/details/table/'+placeid+'/' :
                     fc==='wg' ? url + '/' + placeid : url + placeid ;
 
-            return _.template(t, {title:placename,url:fcurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
+            return _.template(t)({title:placename,url:fcurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
         },
         do_em: function(data,dt,fcid){
             var fcmax=get.getmax();
@@ -372,12 +372,12 @@
         },
         getmax: function(hours){
             if(my.sampletype==='long') return 0;
-            hours = hours||my.fcmax||72;
+            hours = hours||my.fcmax||my.deffcmax;
             return (get.now||new Date().getTime())+hours*3600000;
         },
         do_wg: function(data,dt,fcid){
             var fcmax=get.getmax();
-            var wg = data.fcst.fcst[3], 
+            var wg = data.fcst.fcst[3],
                 wg_get_time = function(xd) {
                     return (function (d) {
                         return new Date(d[1], d[2] - 1, d[3], d[4], d[5], d[6]);
@@ -411,9 +411,9 @@
                 if(date>get.datalen[1] || !get.datalen[1])get.datalen[1] = date;
             }
         },
-        do_yr: function(data,dt,fcid){
+        do_yr0: function(data,dt,fcid){
             var fcmax=get.getmax();
-            var $xml = $(data), d, 
+            var $xml = $(data), d,
                 yr_get_time = function(xml,name) {
                     var attr = xml.find ? xml.find(name).text() : xml.getAttribute(name);
                     return (function (d) {
@@ -440,6 +440,39 @@
             dt.next = yr_get_time($xml,'nextupdate').getTime();
             last_time = dt.last;
         },
+        do_yr: function(data,dt,fcid){
+            var fcmax=get.getmax();
+            var yr = data.properties.timeseries,
+                yr_get_time = function(xd) {
+                    return new Date(xd);
+                },
+                offset = 0*3600000, d = (yr_get_time((yr[0]||{}).time).getTime()) + offset, //+ 1800000,
+                t = 0, i = 0, j = yr.length, k = j-1, lo, o, op;
+
+            for (; i < j; ++i) {
+                lo = yr[i];
+                t = yr_get_time((lo||{}).time).getTime()+offset;
+                if(i===0||i===k||(fcmax&&t>fcmax)) get.update_len(t,i===0?1:i===k||(fcmax&&t>fcmax)?2:0);
+                if (fcmax&&t>fcmax) { break; }
+                o = lo.data.instant.details;
+                dt.ws_series.data.push([t, my.ntof2p(o.wind_speed)]);
+                dt.wg_series.data.push([t, my.ntof2p(o.wind_speed_of_gust)]);
+                dt.wd_series.data.push([t, my.ntof2p(o.wind_from_direction)]);
+                dt.temp_series.data.push([t, my.ntof2p(o.air_temperature)]);
+                dt.press_series.data.push([t, my.ntof2p(o.air_pressure_at_sea_level)]);
+                dt.humid_series.data.push([t, my.ntof2p(o.relative_humidity)]);
+                if(my.samplemode!=='graph') {
+                    o = lo.data.next_1_hours||lo.data.next_6_hours||lo.data.next_12_hours;
+                    if(o) {
+                        op = o.details.precipitation_amount_max>0 ? o.details.precipitation_amount_min+'-'+o.details.precipitation_amount_max : o.details.precipitation_amount;
+                        dt.rain_series.data.push([t, op]);
+                    }
+                }
+            }
+
+            dt.last = (yr_get_time(data.properties.meta.updated_at).getTime()) + offset;
+            last_time = dt.last;
+        },
         dometa: function(box,data){
             var cnt = $('#'+box+'meta'), cntn=null;
             if(cnt && cnt.length) cnt.html(data);
@@ -452,8 +485,8 @@
         done: function() {
             ajax_done = 0;
             var self=my, i1, i2, i3, i=0,j=0,dn=null,
-                dtf = Object.keys(get.dataseries)[0], 
-                dtp = get.dataseries[my.fcsource||my.fcsources[0]]||get.dataseries[dtf],  
+                dtf = Object.keys(get.dataseries)[0],
+                dtp = get.dataseries[my.fcsource||my.fcsources[0]]||get.dataseries[dtf],
                 dt = dtp[my.fcplace]||{},
                 fc=my.fcplaces[my.fcplace],
                 loc=fc.location, sun = {},
@@ -465,7 +498,7 @@
                     rain: (dt.rain_series && dt.rain_series.data.length),
                     press: (dt.press_series && dt.press_series.data.length),
                     temp: (dt.temp_series && dt.temp_series.data.length)
-                }, 
+                },
                 dbase = has.ws ? dt.ws_series.data : has.temp ? dt.temp_series.data : has.wd ? dt.wd_series.data : [],
                 k=0, l=0, kn='', night=false, nightplot=[], doplot=false;
 
@@ -495,8 +528,8 @@
                 //var htempl = '<tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Sademed</th><th class="hide-edge-xs">Rõhk</th></tr>';
                 //var templ = '<tr class="<%=night?"night hide":""%>"><td><span class="day hide"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="hide-edge-xs"><%=press?press:""%></td></tr>';
                 var str='';
-                var hlinks = '<tr><th colspan="5"><span class="fc-source" name="em">Ilmateenistus</span>&nbsp;<span class="fc-source" name="wg">Windguru.cz</span>&nbsp;<span class="fc-source" name="yr">Yr.no</span></th></tr>';
-                var keys = Object.keys(has),tnow=new Date().getTime();
+                var hlinks = '<tr class="fcontainer"><th colspan="6"><span class="fc-source" name="em">Ilmateenistus</span>&nbsp;<span class="fc-source" name="wg">Windguru.cz</span>&nbsp;<span class="fc-source" name="yr">Yr.no</span><span class="right fchead">'+fc.name+'</span></th></tr>';
+                var keys = Object.keys(has),tnow=new Date().getTime(),o;
 
                 for(i=0,j=dbase.length;i<j;++i) {
                     dn=dbase[i][0]||0;
@@ -514,14 +547,15 @@
                     };
                     for(k=0,l=keys.length;k<l;++k) {
                         kn = keys[k];
-                        opt[kn] = (has[kn]) ? dt[kn+'_series'].data[i][1] : null;
+                        o=(has[kn]) ? dt[kn+'_series'].data[i] : null;
+                        opt[kn] = (o) ? o[1] : null;
                     }
-                    str += _.template(self.fcRowTemplate,opt);
+                    str += _.template(self.fcRowTemplate)(opt);
                 }
 
                 var where = $('#'+my.chartorder[0]+'2');
                 if(where) {
-                    where.html(_.template(self.dataTableTemplate,{classes:'table',thead:_.template(self.fcHeadTemplate,{inforows:hlinks}),tbody:str}));
+                    where.html(_.template(self.dataTableTemplate)({classes:'table',thead:_.template(self.fcHeadTemplate)({inforows:hlinks}),tbody:str}));
                     where.css('height','100%');
                 }
                 $('#'+my.chartorder[1]+'2').hide();

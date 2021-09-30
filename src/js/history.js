@@ -126,7 +126,7 @@
             gridLineWidth: 0,
             title: {
                 text: null
-            },		    	
+            },
             min: 0,
             max: 360,
             tickInterval: 45,
@@ -265,14 +265,13 @@
         donetable: function(json) {
             var self=my, d, s = {};
             //var table = $('<div>&nbsp;</div><table class="table" style="background-color:white;font-size:80%"><thead></thead><tbody class="tbody"></tbody></table>');
-            var hlinks = '<tr><th colspan="5"><span class="hist-length" name="4"> 4h </span>&nbsp;<span class="hist-length" name="6"> 6h </span>&nbsp;<span class="hist-length" name="12"> 12h </span>&nbsp;<span class="hist-length" name="24"> 24h </span>&nbsp;<span class="hist-length" name="48"> 2p </span>&nbsp;<span class="hist-length" name="72"> 3p </span></th></tr>';
             var html = '<tbody>';
             my.lastdate = my.normalizeData(my.curplace, json, function(obj,count,i){
                 //if(count-i>20) return false;
                 var loc = my.curplaces[my.curplace].location,
                     sun = SunCalc.getPosition(new Date(obj.time), loc[0], loc[1]);
                 var time = self.getTimeStr(obj.time).split(/\s/);
-                html += _.template(my.histRowTemplate,{
+                html += _.template(my.histRowTemplate)({
                     d:obj,
                     day:self.getDayLetter(obj.time),
                     date:time[0],
@@ -286,11 +285,13 @@
             html += '</tbody>';
             var $html = $(html);
             //var rev = _.filter($html.children('.item').get().reverse(),function(a,i){return i<15;});
+            var ln = my.curplaces[my.curplace].name;
+            var hlinks = '<tr class="fcontainer"><th colspan="7"><span class="hist-length" name="4"> 4h </span>&nbsp;<span class="hist-length" name="6"> 6h </span>&nbsp;<span class="hist-length" name="12"> 12h </span>&nbsp;<span class="hist-length" name="24"> 24h </span>&nbsp;<span class="hist-length" name="48"> 2p </span>&nbsp;<span class="hist-length" name="72"> 3p </span><span class="fchead right">'+ln+'</span></th></tr>';
             var rev = $html.children('.item').get().reverse();
             $html.html(rev);
             d = new Date(my.lastdate);
             var where = $('#'+my.chartorder[0]+'1');
-            where.html(_.template(self.dataTableTemplate,{classes:'table',thead:_.template(self.histHeadTemplate,{inforows:hlinks}),tbody:$html.html()}));
+            where.html(_.template(self.dataTableTemplate)({classes:'table',thead:_.template(self.histHeadTemplate)({inforows:hlinks}),tbody:$html.html()}));
             where.css('height','100%');
             var where2 = where.find('.table')[0];
             $('#'+my.chartorder[1]+'1').hide();
@@ -329,7 +330,7 @@
 			#8d4653 - pruun,
 			#91e8e1 - sinine2(hele)
 			*/
-            var d, s = {};			
+            var d, s = {};
             //windspeed
             s.avg_ws_series = $.extend(true, {}, d_series, {name: 'Keskmine',color:'#7cb5ec', lineWidth: 2});//1
             s.max_ws_series = $.extend(true, {}, d_series, {name: 'Max', color: '#910000', lineWidth: 2, dashStyle: 'shortdot'});//2
@@ -351,11 +352,11 @@
 
             my.lastdate = my.normalizeData(my.curplace, json, function(o){
                 var x = Object.keys(s)[0];
-                if(!x || !s[x].data || !s[x].data.length) get.datalen[0]=o.time; 
-                else get.datalen[1]=o.time; 
+                if(!x || !s[x].data || !s[x].data.length) get.datalen[0]=o.time;
+                else get.datalen[1]=o.time;
                 my.rowToSeries(o, s);
             }, 0, my.start);
-			
+
             options.wind_speed.series = null;
             options.wind_speed.series = [];
             options.wind_speed.series.push(s.min_ws_series);
@@ -365,7 +366,7 @@
 				options.wind_speed.yAxis[0].min=0;
 			}
 			else delete options.wind_speed.yAxis[0].min;*/
-			
+
             d = new Date(my.lastdate);
             /*$("#ajaraam").html(
 				'<div class="row-fix" style="float:right;"><a href="#" onclick="return ilm.showLinks();">Lingid</a>'
@@ -394,14 +395,14 @@
             //console.log('width '+v);
             if(v>450) {
                 if (s.avg_ws_series.data.length) {
-                    options.wind_speed.title.text = 
+                    options.wind_speed.title.text =
 				' Tuule kiirus'+(!my.historyactive? ' [ <b>' + s.avg_ws_series.data[s.avg_ws_series.data.length - 1][1] + '</b> m/s' +
 					' (pagid: <b>' + (s.max_ws_series.data[s.max_ws_series.data.length - 1]||['','-'])[1] + '</b> m/s) ]':'');
                 } else {
                     options.wind_speed.title.text = 'Tuule kiiruse andmed puuduvad';
                 }
                 if (s.avg_wd_series.data.length) {
-                    options.wind_dir.title.text = 
+                    options.wind_dir.title.text =
 				' Tuule suund'+(!my.historyactive? ' [ <b>' + s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1] + '</b> ° ' +
 					'(<b>' + my.dirs(s.avg_wd_series.data[s.avg_wd_series.data.length - 1][1]) + '</b>) ]':'');
                 } else {
@@ -425,7 +426,7 @@
 
             options.wind_dir.series = null;
             options.wind_dir.series = [];
-			
+
             options.wind_dir.series.push(s.min_wd_series);
             options.wind_dir.series.push(s.max_wd_series);
             options.wind_dir.series.push(s.avg_wd_series);
@@ -440,14 +441,14 @@
             options.temp.series.push(s.avg_press_series);
             options.temp.series.push(s.avg_wl_series);
             options.temp.series.push(s.avg_wtemp_series);
-			
+
             //console.log(JSON.stringify(options));
-			
-			
+
+
             options.wind_speed.chart.renderTo = 'wind_speed1';
             options.wind_dir.chart.renderTo = 'wind_dir1';
             options.temp.chart.renderTo = 'temp1';
-			
+
             if(my.chartorder.indexOf('wind_speed') >= 0) my.charts[0] = new Highcharts.Chart(options.wind_speed);
             if(my.chartorder.indexOf('wind_dir') >= 0)  my.charts[1] = new Highcharts.Chart(options.wind_dir);
             if(my.chartorder.indexOf('temp') >= 0)  my.charts[2] = new Highcharts.Chart(options.temp);
@@ -463,7 +464,7 @@
 
             /*$('#curmeta').html(
 				'<a href="http://' + host + my.curplaces[my.curplace].link  +
-					'" onclick="window.open(this.href);return false;">'+host.charAt(0).toUpperCase() + host.slice(1)+'</a>, andmed viimati uuendatud: ' + 
+					'" onclick="window.open(this.href);return false;">'+host.charAt(0).toUpperCase() + host.slice(1)+'</a>, andmed viimati uuendatud: ' +
 					//new Date(my.lastdate).toLocaleString() +
 					my.getTimeStr(my.lastdate) +
 					', Järgmine uuendus: ' +
@@ -498,7 +499,7 @@
     	},
     	histlink: function(fc,last,next) {
     		var cid= my.curplaces[fc],link=cid.link,fcid=cid.cid;
-            var base = /emhi/.test(fc) ? 'emhi' : 
+            var base = /emhi/.test(fc) ? 'emhi' :
                 /emu/.test(fc) ? 'emu' :
                     /flydog/.test(fc) ? 'flydog' :
                         /^ut/.test(fc) ? 'ut' :
@@ -509,7 +510,7 @@
             var t = '<a onclick="window.open(this.href);return false;" href="<%=url%>"><%=title%><%if(last){%> <%=last%><%}if(next){%>, järgmine <%=next%><%}%></a>';
             //var meta = '';
             var xurl = 'http://' + url + link + (base==='emhi' ? fcid+'/': '');
-            return _.template(t, {title:title,url:xurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
+            return _.template(t)({title:title,url:xurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
         },
         dohmeta: function(box,data){
             var cnt = $('#curmeta'), cntn=null;
@@ -547,7 +548,7 @@
         };
         cb(d-my.timeframe);
     };
-    
+
     /*function afterSetExtremes(e) {
         //var url;
         var currentExtremes, range, self=this;
@@ -569,11 +570,11 @@
             intval = setInterval(my.loadCur, interval);
     	}
     };
-    
+
     my.reload = function () {
     	my.loadInt();
     };
-   
+
     return my;
 
 })(ilm || {});
