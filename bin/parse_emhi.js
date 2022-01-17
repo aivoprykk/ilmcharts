@@ -73,7 +73,7 @@ fs.readFile(path, function(err, data) {
 				//none
 			}
 			else if(a===2) {
-				if(/parnu/.test(path)) ret.push(""); //mootjal ei ole ohutemperatuuri
+				if(/(parnu|montu)/.test(path)) ret.push(""); //mootjal ei ole ohutemperatuuri
 				if(text) test = true;
 			}
 			else if(a>=3 && text && !test) {

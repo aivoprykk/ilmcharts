@@ -79,7 +79,7 @@ emu)
 	out=emu_data/$place
 	;;
 ut)
-	url='http://meteo.physic.ut.ee/et/archive.php?do=data';
+	url='https://meteo.physic.ut.ee/et/archive.php?do=data';
 	url="$url&`date '+begin[year]=%Y&begin[mon]=%m&begin[mday]=%d'`"
 	url="$url&`date --date='tomorrow' '+end[year]=%Y&end[mon]=%m&end[mday]=%d'`"
 	url="$url&9=1&12=1&10=1&15=1&16=1"

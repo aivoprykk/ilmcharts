@@ -10,7 +10,7 @@ pth=$(dirname $0)
 topth=/var/www/ilm/prod/ilmcharts
 (
 cd $pth;
-rsync $l --no-links --exclude='public/*data' --exclude='public/arhiiv*' --exclude='*lock.json' --exclude='.git' --exclude='.DS*' --exclude='._*' --exclude=node_modules . root@$host:$topth/;
+rsync $l --no-links --exclude='public/*data' --exclude='public/*data2' --exclude='public/arhiiv*' --exclude='*lock.json' --exclude='.git' --exclude='.DS*' --exclude='._*' --exclude=node_modules . root@$host:$topth/;
 #if [ x"$DRY" = x"" ]; then
 #ssh -A root@$host 'cd '$topth'; grunt dist';
 #fi

@@ -131,7 +131,7 @@ $time=timegm($sec,$min,$hour,$mday,$month-1,$year-1900);
 }
 if(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/){
 $year=$1;$month=$2;$mday=$3;$hour=$4;$min=$5;$sec=$6;
-$gmtime=timegm($sec,$min,$hour+1,$mday,$month-1,$year-1900);
+$gmtime=timegm($sec,$min,$hour,$mday,$month-1,$year-1900);
 print ($gmtime - $time);
 exit 0;
 }
