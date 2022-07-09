@@ -61,23 +61,63 @@ fs.readFile(path, function(err, data) {
 	if(err) throw err;
 	var $ = cheerio.load(data), child,
 	text, trs, ret, test, d=0, m=0, wd=[], wdata=[];
+	var cols=0, wtemp=0, atemp=0, mode=0;
+	var datadate, dd=$(".data-date"), datatime;
+	if(dd.length==0) {
+		dd=$(".utc-info");
+		mode=1;
+	}
+	if(dd.length==0) {
+		dd=$(".direction-compass span");
+		mode=2;
+	}
+	if(dd.length && mode==2) {
+		try {
+			datadate = dd.text().trim();
+			datadate = new Date(datadate.replace(/^(\d*)\.(\d*)\.(\d*)\s+kell\s+/,'$3-$2-$1 '));
+			//if(debug) console.log("datadate(mode2): "+datadate);
+		} catch(e) {
+			datadate = time;
+		}
+	}
+	else if(dd.length && mode==1) {
+		try {
+			datadate = dd.text().trim();
+			datadate = new Date(datadate.replace(/^UTC (\d*)\.(\d*)\.(\d*)\s+(\d*):(\d*)/,'$3-$2-$1 $4:$5:00'));
+			//if(debug) console.log("datadate(mode1): "+datadate);
+		} catch(e) {
+			datadate = time;
+		}
+	} else {
+		try {
+			datadate = dd.text().trim();
+			datadate = new Date(datadate.replace(/^(\d*)\.(\d*)\.(\d*)\s+kell\s+/,'$3-$2-$1 '));
+			//if(debug) console.log("datadate(mode0): "+datadate);
+		} catch(e) {
+			datadate = time;
+		}
+	}
+
 	$(".table tr").each(function(){
+		
 		trs = $(this).find(".number");
 		ret = []; test = false;
 		trs.each(function(a){
 			child = $(this);
 			text = child.text().trim();
 			//if(debug) console.log(a+' -> ' + test + ' -> ' +text);
-			ret.push(text.replace(/,/g, "."));
-			if(a===1) {
-				//none
-			}
-			else if(a===2) {
-				if(/(parnu|montu)/.test(path)) ret.push(""); //mootjal ei ole ohutemperatuuri
-				if(text) test = true;
-			}
-			else if(a>=3 && text && !test) {
-				test = true;
+			if(mode==0||mode==2) {
+				ret.push(text.replace(/,/g, "."));
+				if(a===1) {
+					//none
+				}
+				else if(a===3) {
+					if(/(parnu|montu|sorve)/.test(path)) ret.push(""); //mootjal ei ole ohutemperatuuri
+					if(text) test = true;
+				}
+				else if(a>=3 && text && !test) {
+					test = true;
+				}
 			}
 		});
 		if (ret.length&&test) {
@@ -85,13 +125,6 @@ fs.readFile(path, function(err, data) {
 			wdata.push(ret.join("\t"));
 		}
 	});
-	var datadate=$(".data-date").text().trim();
-	try {
-		datadate = new Date(datadate.replace(/^(\d*)\.(\d*)\.(\d*)\s+kell\s+/,'$3-$2-$1 '));
-		//console.log("datadate: "+datadate);
-	} catch(e) {
-		datadate = time;
-	}
 	//if(debug) console.log(path+" " + err + " " + wdata);
 	if(wdata){
 		var j = wdata.length-1, t = 0, val, mc;
