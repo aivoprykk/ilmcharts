@@ -215,7 +215,7 @@ yr2)
 	;;
 
 empg)
-  url="https://www.ilmateenistus.ee/wp-content/themes/emhi2013/meteogram.php/?coordinates=${lat},${lon}"
+  url="https://www.ilmateenistus.ee/wp-content/themes/emhi2020/meteogram.php/?coordinates=${lat},${lon}"
   out=empg_data/$place
   file=empg_forecast.json
   ;;
