@@ -62,7 +62,7 @@
                 },
                 {
                     name: 'Meteo.pl',
-                    url: 'http://new.meteo.pl/um/php/meteorogram_map_um.php?lang=en&ntype=0u',
+                    url: 'http://www.meteo.pl/um/php/meteorogram_map_um.php?lang=en&ntype=0u',
                     list: [
                         { href: '&row=227&col=325', title: 'Saadj&auml;rv', id: 'meteopl_saadjarv_aksi' },
                         { href: '&row=234&col=318', title: 'Võrtsj&auml;rv Tamme', id: 'meteopl_vortsjarv_tamme' },
