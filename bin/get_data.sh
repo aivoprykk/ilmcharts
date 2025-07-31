@@ -181,10 +181,10 @@ IFS=:
 set $j
 place=$1
 title=$2
-coord=$(echo "${13}"|tr -d '[:space:]');
+coord=$(echo "${3}"|tr -d '[:space:]');
 lat=${coord/,*/};
 lon=${coord/*,/};
-names="wg:$3 yr:$4 emhi:$5 mnt:$6 zoig:${7} emu:${8} ut:${9} my:${10} empg:${11} fld:${12} yr2:${coord}";
+names="wg:${4} yr:${5} emhi:${6} mnt:${7} zoig:${8} emu:${9} ut:${10} my:${11} empg:${12} flydog:${13} ttu:${14}"
 IFS=' '
   IFS=','; coord=($value); IFS=' ';
 
@@ -208,14 +208,15 @@ wg)
 	out=wg_data/$place
 	file=windguru_forecast.json
 	;;
-yr2)
+yr*)
   out=yr_data2/$place
 	url="https://api.met.no/weatherapi/locationforecast/2.0/?lat=${lat}&lon=${lon}"
   file=yr_forecast.json
 	;;
-
 empg)
-  url="https://www.ilmateenistus.ee/wp-content/themes/emhi2020/meteogram.php/?coordinates=${lat},${lon}"
+  lat=${value/,*/};
+  lon=${value/*,/};
+  url="https://www.ilmateenistus.ee/wp-content/themes/ilm2020/meteogram.php/?locationId=784&coordinates=${lat};${lon}"
   out=empg_data/$place
   file=empg_forecast.json
   ;;

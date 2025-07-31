@@ -15,10 +15,23 @@
 ldir="$dir"
 [ x"$LDIR" != x"" ] && { ldir="$LDIR"; }
 [ -d "$ldir" ] || { ldir=.; }
+side='from'
+[ x"$SIDE" != x"" ] && { side="$SIDE"; }
 (
 cd "$ldir";
-rsync -a$dry$kstr$estr root@$host:"$dir/public/"*_data "$ldir/public/"
-rsync -a$dry$kstr$estr root@$host:"$dir/public/"arhiiv "$ldir/public/"
-rsync -a$hdry$kstr$estr "$ldir/public"/*_data $ldir/public/arhiiv root@$host:"$dir/public/"
+if [ x"$side" = x"from" -o x"$side" = x"both" ]; then
+dirs=$(ssh -A root@$host 'ls -d '$dir'/public/arhiiv '$dir'/public/*_data*|grep -v _old')
+for d in $dirs; do
+b=$(basename "$d")
+rsync -a$dry$kstr$estr root@$host:"$d"/ "$ldir/public/$b/"
+done
+fi
+if [ x"$side" = x"to" -o x"$side" = x"both" ]; then
+dirs=$(ls -d $ldir/public/arhiiv $ldir/public/*_data*|grep -v _old)
+for d in $dirs; do
+b=$(basename "$d")
+rsync -a$hdry$kstr$estr "$d"/ root@$host:"$dir/public/$b/"
+done
+fi
 bash bin/manage_old_data.sh
 )

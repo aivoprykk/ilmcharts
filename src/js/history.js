@@ -291,7 +291,7 @@
             $html.html(rev);
             d = new Date(my.lastdate);
             var where = $('#'+my.chartorder[0]+'1');
-            where.html(_.template(self.dataTableTemplate)({classes:'table',thead:_.template(self.histHeadTemplate)({inforows:hlinks}),tbody:$html.html()}));
+            where.html(_.template(self.dataTableTemplate)({classes:'table table-sm',thead:_.template(self.histHeadTemplate)({inforows:hlinks}),tbody:$html.html()}));
             where.css('height','100%');
             var where2 = where.find('.table')[0];
             $('#'+my.chartorder[1]+'1').hide();
@@ -482,13 +482,13 @@
                     if(b===self.timeframe) return false;
                     my.setFrame(c+'h');
                 });
-                var islabel = d.hasClass('label');
+                var islabel = d.hasClass('btn');
                 if(islabel) {
-                    d.removeClass('label-primary');
+                    d.removeClass('btn-light');
                 }
                 if(b===my.timeframe) {
                     if(islabel) {
-                        d.addClass('label-primary');
+                        d.addClass('btn-primary');
                     }
                     d.css('font-weight','600');
                 }
@@ -498,18 +498,19 @@
             });
     	},
     	histlink: function(fc,last,next) {
-    		var cid= my.curplaces[fc],link=cid.link,fcid=cid.cid;
+    		var cid=my.curplaces[fc],link=cid.link,fcid=cid.cid;
             var base = /emhi/.test(fc) ? 'emhi' :
                 /emu/.test(fc) ? 'emu' :
                     /flydog/.test(fc) ? 'flydog' :
                         /^ut/.test(fc) ? 'ut' :
                             /arhiiv/.test(fc) ? 'arhiiv' :
-                                /mnt/.test(fc) ? 'mnt': '';
+                                /mnt/.test(fc) ? 'mnt' : 
+                                    /ttu/.test(fc) ? 'ttu':'';
             var url = base ? my.histsourcesdata[base] : '';
             var title=url.charAt(0).toUpperCase() + url.slice(1);
             var t = '<a onclick="window.open(this.href);return false;" href="<%=url%>"><%=title%><%if(last){%> <%=last%><%}if(next){%>, järgmine <%=next%><%}%></a>';
             //var meta = '';
-            var xurl = 'http://' + url + link + (base==='emhi' ? fcid+'/': '');
+            var xurl = 'http://' + url + link + (base==='emhi' ? fcid+'/': (base==='ttu' ? '/'+fcid : ''));
             return _.template(t)({title:title,url:xurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
         },
         dohmeta: function(box,data){

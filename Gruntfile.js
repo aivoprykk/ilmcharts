@@ -54,8 +54,6 @@ module.exports = function (grunt) {
                     }
                 },
                 src: [
-                    'node_modules/bootstrap/dist/css/bootstrap.css',
-                    'node_modules/bootstrap/dist/css/bootstrap-theme.css',
                     'node_modules/jquery-ui/themes/base/jquery.ui.core.css',
                     'node_modules/jquery-ui/themes/base/jquery.ui.theme.css',
                     'node_modules/jquery-ui/themes/base/jquery.ui.datepicker.css',
@@ -95,6 +93,7 @@ module.exports = function (grunt) {
                     'node_modules/jquery-ui/widget.js',
                     'node_modules/jquery-ui/mouse.js',
                     'node_modules/jquery-ui/sortable.js',
+                    'node_modules/popperjs-core/dist/umd/popper.js',
                     'node_modules/bootstrap/dist/js/bootstrap.js',
                     'node_modules/suncalc/suncalc.js'
                 ],

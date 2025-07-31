@@ -1,5 +1,4 @@
-var request = require('request'),
-cheerio = require('cheerio'),
+var cheerio = require('cheerio'),
 fs = require('fs'),
 input = __dirname.replace(/bin/,"public")+"/emhi_data/haapsalu/arc-file-haapsalu.html",
 time = new Date(),

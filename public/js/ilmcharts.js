@@ -1,7 +1,7 @@
 /*!
- * Ilmcharts v1.2.2 (http://ilm.majasa.ee)
- * Copyright 2012-2023 Aivo Pruekk
- * Licensed under MIT (https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE)
+ * Ilmcharts v1.2.3 (http://ilm.majasa.ee)
+ * Copyright 2012-2025 Aivo Pruekk
+ * Licensed under  ()
  */
 
 if (typeof jQuery === 'undefined') { throw new Error('Ilmcharts\'s JavaScript requires jQuery') }
@@ -127,57 +127,59 @@ var ilm = (function(my) {
             zoig: 'ilm.zoig.ee',
             arhiiv: 'ilm.majasa.ee',
             mnt: 'balticroads.net',
-            flydog: 'databuoys.sensornest.com'
+            flydog: 'databuoys.sensornest.com',
+            ttu: 'on-line.msi.ttu.ee',
         };
         this.fcplaces = {
-            tartu: { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: '2-588335', emlink: '793', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
-            aksi: { id: 'aksi', name: 'Äksi Saadjärv', wglink: '266923', yrlink: '2-592574', emlink: '9748', group: 'saadjarv', bind: 'arhiiv_saadjarv_saadjarve', location: [58.534918, 26.643429] },
-            uhmardu: { id: 'uhmardu', name: 'Uhmardu', yrlink: '2-793979', emlink: '8629', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
-            jogeva: { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: '2-591902', emlink: '2262', link: '', bind: 'mnt_jogeva', location: [58.764849, 26.404618] },
-            tamme: { id: 'tamme', name: 'Tamme Võrtsjärv', wglink: 192609, yrlink: '2-588397', emlink: '8094', group: 'vortsjarv-tamme', bind: 'arhiiv_vortsjarv_tamme', location: [58.271306, 26.134923] },
-            joesuu: { id: 'joesuu', name: 'Jõesuu Võrtsjärv', wglink: 692681, yrlink: '2-591907', emlink: '8864', group: 'vortsjarv-joesuu', bind: 'arhiiv_vortsjarv_joesuu', location: [58.386441, 26.131942] },
-            rapina: { id: 'rapina', name: 'Räpina Peipsi', wglink: 183648, yrlink: '2-587468', emlink: '7216', group: 'peipsi', bind: 'arhiiv_peipsi_rapina', location: [58.124988, 27.530086] },
-            nina: { id: 'nina', name: 'Nina Peipsi', wglink: 20401, yrlink: '2-589982', emlink: '5427', group: 'peipsi', bind: 'arhiiv_peipsi_nina', location: [58.598889, 27.209722] },
-            mustvee: { id: 'mustvee', name: 'Mustvee Peipsi', wglink: 104337, yrlink: '2-590067', emlink: '5097', group: 'peipsi', bind: 'emhi_mustvee', location: [58.847500, 26.951111] },
-            pirita: { id: 'pirita', name: 'Pirita Tallinn', wglink: 125320, yrlink: '2-10123592', emlink: '596', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
-            rohuneeme: { id: 'rohuneeme', name: 'Rohuneeme Viimsi', wglink: 70524, yrlink: '2-588984', emlink: '7039', group: 'meri', bind: 'emhi_rohuneeme', location: [59.551945, 24.794094] },
-            haapsalu: { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', wglink: 245713, yrlink: '2-794885', emlink: '183', group: 'meri', bind: 'emhi_haapsalu', location: [58.9578, 23.4901] },
-            parnu: { id: 'parnu', name: 'Pärnu', wglink: 92781, yrlink: '2-589580', emlink: '624', group: 'meri', bind: 'emhi_parnu', location: [58.365958, 24.526257] },
-            haademeeste: { id: 'haademeeste', name: 'Häädemeeste', wglink: 246420, yrlink: '2-592232', emlink: '1957', group: 'meri', bind: 'emhi_haademeeste', location: [58.071644, 24.478816] },
-            sorve: { id: 'sorve', name: 'Sõrve Saaremaa', wglink: 108163, yrlink: '2-794645', emlink: '7950', group: 'meri', bind: 'emhi_sorve', location: [57.909984, 22.055313] },
-            orjaku: { id: 'orjaku', name: 'Orjaku Hiiumaa', wglink: 92777, yrlink: '2-794840', emlink: '7950', group: 'meri', bind: 'emhi_orjaku', location: [58.76252573432038, 22.799324608581074] },
-            ristna: { id: 'ristna', name: 'Ristna Hiiumaa', wglink: 96592, yrlink: '2-589003', emlink: '2561', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
-            loksa: { id: 'loksa', name: 'Loksa', wglink: 108851, yrlink: '2-587445', emlink: '4471', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
-            dirhami: { id: 'dirhami', name: 'Dirhami', wglink: 261785, yrlink: '2-796115', emlink: '1505', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
-            paatsalu: { id: 'paatsalu', name: 'Paatsalu', wglink: 479054, yrlink: '2-589749', emlink: '5801', group: 'meri', bind: 'emhi_paatsalu', location: [58.508902, 23.663027] }
+            tartu: { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: '2-588335', emlink: '58.380052;26.722116', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
+            aksi: { id: 'aksi', name: 'Äksi Saadjärv', wglink: '266923', yrlink: '58.535,26.669', emlink: '58.529725;26.639348', group: 'saadjarv', bind: 'arhiiv_saadjarv_saadjarve', location: [58.534918, 26.643429] },
+            uhmardu: { id: 'uhmardu', name: 'Uhmardu', yrlink: '2-793979', emlink: '58.625507;26.767479', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
+            jogeva: { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: '2-591902', emlink: '58.746083;26.395523', link: '', bind: 'mnt_jogeva', location: [58.764849, 26.404618] },
+            tamme: { id: 'tamme', name: 'Tamme Võrtsjärv', wglink: 192609, yrlink: '2-587687', emlink: '58.224666;26.135578', group: 'vortsjarv-tamme', bind: 'arhiiv_vortsjarv_tamme', location: [58.271306, 26.134923] },
+            joesuu: { id: 'joesuu', name: 'Jõesuu Võrtsjärv', wglink: 692681, yrlink: '2-591907', emlink: '58.405000;26.076182', group: 'vortsjarv-joesuu', bind: 'arhiiv_vortsjarv_joesuu', location: [58.386441, 26.131942] },
+            rapina: { id: 'rapina', name: 'Räpina Peipsi', wglink: 183648, yrlink: '58.122,27.535', emlink: '58.235806;27.470503', group: 'peipsi', bind: 'arhiiv_peipsi_rapina', location: [58.124988, 27.530086] },
+            nina: { id: 'nina', name: 'Nina Peipsi', wglink: 20401, yrlink: '2-589982', emlink: '58.606881;27.203583', group: 'peipsi', bind: 'arhiiv_peipsi_nina', location: [58.598889, 27.209722] },
+            pirita: { id: 'pirita', name: 'Pirita Tallinn', wglink: 125320, yrlink: '2-798565', emlink: '59.465992;24.834083', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
+            rohuneeme: { id: 'rohuneeme', name: 'Rohuneeme Viimsi', wglink: 70524, yrlink: '2-588984', group: 'meri', bind: 'emhi_rohuneeme', location: [59.551945, 24.794094] },
+            haapsalu: { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', wglink: 245713, yrlink: '58.957,23.543', emlink: '183', group: 'meri', bind: 'emhi_haapsalu', location: [58.9578, 23.4901] },
+            rohukyla: { id: 'rohukyla', name: 'Rohuküla', wglink: 245713, yrlink: '58.911,23.420', emlink: '58.907889;23.428161', group: 'meri', bind: 'ttu_rohukyla', location: [58.9578, 23.4901] },
+            parnu: { id: 'parnu', name: 'Pärnu', wglink: 92781, yrlink: '58.350,24.545', emlink: '58.382515;24.510179', group: 'meri', bind: 'emhi_parnu', location: [58.365958, 24.526257] },
+            haademeeste: { id: 'haademeeste', name: 'Häädemeeste', wglink: 246420, yrlink: '2-592231', emlink: '58.079101;24.493466', group: 'meri', bind: 'emhi_haademeeste', location: [58.071644, 24.478816] },
+            sorve: { id: 'sorve', name: 'Sõrve Saaremaa', wglink: 108163, yrlink: '57.899,22.043', emlink: '57.918654;22.059625', group: 'meri', bind: 'emhi_sorve', location: [57.909984, 22.055313] },
+            saaretirp: { id: 'saaretirp', name: 'Sääretirp Hiiumaa', wglink: 1299399, yrlink: '58.764,22.790', emlink: '7950', group: 'meri', bind: 'ttu_saaretirp', location: [58.758522, 22.789624] },
+            ristna: { id: 'ristna', name: 'Ristna Hiiumaa', wglink: 96592, yrlink: '2-794818', emlink: '58.928326;22.069358', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
+            koipsi: { id: 'koipsi', name: 'Koipsi', wglink: 1299411, yrlink: '2-591227', emlink: '59.581387;25.722052', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
+            dirhami: { id: 'dirhami', name: 'Dirhami', wglink: 261785, yrlink: '2-796115', emlink: '59.208078;23.496537', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
+            paatsalu: { id: 'paatsalu', name: 'Paatsalu', wglink: 479054, yrlink: '2-589817', emlink: '58.529210;23.700999', group: 'meri', bind: 'ttu_paatsalu', location: [58.508902, 23.663027] }
         };
         this.curplaces = {
             arhiiv_saadjarv_saadjarve: { id: 'arhiiv_saadjarv_saadjarve', cid: '', name: 'Saadjärve Saadjärv', group: 'saadjarv', link: '', bind: 'aksi', location: [58.54048, 26.68177] },
-            //flydog_aksi: { id: 'flydog_aksi', name: 'Äksi Saadjärv', cid: '', group: 'saadjarv', link: '/saadjarve/', bind: 'aksi', location: [58.534918, 26.643429] },
-            emu: { id: 'emu', name: 'EMU Tartu', cid: '', group: 'tartu', link: '/weather', bind: 'tartu', location: [58.388575, 26.694013] },
+            // emu: { id: 'emu', name: 'EMU Tartu', cid: '', group: 'tartu', link: '/weather', bind: 'tartu', location: [58.388575, 26.694013] },
             ut_tartu: { id: 'ut_tartu', cid: '', name: 'UT Tartu', group: 'koht', link: '', bind: 'tartu', location: [58.365945, 26.690791] },
             arhiiv_vortsjarv_tamme: { id: 'arhiiv_vortsjarv_tamme', cid: '', name: 'Tamme Võrtsjärv', group: 'vortsjarv-tamme', link: '', bind: 'tamme', location: [58.271306, 26.134923] },
+            mnt_tamme: { id: 'mnt_tamme', cid: '', name: 'Tamme(V-Rakke) MNT', group: 'vortsjarv', link: '', bind: 'tamme', location: [58.331664, 26.187807] },
             arhiiv_vortsjarv_joesuu: { id: 'arhiiv_vortsjarv_joesuu', cid: '', name: 'Jõesuu Võrtsjärv', group: 'vortsjarv-joesuu', link: '', bind: 'joesuu', location: [58.386441, 26.131942] },
             arhiiv_peipsi_nina: { id: 'arhiiv_peipsi_nina', cid: '', name: 'Nina Peipsi', group: 'peipsi-nina', link: '', bind: 'nina', location: [58.598889, 27.209722] },
             arhiiv_peipsi_rapina: { id: 'arhiiv_peipsi_rapina', cid: '', name: 'Räpina Peipsi', group: 'peipsi-rapina', link: '', bind: 'rapina', location: [58.124988, 27.530086] },
-            /*mnt_tartu:{id:'mnt_tartu',cid:',name:'Tartu MNT',group:'jarv',link:'',bind:'',location:[58.380756, 26.723452]},*/
-            mnt_tamme: { id: 'mnt_tamme', cid: '', name: 'V-Rakke MNT', group: 'vortsjarv', link: '', bind: 'tamme', location: [58.331664, 26.187807] },
             mnt_rapina: { id: 'mnt_rapina', cid: '', name: 'Räpina MNT', group: 'peipsi', link: '', bind: 'rapina', location: [57.957275, 27.626020] },
-            mnt_uhmardu: { id: 'mnt_uhmardu', cid: '', name: 'Uhmardu MNT', group: 'koht', link: '', bind: 'uhmardu', location: [58.640605, 26.791860] },
-            mnt_jogeva: { id: 'mnt_jogeva', cid: '', name: 'Jõgeva MNT', group: 'koht', link: '', bind: 'jogeva', location: [58.764849, 26.404618] },
-            emhi_mustvee: { id: 'emhi_mustvee', cid: 'mustvee', name: 'Mustvee EMHI', group: 'peipsi', link: '', bind: 'mustvee', location: [58.847650, 26.951025] },
+            emhi_haademeeste: { id: 'emhi_haademeeste', cid: 'haademeeste', name: 'Häädemeeste EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haademeeste', location: [58.071644, 24.478816] },
+            // arhiiv_parnu_aloha: { id: 'arhiiv_parnu_aloha', cid: '', name: 'Pärnu Aloha', group: 'meri', link: '', bind: 'parnu', location: [58.371146, 24.508807] },
+            emhi_parnu: { id: 'emhi_parnu', cid: 'parnu', name: 'Pärnu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'parnu', location: [58.365958, 24.526257] },
+            ttu_parnu: { id: 'ttu_parnu', cid: 'parnu', name: 'Pärnu TTU', group: 'meri', link: '', bind: 'parnu', location: [58.365958, 24.526257] },
+            emhi_paatsalu: { id: 'emhi_paatsalu', cid: 'virtsu', name: 'Virtsu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'paatsalu', location: [58.508902, 23.663027] },
+            // ttu_paatsalu: { id: 'ttu_paatsalu', cid: 'virtsu', name: 'Virtsu TTU', group: 'meri', link: '', bind: 'paatsalu', location: [58.508902, 23.663027] },
+            emhi_sorve: { id: 'emhi_sorve', cid: 'montu', name: 'Sõrve EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'sorve', location: [57.909984, 22.055313] },
+            emhi_saaretirp: { id: 'emhi_saaretirp', cid: 'heltermaa', name: 'Heltermaa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'saaretirp', location: [58.866845079804946, 23.04607326381741] },
+            ttu_saaretirp: { id: 'ttu_saaretirp', cid: 'heltermaa', name: 'Heltermaa TTU', group: 'meri', link: '', bind: 'saaretirp', location: [58.866845079804946, 23.04607326381741] },
+            emhi_ristna: { id: 'emhi_ristna', cid: 'ristna-2', name: 'Ristna EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'ristna', location: [58.927304, 22.041023] },
+            ttu_rohukyla: { id: 'ttu_rohukyla', cid: 'rohukyla', name: 'Rohuküla TTU', group: 'meri', link: '', bind: 'rohukyla', location: [58.9578, 23.4901] },
+            emhi_dirhami: { id: 'emhi_dirhami', cid: 'dirhami', name: 'Dirhami EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'dirhami', location: [59.2133, 23.5031] },
             emhi_pirita: { id: 'emhi_pirita', cid: 'pirita', name: 'Pirita EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'pirita', location: [59.471562, 24.825608] },
             emhi_rohuneeme: { id: 'emhi_rohuneeme', cid: 'rohuneeme', name: 'Rohuneeme EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'rohuneeme', location: [59.551945, 24.794094] },
+            emhi_loksa: { id: 'emhi_loksa', cid: 'loksa', name: 'Loksa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'koipsi', location: [59.5872, 25.6943] },
             emhi_haapsalu: { id: 'emhi_haapsalu', previd: 'emhi_topu', cid: 'haapsalu-sadam', name: 'Haapsalu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haapsalu', location: [58.9578, 23.4901] },
-            arhiiv_parnu_aloha: { id: 'arhiiv_parnu_aloha', cid: '', name: 'Pärnu Aloha', group: 'meri', link: '', bind: 'parnu', location: [58.371146, 24.508807] },
-            emhi_parnu: { id: 'emhi_parnu', cid: 'parnu', name: 'Pärnu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'parnu', location: [58.365958, 24.526257] },
-            emhi_haademeeste: { id: 'emhi_haademeeste', cid: 'haademeeste', name: 'Häädemeeste EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haademeeste', location: [58.071644, 24.478816] },
-            emhi_orjaku: { id: 'emhi_orjaku', cid: 'heltermaa', name: 'Heltermaa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'orjaku', location: [58.866845079804946, 23.04607326381741] },
-            emhi_sorve: { id: 'emhi_sorve', cid: 'montu', name: 'Sõrve EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'sorve', location: [57.909984, 22.055313] },
-            emhi_ristna: { id: 'emhi_ristna', cid: 'ristna-2', name: 'Ristna EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'ristna', location: [58.927304, 22.041023] },
-            emhi_loksa: { id: 'emhi_loksa', cid: 'loksa', name: 'Loksa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'loksa', location: [59.5872, 25.6943] },
-            emhi_dirhami: { id: 'emhi_dirhami', cid: 'dirhami', name: 'Dirhami EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'dirhami', location: [59.2133, 23.5031] },
-            emhi_paatsalu: { id: 'emhi_paatsalu', cid: 'virtsu', name: 'Virtsu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'paatsalu', location: [58.508902, 23.663027] }
+            mnt_jogeva: { id: 'mnt_jogeva', cid: '', name: 'Jõgeva MNT', group: 'koht', link: '', bind: 'jogeva', location: [58.764849, 26.404618] },
+            mnt_uhmardu: { id: 'mnt_uhmardu', cid: '', name: 'Uhmardu MNT', group: 'koht', link: '', bind: 'uhmardu', location: [58.640605, 26.791860] },
         };
         this.addDst = this.isDst();
         this.lastdate = this.getTime(); //-(4*24*3600);
@@ -448,7 +450,7 @@ var ilm = (function(my) {
             gmp.prototype.draw = function() {
                 var divPosition = this.getProjection().fromLatLngToDivPixel(this.position);
 
-                // Hide the popup when it is far out of view.
+                // d-none the popup when it is far out of view.
                 var display =
                     Math.abs(divPosition.x) < 4000 && Math.abs(divPosition.y) < 4000 ?
                         'block' :
@@ -604,12 +606,12 @@ var ilm = (function(my) {
                     n = this.curplaces[gridorder[i]];
                     if (n) {
                         html += '<tr id="' + co + n.id + '" name="' + n.id + '" class="data-menu-row" style="background-color:white">';
-                        html += '<td class="sortable-is-active hide">-</td><td colspan="8">' + n.name + '</td>';
+                        html += '<td class="sortable-is-active d-none">-</td><td colspan="8">' + n.name + '</td>';
                         html += '</tr>';
                     }
                 }
                 html += '</tbody>';
-                el.innerHTML = '<div>&nbsp;</div>' + _.template(self.dataTableTemplate)({ classes: 'table sortable-table', thead: self.gridHeadTemplate, tbody: html });
+                el.innerHTML = '<div>&nbsp;</div>' + _.template(self.dataTableTemplate)({ classes: 'table sortable-table table-sm', thead: self.gridHeadTemplate, tbody: html });
                 self.ready(doc, function() {
                     clearInterval(self.gridintval);
                     self.fillGridLast(self);
@@ -623,11 +625,11 @@ var ilm = (function(my) {
                         if ($(this).hasClass('change')) {
                             $(this).removeClass('change');
                             self.makeSortable('.sortable-table tbody');
-                            $('.sortable-is-active').each(function(i, a) { $(a).removeClass('hide'); });
+                            $('.sortable-is-active').each(function(i, a) { $(a).removeClass('d-none'); });
                         } else {
                             $(this).addClass('change');
                             self.makeUnSortable('.sortable-table tbody');
-                            $('.sortable-is-active').each(function(i, a) { $(a).addClass('hide'); });
+                            $('.sortable-is-active').each(function(i, a) { $(a).addClass('d-none'); });
                         }
                     });
                 });
@@ -644,22 +646,22 @@ var ilm = (function(my) {
                     var u = 0,
                         xlarge = (self.getWidth() >= 1400) ? true : false,
                         s = '';
-                    s += '<div class="chartbox" style="width:100%;height:100%;">';
-                    s += '<div class="chart-control-box" style="width:100%;position:relative;font-size:80%;">&nbsp;';
+                    s += '<div class="chartbox row">';
+                    s += '<div class="chart-control-box col-12">&nbsp;';
                     if (self.samplemode !== 'table' && self.viewmode === 'cur') {
-                        s += '<div id="graph-timeframe-control" style="position:absolute;z-index:10000;top:-7px;left:8px;">';
-                        //s += '<span class="fchead label label-default"> '+n.name+' </span>';
-                        s += '&nbsp;<span class="hist-length label label-default" name="4"> 4h </span>&nbsp;<span class="hist-length label label-default" name="6"> 6h </span>&nbsp;<span class="hist-length label label-default" name="12"> 12h </span>&nbsp;<span class="hist-length label label-default" name="24"> 24h </span>&nbsp;<span class="hist-length label label-default" name="48"> 2p </span>&nbsp;<span class="hist-length label label-default" name="72"> 3p </span>';
+                        s += '<div id="graph-timeframe-control" style="position:absolute;z-index:1000;top:-7px;left:8px;">';
+                        //s += '<span class="fchead badge bg-primary"> '+n.name+' </span>';
+                        s += '&nbsp;<span class="hist-length badge bg-primary" name="4"> 4h </span>&nbsp;<span class="hist-length badge bg-primary" name="6"> 6h </span>&nbsp;<span class="hist-length badge bg-primary" name="12"> 12h </span>&nbsp;<span class="hist-length badge bg-primary" name="24"> 24h </span>&nbsp;<span class="hist-length badge bg-primary" name="48"> 2p </span>&nbsp;<span class="hist-length badge bg-primary" name="72"> 3p </span>';
                         s += '</div>';
                     }
-                    s += '<div style="position:absolute;z-index:10000;left:5px;top:5px;">';
-                    s += '<span class="title-chart"></span>&nbsp;<span class="change-chart label label-default" name="cur">Ajalugu</span>&nbsp;<span class="change-chart label label-default" name="est">Prognoos</span>';
+                    s += '<div style="position:absolute;z-index:1000;left:10px;top:5px;">';
+                    s += '<span class="title-chart"></span>&nbsp;<span class="change-chart badge bg-primary" name="cur">Ajalugu</span>&nbsp;<span class="change-chart badge bg-primary" name="est">Prognoos</span>';
                     s += '</div>';
-                    s += '<div style="position:absolute;z-index:10000;right:35px;top:5px;">';
-                    //s += (self.samplemode !== 'table') ? '<span class="fchead label label-default"> '+my.fcplaces[n.bind].name+' </span>&nbsp;' : '';
-                    s += (self.samplemode === 'table') ? ('<span class="night-chart label label-default" name="' + (self.fcshownight ? 'fcsnf' : 'fcsnt') + '"> ' + (self.fcshownight ? '-' : '+') + 'Ööd</span>&nbsp;') : '&nbsp;';
-                    s += '<span class="sample-chart label label-default" name="' + (self.samplemode === 'table' ? 'graph' : 'table') + '">Näita ' + (self.samplemode === 'table' ? 'Graafikut' : 'Tabelit') + '</span>&nbsp;';
-                    s += (self.viewmode !== 'cur' || xlarge) ? ('<span class="long-chart label label-default" name="' + (self.sampletype === 'long' ? 'detail' : 'long') + '">Näita ' + (self.sampletype === 'long' ? 'Detailset' : 'Pikaajalist') + '</span>&nbsp;') : '&nbsp;';
+                    s += '<div style="position:absolute;z-index:1000;right:0px;top:5px;">';
+                    //s += (self.samplemode !== 'table') ? '<span class="fchead badge bg-primary"> '+my.fcplaces[n.bind].name+' </span>&nbsp;' : '';
+                    s += (self.samplemode === 'table') ? ('<span class="night-chart badge bg-primary" name="' + (self.fcshownight ? 'fcsnf' : 'fcsnt') + '"> ' + (self.fcshownight ? '-' : '+') + 'Ööd</span>&nbsp;') : '&nbsp;';
+                    s += '<span class="sample-chart badge bg-primary" name="' + (self.samplemode === 'table' ? 'graph' : 'table') + '">Näita ' + (self.samplemode === 'table' ? 'Graafikut' : 'Tabelit') + '</span>&nbsp;';
+                    s += (self.viewmode !== 'cur' || xlarge) ? ('<span class="long-chart badge bg-primary" name="' + (self.sampletype === 'long' ? 'detail' : 'long') + '">Näita ' + (self.sampletype === 'long' ? 'Detailset' : 'Pikaajalist') + '</span>&nbsp;') : '&nbsp;';
                     s += '</div>';
                     s += '</div>';
                     el.html(s);
@@ -671,11 +673,11 @@ var ilm = (function(my) {
                         else self.timeframe = 24 * 3600 * 1000;
                     }
                     s = '<div class="float two-lg"><div class="meta"></div><div class="fckhead fcright">';
-                    if (self.samplemode !== 'table') s += '<span class="label label-info"> '+n.name+'</span>';
+                    if (self.samplemode !== 'table') s += '<span class="badge bg-info"> '+n.name+'</span>';
                     s += '</div></div>';
                     if (xlarge) {
                         s += '<div class="float two-lg"><div class="meta"></div><div class="fckhead fcleft">';
-                        if (self.samplemode !== 'table') s += '<span class="label label-info"> '+my.fcplaces[n.bind].name+'</span>';
+                        if (self.samplemode !== 'table') s += '<span class="badge bg-info"> '+my.fcplaces[n.bind].name+'</span>';
                         s += '</div></div>';
                     }
                     u = $(el).find('.chartbox');
@@ -785,14 +787,66 @@ var ilm = (function(my) {
             return false;
         },
         dataTableTemplate: '<table class="<%=classes%>" style="background-color:white;font-size:80%"><%=thead%><%=tbody%></table>',
-        fcHeadTemplate: '<thead><%=inforows%><tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Sademed</th><th class="hide-edge-xs">Rõhk</th></tr></thead>',
-        fcRowTemplate: '<tr class="<%=night?"night":""%><%=night&&hide?" hide":""%>"><td><span class="day"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><span class="arrow <%=dn%>"></span><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="hide-edge-xs"><%=press?press:""%></td></tr>',
-        histHeadTemplate: '<thead><%=inforows%><tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Vesi</th><th class="hide-lg">Veetemp</th><th class="hide-edge-xs">Sademed</th></tr></thead>',
-        histRowTemplate: '<tr class="item <%=night?"night":""%>" id="<%=d.time%>"><td><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class="hide-edge"><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td><td><span class="grid-cell-title">Tuul:&nbsp;</span><span class="grid-em"><span class="avg_ws" style="color:<%=wscolor%>"><%=d.avg_ws%></span>/<span class="max_ws" style="color:<%=wgcolor%>"><%=d.max_ws%></span></span></td><td class="avg_wd" title="<%=dn%>"><span class="grid-cell-title">Suund:&nbsp;</span><span class="arrow <%=dn%>"></span><span class="grid-em"><%=d.avg_wd%></span></td><td class="avg_temp"><span class="grid-cell-title">Temp:&nbsp;</span><span class="grid-em"><%=d.avg_temp%></span></td><td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td><td class="avg_wtemp hide-lg"><span class="grid-cell-title">Veetemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td><td class="hide-edge-xs avg_rain"><span class="grid-cell-title">Sademed:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td></tr>',
-        gridHeadTemplate: '<thead><tr style="background-color:white"><th><span class="data-menu-order change label label-default" style="position:absolute;display:inline-block;background-color:white;border-radius:5px;color:black">+</span></th><th class="sortable-is-active hide"></th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Vesi</th><th class="hide-lg">Veetemp</th><th class="hide-edge">Sademed</th><th class="hide-edge-xs">Aeg</th></tr></thead>',
-        gridRowTemplate: '<td class="sortable-is-active hide">-</td><td><span class="grid-em"><%=first%><span class="hide-edge-xs">&nbsp;<%=last%></span></span></td><td><span class="grid-cell-title">Tuul:&nbsp;</span><span class="trend"><%=d.trend=="u"?"&uarr;":d.trend=="d"?"&darr;":"&nbsp;"%>&nbsp;</span><span class="grid-em" style="color:<%=wscolor%>"><span class="avg_ws"><%=d.avg_ws%></span>/<span class="max_ws" style="color:<%=wgcolor%>"><%=d.max_ws%></span></span></td><td class="avg_wd" title="<%=dn%>"><span class="grid-cell-title">Suund:&nbsp;</span><span class="arrow <%=dn%>"></span><span class="grid-em"><%=d.avg_wd%></span></td><td class="avg_temp"><span class="grid-cell-title">Temp:&nbsp;</span><span class="grid-em"><%=d.avg_temp%></span></td><td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td><td class="avg_wtemp hide-lg"><span class="grid-cell-title">Veetemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td><td class="avg_rain hide-edge"><span class="grid-cell-title">Sademed:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td><td class="time hide-edge-xs"><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class="hide-edge hide-edge-lg"><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td>',
-        chartContainerTemplate: '<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="curplace" class="btn btn-default btn-xs navbar-btn">Andmed <b><%=title%></b></a><a id="curtime" class="btn btn-default btn-xs navbar-btn"><%=date%></a><a id="cursel" style="" data-toggle="dropdown" class="btn btn-default btn-xs navbar-btn dropdown-toggle"><span class="caret"></span></a><ul id="curmenu" role="menu" class="curmenu dropdown-menu"><li><a href="#" name="arhiiv_saadjarv_saadjarve" class="curplace-select active">Saadjärve Saadjärv</a></li><!--li><a href="#" name="flydog_aksi" class="curplace-select active">Saadjärv Äksi</a></li--><li><a href="#" name="emu" class="curplace-select active">Tartu EMU</a></li><li><a href="#" name="ut_tartu" class="curplace-select">Tartu UT</a></li><li><a href="#" name="arhiiv_vortsjarv_joesuu" class="curplace-select">Võrtsjärv Jõesuu</a></li><li><a href="#" name="arhiiv_vortsjarv_tamme" class="curplace-select">Võrtsjärv Tamme</a></li><li><a href="#" name="mnt_tamme" class="curplace-select">V-Rakke MNT</a></li><li><a href="#" name="mnt_rapina" class="curplace-select">Räpina MNT</a></li><li><a href="#" name="mnt_uhmardu" class="curplace-select">Uhmardu MNT</a></li><li><a href="#" name="mnt_jogeva" class="curplace-select">Jõgeva MNT</a></li><li><a href="#" name="emhi_mustvee" class="curplace-select">Mustvee EMHI</a></li><li><a href="#" name="emhi_pirita" class="curplace-select">Pirita EMHI</a></li><li><a href="#" name="emhi_rohuneeme" class="curplace-select">Püünsi EMHI</a></li><li><a href="#" name="emhi_haapsalu" class="curplace-select">Haapsalu EMHI</a></li><li><a href="#" name="emhi_parnu" class="curplace-select">Pärnu EMHI</a></li><li><a href="#" name="emhi_haademeeste" class="curplace-select">Häädemeeste EMHI</a></li><li><a href="#" name="emhi_sorve" class="curplace-select">Sõrve EMHI</a></li><li><a href="#" name="emhi_ristna" class="curplace-select">Ristna EMHI</a></li><li><a href="#" name="emhi_heltermaa" class="curplace-select">Heltermaa EMHI</a></li></ul></div><input id="datepicker" type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0" class="hasDatepicker"><div class="meta"><div id="curmeta" class="ilm-meta"></div></div></div>',
-        chart2Container: '<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="fctitle" class="btn btn-default btn-xs navbar-btn"><%=title%></a><a id="fcsel" data-toggle="dropdown" class="btn btn-default btn-xs navbar-btn dropdown-toggle"><%=date%><span class="caret"></span></a><ul id="fcmenu" role="menu" class="fcmenu dropdown-menu"></ul></div><div class="meta"><div id="yrmeta" class="ilm-meta"><a href="http://www.yr.no/place/Estonia/Tartumaa/Äksi/hour_by_hour.html" onclick="window.open(this.href);return false;">Yr.no</a> andmed viimati uuendatud: 26.07.2017 22:32, Järgmine uuendus: 27.07.2017 11:00</div><div id="wgmeta" class="ilm-meta"><a href="http://www.windguru.cz/ee/?go=1&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: 27.07.2017 01:24, Järgmine uuendus: 27.07.2017 01:24</div></div></div>',
+        fcHeadTemplate: '<thead><%=inforows%><tr><th scope="col">Aeg</th><th scope="col">Tuul</th><th scope="col">Suund</th><th scope="col">Temp</th><th scope="col">Sadu</th><th scope="col" class="d-xs-none">Rõhk</th></tr></thead>',
+        fcRowTemplate: `<tr class="<%=night?"night":""%><%=night&&hide?" hide":""%>">
+        <td><span class="day"><%=day%>&nbsp;</span><%=time%></td>
+        <td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td>
+        <td><span class="arrow <%=dn%>"></span><%=wd?wd:""%></td>
+        <td><%=temp?temp:""%></td>
+        <td><%=rain?rain:""%></td>
+        <td class="d-xs-none"><%=press?press:""%></td></tr>`,
+        histHeadTemplate: '<thead><%=inforows%><tr><th scope="col">Aeg</th><th scope="col">Tuul</th><th scope="col">Suund</th><th scope="col">Temp</th><th scope="col">Vesi</th><th scope="col">Vtemp</th><th scope="col" class="">Sadu</th></tr></thead>',
+        histRowTemplate:`<tr class="item <%=night?"night":""%>" id="<%=d.time%>"><td><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class=""><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td>
+        <td><span class="grid-cell-title">Tuul:&nbsp;</span><span class="grid-em"><span class="avg_ws" style="color:<%=wscolor%>"><%=d.avg_ws%></span>/<span class="max_ws" style="color:<%=wgcolor%>"><%=d.max_ws%></span></span></td>
+        <td class="avg_wd" title="<%=dn%>"><span class="grid-cell-title">Suund:&nbsp;</span><span class="arrow <%=dn%>"></span><span class="grid-em"><%=d.avg_wd%></span></td>
+        <td class="avg_temp"><span class="grid-cell-title">Temp:&nbsp;</span><span class="grid-em"><%=d.avg_temp%></span></td>
+        <td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td>
+        <td class="avg_wtemp d-none d-lg-table-cell"><span class="grid-cell-title">Vtemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td>
+        <td class="avg_rain d-none d-lg-table-cell"><span class="grid-cell-title">Sadu:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td></tr>`,
+        gridHeadTemplate: `<thead><tr style="background-color:white">
+        <th><span class="data-menu-order change btn btn-sm btn-primary" style="position:absolute;display:table-cell;background-color:white;border-radius:5px;color:black;top:1.5rem">+</span></th>
+        <th class="sortable-is-active d-none"></th>
+        <th scope="col">Tuul</th>
+        <th scope="col">Suund</th>
+        <th scope="col">Temp</th>
+        <th scope="col">Vesi</th>
+        <th scope="col" class="d-none d-lg-table-cell">Vtemp</th>
+        <th scope="col" class="d-none d-lg-table-cell">Sadu</th>
+        <th scope="col">Aeg</th></tr></thead>`,
+        gridRowTemplate: `<td class="sortable-is-active d-none">-</td>
+        <td><span class="grid-em"><%=first%><span class="d-xs-none">&nbsp;<%=last%></span></span></td>
+        <td><span class="grid-cell-title">Tuul:&nbsp;</span><span class="trend"><%=d.trend=="u"?"&uarr;":d.trend=="d"?"&darr;":"&nbsp;"%>&nbsp;</span><span class="grid-em" style="color:<%=wscolor%>"><span class="avg_ws"><%=d.avg_ws%></span>/<span class="max_ws" style="color:<%=wgcolor%>"><%=d.max_ws%></span></span></td>
+        <td class="avg_wd" title="<%=dn%>"><span class="grid-cell-title">Suund:&nbsp;</span><span class="arrow <%=dn%>"></span><span class="grid-em"><%=d.avg_wd%></span></td>
+        <td class="avg_temp"><span class="grid-cell-title">Temp:&nbsp;</span><span class="grid-em"><%=d.avg_temp%></span></td>
+        <td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td>
+        <td class="avg_wtemp d-none d-lg-table-cell"><span class="grid-cell-title">Vtemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td>
+        <td class="avg_rain hide-edge"><span class="grid-cell-title">Sademed:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td>
+        <td class="time hide-edge-xs"><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class="hide-edge hide-edge-lg"><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td>`,
+        chartContainerTemplate: `<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="curplace" class="btn btn-secondary btn-xs navbar-btn">Andmed <b><%=title%></b></a><a id="curtime" class="btn btn-secondary btn-xs navbar-btn"><%=date%></a><a id="cursel" style="" data-toggle="dropdown" class="btn btn-secondary btn-xs navbar-btn dropdown-toggle"><span class="caret"></span></a><ul id="curmenu" role="menu" class="curmenu dropdown-menu">
+        <li><a href="#" name="arhiiv_saadjarv_saadjarve" class="curplace-select active">Saadjärve Saadjärv</a></li>
+        <!--li><a href="#" name="flydog_aksi" class="curplace-select active">Saadjärv Äksi</a></li-->
+        <li><a href="#" name="emu" class="curplace-select active">Tartu EMU</a></li>
+        <li><a href="#" name="ut_tartu" class="curplace-select">Tartu UT</a></li>
+        <li><a href="#" name="arhiiv_vortsjarv_joesuu" class="curplace-select">Võrtsjärv Jõesuu</a></li>
+        <li><a href="#" name="arhiiv_vortsjarv_tamme" class="curplace-select">Võrtsjärv Tamme</a></li>
+        <li><a href="#" name="mnt_tamme" class="curplace-select">V-Rakke MNT</a></li>
+        <li><a href="#" name="arhiiv_peipsi_rapina" class="curplace-select">Peipsi Räpina</a></li>
+        <li><a href="#" name="mnt_rapina" class="curplace-select">Räpina MNT</a></li>
+        <li><a href="#" name="mnt_uhmardu" class="curplace-select">Uhmardu MNT</a></li>
+        <li><a href="#" name="mnt_jogeva" class="curplace-select">Jõgeva MNT</a></li>
+        <li><a href="#" name="emhi_pirita" class="curplace-select">Pirita EMHI</a></li>
+        <li><a href="#" name="emhi_rohuneeme" class="curplace-select">Püünsi EMHI</a></li>
+        <li><a href="#" name="emhi_haapsalu" class="curplace-select">Haapsalu EMHI</a></li>
+        <li><a href="#" name="emhi_parnu" class="curplace-select">Pärnu EMHI</a></li>
+        <li><a href="#" name="ttu_parnu" class="curplace-select">Pärnu TTU</a></li>
+        <li><a href="#" name="emhi_haademeeste" class="curplace-select">Häädemeeste EMHI</a></li>
+        <li><a href="#" name="emhi_sorve" class="curplace-select">Sõrve EMHI</a></li>
+        <li><a href="#" name="emhi_ristna" class="curplace-select">Ristna EMHI</a></li>
+        <li><a href="#" name="emhi_heltermaa" class="curplace-select">Heltermaa EMHI</a></li>
+        <li><a href="#" name="ttu_heltermaa" class="curplace-select">Heltermaa TTU</a></li>
+        </ul></div>
+        <input id="datepicker" type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0" class="hasDatepicker"><div class="meta"><div id="curmeta" class="ilm-meta"></div></div></div>`,
+        chart2Container: '<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="fctitle" class="btn btn-secondary btn-xs navbar-btn"><%=title%></a><a id="fcsel" data-toggle="dropdown" class="btn btn-secondary btn-xs navbar-btn dropdown-toggle"><%=date%><span class="caret"></span></a><ul id="fcmenu" role="menu" class="fcmenu dropdown-menu"></ul></div><div class="meta"><div id="yrmeta" class="ilm-meta"><a href="http://www.yr.no/place/Estonia/Tartumaa/Äksi/hour_by_hour.html" onclick="window.open(this.href);return false;">Yr.no</a> andmed viimati uuendatud: 26.07.2017 22:32, Järgmine uuendus: 27.07.2017 11:00</div><div id="wgmeta" class="ilm-meta"><a href="http://www.windguru.cz/ee/?go=1&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: 27.07.2017 01:24, Järgmine uuendus: 27.07.2017 01:24</div></div></div>',
         gridintval: 0,
         getDayLetter: function(date) {
             var day = new Date(date).getDay();
@@ -843,6 +897,7 @@ var ilm = (function(my) {
                                 if (obj) {
                                     var deferred = false,
                                         time = self.getTimeStr(obj.time).split(/\s/),
+                                        yr = time[0].split(/\./)[2],
                                         idx = n.name.lastIndexOf(' '),
                                         first = n.name.substring(0, idx + 1),
                                         last = n.name.substring(idx + 1, n.name.length);
@@ -855,9 +910,9 @@ var ilm = (function(my) {
                                         d: obj,
                                         first: first,
                                         last: last,
-                                        day: self.getDayLetter(obj.time),
+                                        day: (!deferred) ? self.getDayLetter(obj.time) : '',
                                         date: time[0],
-                                        time: time[1],
+                                        time: (deferred && yr) ? '' : time[1],
                                         dn: self.dirs(obj.avg_wd),
                                         wscolor: wsbf.label.style.color || 'gray',
                                         wgcolor: wgbf.label.style.color || 'gray',
@@ -1171,7 +1226,7 @@ var ilm = (function(my) {
             if (/emu/.test(place)) {
                 return 'emu_data/' + self.setTxtFileName(d);
             } else {
-                return place.replace(/^(ut|zoig|emhi|mnt|arhiiv|flydog|)_(.*)$/, function(match, dir, name) {
+                return place.replace(/^(ut|ttu|zoig|emhi|mnt|arhiiv|flydog|)_(.*)$/, function(match, dir, name) {
                     return dir + (dir === 'arhiiv' ? '' : '_data') + '/' + name + '/' + self.setTxtFileName(d);
                 });
             }
@@ -1384,12 +1439,14 @@ var ilm = (function(my) {
         },
         getTimeStr: function(d, f, g) {
             d = d ? new Date(d) : this.getTime();
-            var month = d.getMonth();
+            var month = d.getMonth(), ret = '';
             if (!(/\d/).test(month)) return ret;
-            var ret = '',
-                dsep = '.' + (month < 9 ? '0' : '') + (month + 1) + '.';
-            if (f) { dsep = '. ' + my.months[month].toLowerCase() + ' '; }
-            ret = (d.getDate() < 9 ? '0' : '') + d.getDate() + dsep + d.getFullYear();
+            var dsep = '.' + (month < 9 ? '0' : '') + (month + 1);
+            if (f) { dsep = '. ' + my.months[month].toLowerCase(); }
+            ret = (d.getDate() < 9 ? '0' : '') + d.getDate() + dsep; // + d.getFullYear();
+            if (this.getTime().getFullYear() !== d.getFullYear()) {
+                ret += ((f) ? ' ' : '.') + d.getFullYear();   
+            }
             if (!g) ret += ' ' + (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
             return ret;
         },
@@ -1408,7 +1465,7 @@ var ilm = (function(my) {
                 z = '';
             if (my.state.attr) {
                 z = my.getFrame();
-                html += '<form class="setting-form" style="width:320px;"><div><label for="timeframe">Ajaraam</label> <select class="form-control input-sm" onchange="ilm.setFrame(this.options[this.selectedIndex].value);ilm.reload();return true;" id="timeframe" name="timeframe">' +
+                html += '<form class="setting-form px-4 py-3"><div><label for="timeframe">Ajaraam</label> <select class="form-control input-sm" onchange="ilm.setFrame(this.options[this.selectedIndex].value);ilm.reload();return true;" id="timeframe" name="timeframe">' +
                     '<option value="12h"' + (z === '12h' ? ' selected' : '') + '>12 tundi</option><option value="1d"' + (z === '1d' ? ' selected' : '') + '>1 päev</option><option value="2d"' + (z === '2d' ? ' selected' : '') + '>2 päeva</option><option value="3d"' + (z === '3d' ? ' selected' : '') + '>3 päeva</option>' +
                     '</select></div>';
                 html += '<div><label for="history">Andmed</label> <select class="form-control input-sm" onchange="ilm.setCurPlace(this.options[this.selectedIndex].value);ilm.settingTemplate(\'#ilm-seaded-dropdown\');return false;" id="history-sel" name="history-sel">';
@@ -1627,6 +1684,21 @@ temp 5 <td class="number">9,8</td>
                     if (c[5] !== null) r.avg_temp = my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5]);
                     r.avg_wtemp = my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4]);
                     r.avg_wl = my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2]);
+                } else if (/ttu/.test(place)) {
+                    c[5] = (c[5] === null || c[5] === undefined || c[5] < -49) ? null : c[5];
+                    c[6] = (c[6] && (c[6] < 0 || c[6] > 49)) ? null : c[6];
+                    if (e) e[6] = (e[6] && (e[6] < 0 || e[6] > 49)) ? null : e[6];
+                    c[7] = (c[7] && (c[7] < 0 || c[7] > 49)) ? null : c[7];
+                    if (e) e[7] = (e[7] && (e[7] < 0 || e[7] > 49)) ? null : e[7];
+                    r.avg_ws = my.ntof2p((e) ? my.getavg([c[6], e[6]]) : c[6]);
+                    r.max_ws = my.ntof2p((e) ? my.getmax([c[7], e[7]]) : c[7]);
+                    r.avg_wd = my.ntof2p((e) ? my.wdavg([c[8], e[8]]) : c[8]);
+                    if (c[5] !== null) r.avg_temp = my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5]);
+                    r.avg_wtemp = my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4]);
+                    r.avg_wl = my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2]);
+                    if (c[9] !== '') r.avg_humid = my.ntof2p((e) ? my.getavg([c[9], e[9]]) : c[9]);
+                    if (c[10] !== '') r.avg_press = my.ntof2p((e) ? my.getavg([c[10], e[10]]) : c[10]);
+                    if (c[11] !== '') r.avg_rain = my.ntof2p((e) ? my.getavg([c[11], e[11]]) : c[11]);
                 } else if (/mnt/.test(place)) {
                     c[2] = (c[2] === null || c[2] === undefined || c[2] < -49) ? null : c[2];
                     c[8] = (c[8] && (c[8] < 0 || c[8] > 49)) ? null : c[8];
@@ -2406,7 +2478,7 @@ window.$(function() {
             $html.html(rev);
             d = new Date(my.lastdate);
             var where = $('#'+my.chartorder[0]+'1');
-            where.html(_.template(self.dataTableTemplate)({classes:'table',thead:_.template(self.histHeadTemplate)({inforows:hlinks}),tbody:$html.html()}));
+            where.html(_.template(self.dataTableTemplate)({classes:'table table-sm',thead:_.template(self.histHeadTemplate)({inforows:hlinks}),tbody:$html.html()}));
             where.css('height','100%');
             var where2 = where.find('.table')[0];
             $('#'+my.chartorder[1]+'1').hide();
@@ -2597,13 +2669,13 @@ window.$(function() {
                     if(b===self.timeframe) return false;
                     my.setFrame(c+'h');
                 });
-                var islabel = d.hasClass('label');
+                var islabel = d.hasClass('btn');
                 if(islabel) {
-                    d.removeClass('label-primary');
+                    d.removeClass('btn-light');
                 }
                 if(b===my.timeframe) {
                     if(islabel) {
-                        d.addClass('label-primary');
+                        d.addClass('btn-primary');
                     }
                     d.css('font-weight','600');
                 }
@@ -2613,18 +2685,19 @@ window.$(function() {
             });
     	},
     	histlink: function(fc,last,next) {
-    		var cid= my.curplaces[fc],link=cid.link,fcid=cid.cid;
+    		var cid=my.curplaces[fc],link=cid.link,fcid=cid.cid;
             var base = /emhi/.test(fc) ? 'emhi' :
                 /emu/.test(fc) ? 'emu' :
                     /flydog/.test(fc) ? 'flydog' :
                         /^ut/.test(fc) ? 'ut' :
                             /arhiiv/.test(fc) ? 'arhiiv' :
-                                /mnt/.test(fc) ? 'mnt': '';
+                                /mnt/.test(fc) ? 'mnt' : 
+                                    /ttu/.test(fc) ? 'ttu':'';
             var url = base ? my.histsourcesdata[base] : '';
             var title=url.charAt(0).toUpperCase() + url.slice(1);
             var t = '<a onclick="window.open(this.href);return false;" href="<%=url%>"><%=title%><%if(last){%> <%=last%><%}if(next){%>, järgmine <%=next%><%}%></a>';
             //var meta = '';
-            var xurl = 'http://' + url + link + (base==='emhi' ? fcid+'/': '');
+            var xurl = 'http://' + url + link + (base==='emhi' ? fcid+'/': (base==='ttu' ? '/'+fcid : ''));
             return _.template(t)({title:title,url:xurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
         },
         dohmeta: function(box,data){
@@ -2965,7 +3038,7 @@ window.$(function() {
                 type: 'get',
                 url: fc.datadir + '/' + place  + '/' + fcfile + '?' + get.now,
             };
-            if(fc.datatype==='json' && fcid!=='yr') {
+            if(fc.datatype==='json' && fcid!=='yr' && fcid!=='em') {
                 ajaxopt.dataType = 'jsonp';
                 ajaxopt.jsonp =  'callback';
                 ajaxopt.jsonpCallback = fcid==='wg' ? fcid+'_data' : 'callback';
@@ -3029,7 +3102,7 @@ window.$(function() {
                     }
                 }
             }
-            var fcurl = fc==='em' ? url + '/asukoha-prognoos/?coordinates=' + placeid :
+            var fcurl = fc==='em' ? url + '/ilm/prognoosid/asukoha-prognoos/?coordinates=' + placeid :
                 fc==='yr' ? url+'/en/details/table/'+placeid+'/' :
                     fc==='wg' ? url + '/' + placeid : url + placeid ;
 
@@ -3220,8 +3293,8 @@ window.$(function() {
                     }
                 }
             } else {
-                //var htempl = '<tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Sademed</th><th class="hide-edge-xs">Rõhk</th></tr>';
-                //var templ = '<tr class="<%=night?"night hide":""%>"><td><span class="day hide"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="hide-edge-xs"><%=press?press:""%></td></tr>';
+                //var htempl = '<tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Sademed</th><th class="d-xs-none">Rõhk</th></tr>';
+                //var templ = '<tr class="<%=night?"night hide":""%>"><td><span class="day hide"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="d-xs-none"><%=press?press:""%></td></tr>';
                 var str='';
                 var hlinks = '<tr class="fcontainer"><th colspan="6"><span class="fc-source" name="em">Ilmateenistus</span>&nbsp;<span class="fc-source" name="wg">Windguru.cz</span>&nbsp;<span class="fc-source" name="yr">Yr.no</span><span class="right fchead">'+fc.name+'</span></th></tr>';
                 var keys = Object.keys(has),tnow=new Date().getTime(),o;
@@ -3250,7 +3323,7 @@ window.$(function() {
 
                 var where = $('#'+my.chartorder[0]+'2');
                 if(where) {
-                    where.html(_.template(self.dataTableTemplate)({classes:'table',thead:_.template(self.fcHeadTemplate)({inforows:hlinks}),tbody:str}));
+                    where.html(_.template(self.dataTableTemplate)({classes:'table table-sm',thead:_.template(self.fcHeadTemplate)({inforows:hlinks}),tbody:str}));
                     where.css('height','100%');
                 }
                 $('#'+my.chartorder[1]+'2').hide();
@@ -3358,17 +3431,24 @@ window.$(function() {
                     url: 'http://www.windguru.cz/',
                     list: [
                         { href: '365700', title: 'Tartu', id: 'windguru_tartu' },
-                        { href: '266923', title: 'Saadj&auml;rv', id: 'windguru_aksi' },
-                        { href: '204512', title: 'V&otilde;rtsj&auml;rv Tamme', id: 'windguru_tamme' },
-                        { href: '92781', title: 'P&auml;rnu', id: 'windguru_parnu' },
-                        { href: '152536', title: 'H&auml;&auml;demeeste', id: 'windguru_haademeeste' },
+                        { href: '266923', title: 'Saadjärv', id: 'windguru_aksi' },
+                        { href: '204512', title: 'Võrtsjärv Tamme', id: 'windguru_tamme' },
+                        { href: '692681', title: 'Võrtsjärv Jõesuu', id: 'windguru_joesuu' },
+                        { href: '858409', title: 'Peipsi Räpina', id: 'windguru_rapina' },
+                        { href: '20401', title: 'Peipsi Nina', id: 'windguru_nina' },
+                        { href: '1001000', title: 'Peipsi Mustvee', id: 'windguru_mustvee' },
+                        { href: '92781', title: 'Pärnu', id: 'windguru_parnu' },
+                        { href: '1182525', title: 'Munalaid', id: 'windguru_munalaid' },
+                        { href: '152536', title: 'Häädemeeste', id: 'windguru_haademeeste' },
                         { href: '125320', title: 'Tallinn', id: 'windguru_tallinn' },
                         { href: '108163', title: 'Saaremaa Sõrve', id: 'windguru_sorve' },
                         { href: '96592', title: 'Hiiumaa Ristna', id: 'windguru_ristna' },
-                        { href: '92777', title: 'Hiiumaa Orjaku', id: 'windguru_orjaku' },
-                        { href: '479054', title: 'Pärnumaa Paatsalu', id: 'windguru_paatsalu' },
+                        { href: '1299399', title: 'Hiiumaa Sääretirp', id: 'windguru_orjaku' },
+                        { href: '18713', title: 'Topu', id: 'windguru_topu' },
+                        { href: '1182536', title: 'Rohuküla', id: 'windguru_rohukyla' },
+                        { href: '479054', title: 'Paatsalu', id: 'windguru_paatsalu' },
                         { href: '?set=143499', title: 'Eesti Meri', id: 'windguru_meri' },
-                        { href: '?set=143439', title: 'Sisej&auml;rved', id: 'windguru_jarved' }
+                        { href: '?set=143439', title: 'Sisejärved', id: 'windguru_jarved' }
                     ]
                 },
                 {
@@ -3379,19 +3459,21 @@ window.$(function() {
                         { href: '2-592574', title: 'Saadjärv', id: 'yr_aksi' },
                         { href: '2-588397', title: 'Võrtsjärv Tamme', id: 'yr_tamme' },
                         { href: '2-591907', title: 'Võrtsjärv Jõesuu', id: 'yr_joesuu' },
-                        { href: '2-587468', title: 'Peipsi Räpina', id: 'yr_rapina' },
+                        { href: '58.122,27.535', title: 'Peipsi Räpina', id: 'yr_rapina' },
                         { href: '2-589982', title: 'Peipsi Nina', id: 'yr_nina' },
                         { href: '2-590067', title: 'Peipsi Mustvee', id: 'yr_mustvee' },
                         { href: '2-589580', title: 'Pärnu', id: 'yr_parnu' },
-                        { href: '2-592232', title: 'Häädemeeste', id: 'yr_parnu' },
+                        { href: '58.223,24.111', title: 'Munalaid', id: 'yr_munalaid' },
+                        { href: '2-592232', title: 'Häädemeeste', id: 'yr_haademeeste' },
                         { href: '2-10123592', title: 'Tallinn Pirita', id: 'yr_pirita' },
                         { href: '2-588984', title: 'Tallinn Rohuneeme', id: 'yr_rohuneeme' },
                         { href: '2-794645', title: 'Saaremaa Sõrve', id: 'yr_sorve' },
                         { href: '2-589003', title: 'Hiiumaa Ristna', id: 'yr_ristna' },
-                        { href: '2-794840', title: 'Hiiumaa Orjaku', id: 'yr_orjaku' },
+                        { href: '58.764,22.790', title: 'Hiiumaa Sääretirp', id: 'yr_saaaretirp' },
                         { href: '2-796115', title: 'Dirhami', id: 'yr_dirhami' },
-                        { href: '2-589749', title: 'Pärnumaa Paatsalu', id: 'yr_paatsalu' },
+                        { href: '2-589817', title: 'Paatsalu', id: 'yr_paatsalu' },
                         { href: '2-794885', title: 'Topu', id: 'yr_topu' },
+                        { href: '2-588987', title: 'Rohuküla', id: 'yr_rohukyla' },
                         { href: '2-587445', title: 'Võsu', id: 'yr_vosu' }
                     ]
                 },
@@ -3640,16 +3722,17 @@ window.$(function() {
                 a.height(w.innerHeight-(w.innerHeight/3));
             } else {
                 b.removeClass('dropdown-toggle');
-                b.attr({'data-toggele':'modal','data-target':'.ilm-modal'});
+                b.attr({'data-toggele':'ilm-modal','data-target':'.ilm-modal'});
                 $('#ilm-modal .popup-sisu').html(w.ilm.lingid.process(w.ilm.lingid.JSON));
-                $('#ilm-modal').modal();
+                $('#ilm-modal').modal('toggle');
             }
             //return false;
         });
-        $('#ilm-seaded').click(function(e){
+        $('#ilm-seaded').click(function(){
             my.settingTemplate('#ilm-seaded-dropdown');
-            //w.ilm.Popup("seaded",w.ilm.Options);
-            //return false;
+            // $('.dropdown-toggle').dropdown();
+            // w.ilm.Popup("seaded",w.ilm.Options);
+            // return false;
         });
         $('#fctitle').on('click',function(){
             w.ilm.setEstPlace(w.ilm.nextPlace());

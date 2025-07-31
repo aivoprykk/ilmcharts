@@ -53,10 +53,13 @@ IFS=:
 set $j
 place=$1
 title=$2
-coord=$(echo "${13}"|tr -d '[:space:]');
+coord=$(echo "${3}"|tr -d '[:space:]');
 lat=${coord/,*/};
 lon=${coord/*,/};
-names="wg:$3 yr:$4 emhi:$5 mnt:$6 zoig:$7 emu:$8 ut:$9 my:${10} empg:${11} flydog:${12}";
+names="wg:$4 yr:$5 emhi:$6 mnt:$7 zoig:$8 emu:$9 ut:${10} my:${11} empg:${12} flydog:${13} ttu:${14}"
+[ x"$place" = x"" ] && continue;
+[ x"$title" = x"" ] && title=$place;
+[ x"$lat" = x"" -o x"$lon" = x"" ] && { echo "No coordinates for $place"; continue; }
 IFS=' '
 (
 cd public
@@ -72,7 +75,7 @@ minutes=6
 #continue;
 [ x"$station" != x"" -a "$name" != "$station" ] && continue;
 file="ARC-"$date".txt"
-
+wgetarg=''
 case "$name" in
 emu)
 	url="http://energia.emu.ee/weather/Archive/"$file;
@@ -102,6 +105,14 @@ mnt)
 	out="mnt_data/"$place
 	temp="arc-file-$place.html"
 	minutes=11
+	#continue;
+	;;
+ttu)
+	url='http://on-line.msi.ttu.ee/metoc/infowindow.php'
+	out="ttu_data/"$place
+	temp="arc-file-$place.html"
+	minutes=11
+  wgetarg="--post-data=station=$value"
 	#continue;
 	;;
 flydog)
@@ -148,21 +159,21 @@ let 'm=cur_min-last_min';
 }
 last=$last_stamp
 fi
-
+wgetcmd="wget -t1 -T10 -U '$meinfo' -q $wgetarg -O $out"
 labstr=""
 if [ $lab -gt 0 ]; then
   labstr="lab"
   echo "`date '+%F %T'` last:$last_stamp";
   if [ x"$temp" != x"" ]; then
-    echo "$place:$name wget -U '$meinfo' -q -O $out/$temp $url"
+    echo "$place:$name $wgetcmd/$temp $url"
     [ -e $dir"/parse_$name.js" ] && echo "node $dir/parse_$name.js $out/$temp $value $labstr"
   else
-    echo "$place:$name wget -T40 -U '$meinfo' -q -O $out/$file $url"
+    echo "$place:$name $wgetcmd/$file $url"
   fi
 fi
 if [ x"$dry" = x"" ]; then
 	if [ x"$temp" != x"" ]; then
-	  wget -T10 --tries=1 -U "$meinfo" -q -O $out/$temp $url
+	  $wgetcmd/$temp $url
 	  [ -e $dir"/parse_$name.js" ] && node --trace-deprecation $dir"/parse_$name.js" $out/$temp $value $labstr
     x=`cat $out/last.txt|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}'|wc -l`
     if [ $x -gt 0 ]; then
@@ -171,7 +182,7 @@ if [ x"$dry" = x"" ]; then
     fi
 	  #rm -f $out"/"$temp
 	else
-	  wget -T10 --tries=1 -U "$meinfo" -q -O $out/$file $url
+	  $wgetcmd/$file $url
     x=`cat $out/$file|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}'|wc -l`
     if [ $x -gt 0 ]; then tail -6 $out/$file|awk 'match($1, /[0-9][0-9][0-9][0-9]/){print;}' > $out/last.txt; fi
 	fi

@@ -1,7 +1,7 @@
 {
     "name": "ilmcharts",
     "description": "Domestic weather application http://ilm.majasa.ee",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "language": "et",
     "charset": "utf-8",
     "keywords": [
@@ -17,13 +17,10 @@
         "type": "git",
         "url": "https://github.com/aivoprykk/ilmcharts.git"
     },
-    "license": {
-        "type": "MIT",
-        "url": "https://github.com/aivoprykk/ilmcharts/blob/master/LICENSE"
-    },
+    "license": "MIT",
     "devDependencies": {
-        "backbone": "^1.4.0",
-        "bootstrap": "^3.4.1",
+        "backbone": "^1.6.0",
+        "bootstrap": "^5.3.3",
         "grunt": "^1.4.1",
         "grunt-banner": "^0.6.0",
         "grunt-contrib-clean": "^2.0.0",
@@ -33,15 +30,15 @@
         "grunt-contrib-cssmin": "^4.0.0",
         "grunt-contrib-pug": "^3.0.0",
         "grunt-contrib-uglify": "^5.0.1",
-        "jquery": "^3.4.0",
-        "jquery-ui": "^1.12.1",
+        "jquery": "^3.7.1",
+        "jquery-ui": "^1.14.1",
         "load-grunt-tasks": "^5.1.0",
+        "popperjs-core": "^1.0.0",
         "suncalc": "*",
-        "underscore": "^1.13.1",
+        "underscore": "^1.13.7",
         "weather-icons2": "^2.0.10"
     },
     "dependencies": {
-        "cheerio": "^0.22.0",
-        "request": "^2.88.0"
+        "cheerio": "^1.0.0"
     }
 }

@@ -270,7 +270,7 @@
                 type: 'get',
                 url: fc.datadir + '/' + place  + '/' + fcfile + '?' + get.now,
             };
-            if(fc.datatype==='json' && fcid!=='yr') {
+            if(fc.datatype==='json' && fcid!=='yr' && fcid!=='em') {
                 ajaxopt.dataType = 'jsonp';
                 ajaxopt.jsonp =  'callback';
                 ajaxopt.jsonpCallback = fcid==='wg' ? fcid+'_data' : 'callback';
@@ -334,7 +334,7 @@
                     }
                 }
             }
-            var fcurl = fc==='em' ? url + '/asukoha-prognoos/?coordinates=' + placeid :
+            var fcurl = fc==='em' ? url + '/ilm/prognoosid/asukoha-prognoos/?coordinates=' + placeid :
                 fc==='yr' ? url+'/en/details/table/'+placeid+'/' :
                     fc==='wg' ? url + '/' + placeid : url + placeid ;
 
@@ -525,8 +525,8 @@
                     }
                 }
             } else {
-                //var htempl = '<tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Sademed</th><th class="hide-edge-xs">Rõhk</th></tr>';
-                //var templ = '<tr class="<%=night?"night hide":""%>"><td><span class="day hide"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="hide-edge-xs"><%=press?press:""%></td></tr>';
+                //var htempl = '<tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Sademed</th><th class="d-xs-none">Rõhk</th></tr>';
+                //var templ = '<tr class="<%=night?"night hide":""%>"><td><span class="day hide"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="d-xs-none"><%=press?press:""%></td></tr>';
                 var str='';
                 var hlinks = '<tr class="fcontainer"><th colspan="6"><span class="fc-source" name="em">Ilmateenistus</span>&nbsp;<span class="fc-source" name="wg">Windguru.cz</span>&nbsp;<span class="fc-source" name="yr">Yr.no</span><span class="right fchead">'+fc.name+'</span></th></tr>';
                 var keys = Object.keys(has),tnow=new Date().getTime(),o;
@@ -555,7 +555,7 @@
 
                 var where = $('#'+my.chartorder[0]+'2');
                 if(where) {
-                    where.html(_.template(self.dataTableTemplate)({classes:'table',thead:_.template(self.fcHeadTemplate)({inforows:hlinks}),tbody:str}));
+                    where.html(_.template(self.dataTableTemplate)({classes:'table table-sm',thead:_.template(self.fcHeadTemplate)({inforows:hlinks}),tbody:str}));
                     where.css('height','100%');
                 }
                 $('#'+my.chartorder[1]+'2').hide();
