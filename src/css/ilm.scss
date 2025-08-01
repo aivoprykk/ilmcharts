@@ -64,48 +64,6 @@ body {
 	color: whitesmoke;
 }
 
-
-
-
-.chartbox {
-	width: 100%;
-	.chart-frame1, .chart-frame2 {
-		max-width: 750px;
-		padding-left: 3px;
-		padding-bottom: 3px;
-	}
-
-	.chart-frame1 {
-		height: 280px;
-		.table {
-			margin-bottom: 0;
-		}
-	}
-
-	.chart-frame2 {
-		height: 230px;
-	}
-
-	.chart-frame1, .chart-frame2 {
-		height: 200px;
-	}
- 
-	.chart-control-box {
-		margin: 0;
-		padding: 0;
-		width:100%;
-		position:relative;
-		font-size:80%;
-	}
-}
-
-.mapbox {
-	position: relative;
-	overflow: hidden;
-	height: 400px;
-	width: 100%;
-}
-
 .ilm-backgr {
 	position: fixed;
 	top: 0;
@@ -312,89 +270,242 @@ a {
 	color: blue;
 }
 
+@media (max-width:510px) {
+	.avg_rain {
+		display: none;
+		visibility: hidden;
+	}
+}
+
+@media (max-width:390px) {
+	.avg_wtemp {
+		display: none;
+		visibility: hidden;
+	}
+}
+
+@media (min-width: 768px) and (max-width: 992px), (min-width: 1200px) and (max-width: 1400px) {
+	.container {
+		max-width:98%;
+	}
+}
+@media (min-width:1400px) {
+	.container {
+		max-width: 1400px;
+	}
+}
+
+.startdate-control {
+	max-width: 100px;
+	left: 30%;
+	top: 3px;
+	>input {
+		width: 100px;
+		padding: 0 5px;
+	}
+}
+
+th .fchead {
+	position: absolute;
+	right: 2em;
+	font-weight: 600;
+}
+
+tr.fcontainer {
+	>th {
+		position: relative;
+	}
+}
+
+.fckhead {
+	position: absolute;
+	top: -16px;
+	>span {
+		display: inline-block;
+		margin-right: 0.3em;
+	}
+}
+.fcleft {
+	left: 0.5em;
+}
+.fcright {
+	right: 0.1em;
+}
+
+.settings-dropdown {
+	overflow-y:scroll;
+	max-height:90vh;
+	width:16rem;
+	right:0;
+	padding: 1rem;
+}
+
 .two-lg {
-	width: 50%;
-	float: left;
+	width: 100%;
+	float: none;
 	position: relative;
+	.avg_wtemp {
+		display: table-cell;
+		visibility: visible;
+	}
 }
 
-@media (max-width:1139px) {
-	.two-lg {
-		width: 100%;
-		float: none;
+.chart-control-box {
+	margin: 0;
+	padding: 0;
+	width:100%;
+	position:relative;
+	font-size:80%;
+	>div {
+		position: absolute;
+		z-index: 1000;
+		&.timeframe-control {
+			left: 8px;
+			top: -5px;
+		}
+		&.viewmode-control {
+			left: 8px;
+			top: 10px;
+		}
+		&.samplemode-control {
+			right: 8px;
+			top: -5px;
+		}
 	}
-
+	.startdate-control {
+		left: 8px;
+		top: -9px;
+	}
 }
 
-@media (max-width:992px) {
-	.hide-lg {
-		display: none;
-		visibility: hidden;
-	}
-
-	.two-lg {
-		width: 100%;
-		float: none;
-	}
-
+.chart-frame1, .chart-frame2 {
+	height: 200px;
 }
 
-@media (min-width:930px) and (max-width:1139px) {
-	.hide-edge-lg {
-		display: none;
-		visibility: hidden;
+.chart-table {
+	height: auto;
+	>table {
+		margin-bottom: 0;
 	}
-
+}
+	
+.menu {
+	width: 100%;
+	max-width: 850px;
+	padding: 0;
+	@media (min-width: 850px) {
+		width: 58%;
+	}
+	@media (min-width: 1240px) {
+		width: 42%;
+	}
+	@media (min-width: 1280px) {
+		width: 40%;
+	}
+	.data-menu-order {
+		position:absolute;
+		display:table-cell;
+		background-color:white;
+		border-radius:5px;
+		color:black;
+		top:1.7rem;
+	}
 }
 
-@media (max-width:768px) {
-	.hide-xs {
-		display: none;
-		visibility: hidden;
-	}
-
-}
-
-@media (min-width:768px) and (max-width:992px) {
-	.hide-sm {
-		display: none;
-		visibility: hidden;
-	}
-
-}
-
-@media (max-width:400px) {
-	.hide-edge-xs {
-		display: none;
-		visibility: hidden;
-	}
-
+.chart-container {
+	width: 100%;
+	max-width: 1500px;
 	.mapbox {
+		position: relative;
+		overflow: hidden;
 		height: 300px;
+		width: 100%;
 	}
-
+	.chartbox {
+		width: 100%;
+		margin: auto;
+		.chart-control-box {
+			>div {
+				top: 5px;
+			}
+		}
+		.chart-frame1, .chart-frame2 {
+			max-width: 750px;
+			padding-left: 3px;
+			padding-bottom: 3px;
+		}
+		.two-lg {
+			max-width: 750px;
+			position: relative;
+			padding: 0;
+			@media (min-width:1240px) {
+				width: 50%;
+				float: left;
+			}
+		}
+		.chart-control-box {
+			>div {
+				top: 5px;
+				&.timeframe-control {
+					top: 0px;
+				}
+				&.viewmode-control {
+					top: 15px;
+				}
+				&.samplemode-control {
+					top: 0;
+				}
+			}
+		}
+	}
+	@media (min-width:400px) {
+		.mapbox {
+			height: 400px;
+		}
+	}
+	@media (min-width: 850px) {
+		width: 42%;
+	}
+	@media (min-width: 1240px) {
+		width: 58%;
+	}
+	@media (min-width: 1280px) {
+		width: 60%;
+	}
 }
 
-@media (max-width:550px) {
-	.hide-edge {
-		display: none;
-		visibility: hidden;
+.data-menu-row {
+	&:hover {
+		cursor: pointer;
 	}
-
-	/*.chart-frame1, .chart-frame2 {min-width: 450px;}*/
-}
-
-@media (min-width:768px) and (max-width:930px) {
-	.hide-edge {
-		display: none;
-		visibility: hidden;
+	@media (max-width:440px) {
+		.desc {
+			display: none;
+			visibility: hidden;
+		}
 	}
-
-	/*.chart-frame1, .chart-frame2 {min-width: 450px;}*/
-}
-
-.data-menu-row:hover {
-	cursor: pointer;
+	@media (max-width:510px) {
+		.day {
+			display: none;
+			visibility: hidden;
+		}
+	}
+	@media (max-width:550px), (min-width:576px) and (max-width:1024px), (min-width:1240px) and (max-width:1290px) {
+		.date {
+				display: none;
+				visibility: hidden;
+		}
+		&.deferred {
+			.date {
+				display: inline;
+				visibility: visible;
+			}
+			.day, .time-str {
+				display: none;
+				visibility: hidden;
+			}
+		}
+	}
 }
 
 tr {
@@ -405,6 +516,7 @@ tr {
 		color: #bababa;
 	}
 }
+
 .hide {
 	display: none;
 	visibility: hidden;
@@ -582,31 +694,10 @@ tr {
 	empty-cells: show;
 }
 
-th .fchead {
-	position: absolute;
-	right: 2em;
-	font-weight: 600;
-}
-tr.fcontainer {
-	position: relative;
-}
-#graph-timeframe-control .fchead {
-	margin-right:2em;
-}
-
-.fckhead {
-	position: absolute;
-	top: -1em;
-
-	.fcleft {
-		left: 2em;
-	}
-	.fcright {
-		right: 2em;
-	}
-	@media (max-width: 1400px) {
-		.fcright {
-			left:13em;
-		}
-	}
+.ui-datepicker {
+	background: white;
+	border: 1px solid #bababa;
+	border-radius: 0.5rem;
+	box-shadow: 0 0 10px rgba(0,0,0,0.1);
+	padding: 1rem;
 }

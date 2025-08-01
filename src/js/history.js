@@ -100,7 +100,7 @@
         tooltip: {
             shared: true,
             valueSuffix: ' m/s',
-            xDateFormat: '%d.%m.%Y, %H:%M'
+            xDateFormat: '%a %d.%m.%Y, %H:%M'
         }
     });
 
@@ -135,7 +135,7 @@
         tooltip: {
             shared: true,
             valueSuffix: '°',
-            xDateFormat: '%d.%m.%Y, %H:%M'
+            xDateFormat: '%a %d.%m.%Y, %H:%M'
         }
     });
 
@@ -156,51 +156,7 @@
             title: {
                 text: null
             }
-        },{//1.press
-            gridLineWidth: 0,
-            tickInterval: 10,
-            labels: {
-                formatter: function () {
-                    return this.value + 'hPa';
-                },
-                style: {
-                    color: '#AA4643'
-                }
-            },
-            title: {
-                text: null
-            },
-            opposite: true
-        },{//2.humid
-            gridLineWidth: 0,
-            tickInterval: 10,
-            labels: {
-                formatter: function () {
-                    return this.value + '%';
-                },
-                style: {
-                    color: '#C7C8CA'
-                }
-            },
-            title: {
-                text: null
-            },
-            opposite: true
-        },{ //3.rain
-            gridLineWidth: 0,
-            tickInterval: 2,
-            labels: {
-                formatter: function () {
-                    return this.value + 'mm';
-                },
-                style: {
-                    color: '#4572A7'
-                }
-            },
-            title: {
-                text: null
-            }
-        },{ //4.waterlevel
+        },{ //1.waterlevel
             gridLineWidth: 0,
             tickInterval: 10,
             labels: {
@@ -215,11 +171,56 @@
                 text: null
             },
             opposite: true
+        },{//2.press
+            gridLineWidth: 0,
+            tickInterval: 10,
+            labels: {
+                formatter: function () {
+                    return this.value + 'hPa';
+                },
+                style: {
+                    color: '#AA4643'
+                }
+            },
+            title: {
+                text: null
+            },
+            opposite: true
+        },{//3.humid
+            gridLineWidth: 0,
+            tickInterval: 25,
+            min: 0,
+            max: 100,
+            labels: {
+                formatter: function () {
+                    return this.value + '%';
+                },
+                style: {
+                    color: '#C7C8CA'
+                }
+            },
+            title: {
+                text: null
+            },
+        },{ //4.rain
+            gridLineWidth: 0,
+            tickInterval: 2,
+            labels: {
+                formatter: function () {
+                    return this.value + 'mm';
+                },
+                style: {
+                    color: '#4572A7'
+                }
+            },
+            title: {
+                text: null
+            }
         }],
         tooltip: {
             shared: true,
             valueSuffix: '°C',
-            xDateFormat: '%d.%m.%Y, %H:%M'
+            xDateFormat: '%a %d.%m.%Y, %H:%M'
         },
         legend: {
             layout: 'vertical',
@@ -286,13 +287,22 @@
             var $html = $(html);
             //var rev = _.filter($html.children('.item').get().reverse(),function(a,i){return i<15;});
             var ln = my.curplaces[my.curplace].name;
-            var hlinks = '<tr class="fcontainer"><th colspan="7"><span class="hist-length" name="4"> 4h </span>&nbsp;<span class="hist-length" name="6"> 6h </span>&nbsp;<span class="hist-length" name="12"> 12h </span>&nbsp;<span class="hist-length" name="24"> 24h </span>&nbsp;<span class="hist-length" name="48"> 2p </span>&nbsp;<span class="hist-length" name="72"> 3p </span><span class="fchead right">'+ln+'</span></th></tr>';
+            var hlinks = `<tr class="fcontainer">
+            <th colspan="10">
+            <span class="hist-length" name="4"> 4h </span>&nbsp;
+            <span class="hist-length" name="6"> 6h </span>&nbsp;
+            <span class="hist-length" name="12"> 12h </span>&nbsp;
+            <span class="hist-length" name="24"> 24h </span>&nbsp;
+            <span class="hist-length" name="48"> 2p </span>&nbsp;
+            <span class="hist-length" name="72"> 3p </span>
+            <span class="fchead right">${ln}</span>
+            </th></tr>`;
             var rev = $html.children('.item').get().reverse();
             $html.html(rev);
             d = new Date(my.lastdate);
             var where = $('#'+my.chartorder[0]+'1');
             where.html(_.template(self.dataTableTemplate)({classes:'table table-sm',thead:_.template(self.histHeadTemplate)({inforows:hlinks}),tbody:$html.html()}));
-            where.css('height','100%');
+            where.addClass('chart-table');
             var where2 = where.find('.table')[0];
             $('#'+my.chartorder[1]+'1').hide();
             $('#'+my.chartorder[2]+'1').hide();
@@ -341,14 +351,14 @@
             s.max_wd_series = $.extend(true, {}, d_series,  {type: 'scatter', name: 'Max', color:'#434348', lineWidth: 0});//2
             //temp
             s.avg_temp_series = $.extend(true, {}, d_series, {name: 'Temperatuur', color: '#7cb5ec', negativeColor: 'red', lineWidth: 2});//1
+            s.avg_wl_series = $.extend(true, {}, d_series, {name: 'Veetase', color: '#8085e9', negativeColor: '#e4d354', lineWidth: 2, type: 'spline', yAxis: 1, tooltip: { valueSuffix: ' cm' }});
+            s.avg_press_series = $.extend(true, {}, d_series, {name: 'Õhurõhk', color: '#AA4643', lineWidth: 2, type: 'spline', dashStyle: 'shortdot', yAxis: 2, tooltip: { valueSuffix: ' hPa' }});
+            s.avg_humid_series = $.extend(true, {}, d_series, {name: 'Õhuniiskus', color: '#C7C8CA', lineWidth: 1, type: 'spline', dashStyle: 'longdash', yAxis: 3, tooltip: { valueSuffix: ' %' }});
+            s.avg_rain_series = $.extend(true, {}, d_series, {name: 'Sademed', color: '#4572A7', lineWidth: 0, type: 'column', yAxis: 4, tooltip: { valueSuffix: ' mm' }});
+            s.avg_wtemp_series = $.extend(true, {}, d_series, {name: 'Veetemp', color: '#8d4653', lineWidth: 2});
             s.avg_dp_series = $.extend(true, {}, d_series, {name: 'Kastepunkt', color: '#0d233a', lineWidth: 1});
             s.avg_wc_series = $.extend(true, {}, d_series, {name: 'Tuuletemp', color: '#8bbc21', lineWidth: 1});
-            s.avg_press_series = $.extend(true, {}, d_series, {name: 'Õhurõhk', color: '#AA4643', lineWidth: 2, type: 'spline', dashStyle: 'shortdot', yAxis: 1, tooltip: { valueSuffix: ' hPa' }});
-            s.avg_humid_series = $.extend(true, {}, d_series, {name: 'Õhuniiskus', color: '#C7C8CA', lineWidth: 1, type: 'spline', dashStyle: 'longdash', yAxis: 2, tooltip: { valueSuffix: ' %' }});
-            s.avg_rain_series = $.extend(true, {}, d_series, {name: 'Sademed', color: '#4572A7', lineWidth: 0, type: 'column', yAxis: 3, tooltip: { valueSuffix: ' mm' }});
-            s.avg_wtemp_series = $.extend(true, {}, d_series, {name: 'Veetemp', color: '#8d4653', lineWidth: 2});
-            s.avg_wl_series = $.extend(true, {}, d_series, {name: 'Veetase', color: '#8085e9', negativeColor: '#e4d354', lineWidth: 2, type: 'spline', yAxis: 4, tooltip: { valueSuffix: ' cm' }});
-
+            
 
             my.lastdate = my.normalizeData(my.curplace, json, function(o){
                 var x = Object.keys(s)[0];
@@ -434,14 +444,14 @@
             options.temp.series = null;
             options.temp.series = [];
             options.temp.series.push(s.avg_temp_series);
-            options.temp.series.push(s.avg_wc_series);
-            options.temp.series.push(s.avg_rain_series);
-            options.temp.series.push(s.avg_dp_series);
-            options.temp.series.push(s.avg_humid_series);
-            options.temp.series.push(s.avg_press_series);
             options.temp.series.push(s.avg_wl_series);
+            options.temp.series.push(s.avg_press_series);
+            options.temp.series.push(s.avg_humid_series);
+            options.temp.series.push(s.avg_rain_series);
             options.temp.series.push(s.avg_wtemp_series);
-
+            options.temp.series.push(s.avg_wc_series);
+            options.temp.series.push(s.avg_dp_series);
+            
             //console.log(JSON.stringify(options));
 
 
@@ -536,7 +546,7 @@
                     json_full += json;
                 }
                 var x = new Date(now).getDate() !== new Date(d).getDate();
-                if(/(emhi|emu|mnt|zoig|arhiiv|flydog|ut_)/.test(my.curplace) && x) {
+                if(/(ttu|emhi|emu|mnt|arhiiv|flydog|ut_)/.test(my.curplace) && x) {
                     d += (24 * 3600 * 1000);
                     cb(d);
                 } else {

@@ -19,7 +19,7 @@ html(lang=opt.lang)
 					ul.navbar-nav.mb-2.mb-lg-0
 						li.nav-item.dropdown
 							a.nav-link.dropdown-toggle#ilm-seaded(href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false") Seaded
-							.dropdown-menu#ilm-seaded-dropdown(style="overflow-y:scroll;max-height:90vh;width:16rem;right:0; left:auto" aria-labelledby="ilm-seaded" data-offset="2" )
+							.dropdown-menu#ilm-seaded-dropdown.settings-dropdown(style="left:auto" aria-labelledby="ilm-seaded" data-offset="2" )
 						li.nav-item.dropdown
 							a.nav-link#ilm-viited(href="#" role="button" data-bs-toggle="dropdown") Viited
 						li.nav-item.dropdown.dropleft
@@ -40,10 +40,10 @@ html(lang=opt.lang)
 		#bghide.ilm-bghide
 		#dots.ilm-dots
 		#sisu.ilm-sisu.nopadding
-			.container-fluid
+			.container
 				.row.g-1
-					#menu-container.menu.col-lg-5.col-sm-6.col-xs-12
-					.chart-container.chart.col-lg-7.col-sm-6.col-xs-12
+					#menu-container.menu
+					.chart-container.chart
 		#popup.ilm-popup.panel.panel-primary(style="display:none;")
 			#popup_in.panel-heading
 				b.panel-title

@@ -139,20 +139,6 @@
             //w.ilm.reloadest();
             return false;
         });
-        var dtpckr = $('#datepicker');
-        if(dtpckr.length) {
-            dtpckr.datepicker({
-                dateFormat: 'yy-mm-dd',
-                timezone: '+0'+(((my.addDst)?1:0)+2)+'00',
-                onSelect: function(dateText, inst) {
-                    w.ilm.setDate(dateText);
-                    //w.ilm.reload();
-                }
-            });
-            $('#curtime').on('click',function(){
-                dtpckr.datepicker('show');
-            });
-        }
         $('#curplace').on('click',function(){
             w.ilm.setCurPlace(w.ilm.nextCurPlace());
             //w.ilm.reload();

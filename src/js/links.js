@@ -127,7 +127,7 @@
                         { href: 'teeinfo.evenet.ee/?mapdatatype=9', title: 'Teeinfo', id: 'teeinfo' },
                         { href: 'surf.paper.ee/', title: 'Surf.Paper.EE', id: 'paper' },
                         { href: 'palts.com/a/et_EE/ilmajaam/', title: 'Palts.COM', id: 'palts' },
-                        { href: 'ilm.zoig.ee/', title: 'Zoig.EE', id: 'zoig', app: '?k=516' },
+                        { href: 'gis.ee/', title: 'GIS.EE', id: 'gis' },
                         { href: 'www.kalastusinfo.ee/sisu/ilm/ilm-peipsi-jarvel.php', title: 'Peipsi Ilmajaamad', id: 'kalastusinfo' },
                         { href: 'www.wunderground.com/global/stations/26242.html', title: 'WUnderground Tartu', id: 'wground' },
                         { href: 'www.timeanddate.com/worldclock/astronomy.html?n=242', title: 'Päikesetõus/loojang', id: 'sunclock' }

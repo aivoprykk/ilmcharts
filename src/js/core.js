@@ -13,11 +13,11 @@ var ilm = (function(my) {
         opt = opt || {};
         var defaults = {
             id: 'ilmchartsstore01',
-            datamode: opt.datamode || 'emu',
+            datamode: opt.datamode || 'arhiiv_saadjarv_saadjarve',
             timeframe: opt.timeframe || 0,
             fcsources: opt.fcsources || ['wg', 'yr', 'em'],
             fcplace: opt.fcplace || 'aksi',
-            curplace: opt.curplace || 'emu',
+            curplace: opt.curplace || 'arhiiv_saadjarv_saadjarve',
             chartorder: opt.chartorder || ['temp', 'wind_speed', 'wind_dir'],
             gridorder: opt.gridorder || [],
             showgroup: opt.showgroup || '',
@@ -116,7 +116,6 @@ var ilm = (function(my) {
             emhi: 'ilmateenistus.ee',
             emu: 'energia.emu.ee',
             ut: 'meteo.physic.ut.ee',
-            zoig: 'ilm.zoig.ee',
             arhiiv: 'ilm.majasa.ee',
             mnt: 'balticroads.net',
             flydog: 'databuoys.sensornest.com',
@@ -149,7 +148,7 @@ var ilm = (function(my) {
             // emu: { id: 'emu', name: 'EMU Tartu', cid: '', group: 'tartu', link: '/weather', bind: 'tartu', location: [58.388575, 26.694013] },
             ut_tartu: { id: 'ut_tartu', cid: '', name: 'UT Tartu', group: 'koht', link: '', bind: 'tartu', location: [58.365945, 26.690791] },
             arhiiv_vortsjarv_tamme: { id: 'arhiiv_vortsjarv_tamme', cid: '', name: 'Tamme Võrtsjärv', group: 'vortsjarv-tamme', link: '', bind: 'tamme', location: [58.271306, 26.134923] },
-            mnt_tamme: { id: 'mnt_tamme', cid: '', name: 'Tamme(V-Rakke) MNT', group: 'vortsjarv', link: '', bind: 'tamme', location: [58.331664, 26.187807] },
+            mnt_tamme: { id: 'mnt_tamme', cid: '', name: 'Tamme (V-Rakke) MNT', group: 'vortsjarv', link: '', bind: 'tamme', location: [58.331664, 26.187807] },
             arhiiv_vortsjarv_joesuu: { id: 'arhiiv_vortsjarv_joesuu', cid: '', name: 'Jõesuu Võrtsjärv', group: 'vortsjarv-joesuu', link: '', bind: 'joesuu', location: [58.386441, 26.131942] },
             arhiiv_peipsi_nina: { id: 'arhiiv_peipsi_nina', cid: '', name: 'Nina Peipsi', group: 'peipsi-nina', link: '', bind: 'nina', location: [58.598889, 27.209722] },
             arhiiv_peipsi_rapina: { id: 'arhiiv_peipsi_rapina', cid: '', name: 'Räpina Peipsi', group: 'peipsi-rapina', link: '', bind: 'rapina', location: [58.124988, 27.530086] },
@@ -374,7 +373,7 @@ var ilm = (function(my) {
                             }
                         }
                     }
-                }).disableSelection();
+                });
                 swp.sortable('enable');
             }
         },
@@ -570,7 +569,7 @@ var ilm = (function(my) {
         loadMap: function(e) {
             var self = this,
                 me = e && e.target ? $(e.target) : e ? $(e) : $('.chart-container');
-            var templ = '<div class="map-container"><div style="width:100%"><span class="map-info">&nbsp;</span></div><div class="mapbox" id="map"></div></div>';
+            var templ = '<div class="map-container"><div><span class="map-info">&nbsp;</span></div><div class="mapbox" id="map"></div></div>';
             if (me) {
                 me.html(templ);
                 self.initGoogleMap('map', self.curplaces);
@@ -598,7 +597,7 @@ var ilm = (function(my) {
                     n = this.curplaces[gridorder[i]];
                     if (n) {
                         html += '<tr id="' + co + n.id + '" name="' + n.id + '" class="data-menu-row" style="background-color:white">';
-                        html += '<td class="sortable-is-active d-none">-</td><td colspan="8">' + n.name + '</td>';
+                        html += '<td class="sortable-is-active d-none">-</td><td colspan="100">' + n.name + '</td>';
                         html += '</tr>';
                     }
                 }
@@ -631,30 +630,29 @@ var ilm = (function(my) {
             var self = this,
                 o = '',
                 n = self.curplaces[name] || self.curplaces[self.curplace],
-                m = self.getWidth() < 768 ? $('.chart-box') : $('.chartbox'),
+                m = self.getWidth() < 850 ? $('.chart-box') : $('.chartbox'),
                 me = e && e.target ? $(e.target) : e ? $(e) : null,
                 func = function(el, n) {
                     n = n || {};
                     var u = 0,
-                        xlarge = (self.getWidth() >= 1400) ? true : false,
+                        xlarge = (self.getWidth() >= 1240) ? true : false,
                         s = '';
-                    s += '<div class="chartbox row">';
-                    s += '<div class="chart-control-box col-12">&nbsp;';
-                    if (self.samplemode !== 'table' && self.viewmode === 'cur') {
-                        s += '<div id="graph-timeframe-control" style="position:absolute;z-index:1000;top:-7px;left:8px;">';
+                    s += '<div class="chartbox">';
+                    s += '<div class="chart-control-box">&nbsp;';
+                    if (self.samplemode !== 'table' && (self.viewmode === 'cur' || xlarge)) {
+                        s += '<div id="graph-timeframe-control" class="timeframe-control">';
                         //s += '<span class="fchead badge bg-primary"> '+n.name+' </span>';
                         s += '&nbsp;<span class="hist-length badge bg-primary" name="4"> 4h </span>&nbsp;<span class="hist-length badge bg-primary" name="6"> 6h </span>&nbsp;<span class="hist-length badge bg-primary" name="12"> 12h </span>&nbsp;<span class="hist-length badge bg-primary" name="24"> 24h </span>&nbsp;<span class="hist-length badge bg-primary" name="48"> 2p </span>&nbsp;<span class="hist-length badge bg-primary" name="72"> 3p </span>';
                         s += '</div>';
                     }
-                    s += '<div style="position:absolute;z-index:1000;left:10px;top:5px;">';
-                    s += '<span class="title-chart"></span>&nbsp;<span class="change-chart badge bg-primary" name="cur">Ajalugu</span>&nbsp;<span class="change-chart badge bg-primary" name="est">Prognoos</span>';
+                    s += '<div class="viewmode-control">';
+                    s += '<span class="title-chart"></span>&nbsp;<span class="change-chart badge bg-primary" name="' + (self.viewmode === 'cur' ? 'est' : 'cur') + '">Näita ' + (self.viewmode === 'cur' ? 'Prognoosi' : 'Ajalugu') + '</span>';
                     s += '</div>';
-                    s += '<div style="position:absolute;z-index:1000;right:0px;top:5px;">';
+                    s += '<div class="samplemode-control">';
                     //s += (self.samplemode !== 'table') ? '<span class="fchead badge bg-primary"> '+my.fcplaces[n.bind].name+' </span>&nbsp;' : '';
                     s += (self.samplemode === 'table') ? ('<span class="night-chart badge bg-primary" name="' + (self.fcshownight ? 'fcsnf' : 'fcsnt') + '"> ' + (self.fcshownight ? '-' : '+') + 'Ööd</span>&nbsp;') : '&nbsp;';
                     s += '<span class="sample-chart badge bg-primary" name="' + (self.samplemode === 'table' ? 'graph' : 'table') + '">Näita ' + (self.samplemode === 'table' ? 'Graafikut' : 'Tabelit') + '</span>&nbsp;';
                     s += (self.viewmode !== 'cur' || xlarge) ? ('<span class="long-chart badge bg-primary" name="' + (self.sampletype === 'long' ? 'detail' : 'long') + '">Näita ' + (self.sampletype === 'long' ? 'Detailset' : 'Pikaajalist') + '</span>&nbsp;') : '&nbsp;';
-                    s += '</div>';
                     s += '</div>';
                     el.html(s);
                     var v = self.getWidth(null, el[0]);
@@ -665,11 +663,17 @@ var ilm = (function(my) {
                         else self.timeframe = 24 * 3600 * 1000;
                     }
                     s = '<div class="float two-lg"><div class="meta"></div><div class="fckhead fcright">';
-                    if (self.samplemode !== 'table') s += '<span class="badge bg-info"> '+n.name+'</span>';
+                    if (self.viewmode === 'cur' || xlarge) {
+                        s += '<span class="startdate-control"><input type="text" class="form-control datepicker" id="datepicker" name="datepicker" value="' + self.getDateString(my.start) + '" placeholder="Vali kuupäev" onchange="ilm.setDate(this.value);return false;"></span>';
+                    }
+                    s += '<span class="badge bg-info cur-name"';
+                    if (self.samplemode == 'table') s += ' style="visibility:hidden"';
+                    s += '> '+n.name+'</span>';
+                    s += '</div>';
                     s += '</div></div>';
                     if (xlarge) {
                         s += '<div class="float two-lg"><div class="meta"></div><div class="fckhead fcleft">';
-                        if (self.samplemode !== 'table') s += '<span class="badge bg-info"> '+my.fcplaces[n.bind].name+'</span>';
+                        if (self.samplemode !== 'table') s += '<span class="badge bg-info fc-name"> '+my.fcplaces[n.bind].name+'</span>';
                         s += '</div></div>';
                     }
                     u = $(el).find('.chartbox');
@@ -686,7 +690,6 @@ var ilm = (function(my) {
                     var tfc = $('#graph-timeframe-control');
                     //tfc.find('.hist-length[name="'+(self.timeframe/3600/1000)+'"]').addClass('label-primary');
                     if (!xlarge) {
-                        tfc.css({ top: '-7px' });
                         $('span.change-chart[name="' + self.viewmode + '"]').addClass('label-primary');
                         $('.change-chart').on('click', function(e) {
                             var a = $(this).attr('name');
@@ -757,7 +760,7 @@ var ilm = (function(my) {
                     self.curplace = o;
                 }
             }
-            if (me && self.getWidth() < 768) {
+            if (me && self.getWidth() < 850) {
                 var tmp = me;
                 while (tmp && tmp.length && !tmp.hasClass('data-menu-row') && !tmp.hasClass('chart-container')) {
                     tmp = tmp.parent();
@@ -768,12 +771,12 @@ var ilm = (function(my) {
                         td = doc.createElement('td');
                     tr.className = 'chart-box';
                     tr.appendChild(td);
-                    td.setAttribute('colspan', '6');
+                    td.setAttribute('colspan', '100');
                     $(tr).insertAfter(me);
                     me = $(td);
                 }
                 return func(me, n);
-            } else if (self.getWidth() >= 768) {
+            } else if (self.getWidth() >= 850) {
                 return func($('.chart-container'), n);
             }
             return false;
@@ -787,33 +790,41 @@ var ilm = (function(my) {
         <td><%=temp?temp:""%></td>
         <td><%=rain?rain:""%></td>
         <td class="d-xs-none"><%=press?press:""%></td></tr>`,
-        histHeadTemplate: '<thead><%=inforows%><tr><th scope="col">Aeg</th><th scope="col">Tuul</th><th scope="col">Suund</th><th scope="col">Temp</th><th scope="col">Vesi</th><th scope="col">Vtemp</th><th scope="col" class="">Sadu</th></tr></thead>',
-        histRowTemplate:`<tr class="item <%=night?"night":""%>" id="<%=d.time%>"><td><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class=""><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td>
+        histHeadTemplate: `<thead><%=inforows%><tr>
+        <th scope="col" class="time">Aeg</th>
+        <th scope="col" class="avg_ws">Tuul</th>
+        <th scope="col" class="avg_wd">Suund</th>
+        <th scope="col" class="avg_temp">Temp</th>
+        <th scope="col" class="avg_wl">Vesi</th>
+        <th scope="col" class="avg_wtemp">Vtemp</th>
+        <th scope="col" class="avg_rain">Sadu</th></tr></thead>`,
+        histRowTemplate:`<tr class="item <%=night?"night":""%>" id="<%=d.time%>">
+        <td><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class="time"><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td>
         <td><span class="grid-cell-title">Tuul:&nbsp;</span><span class="grid-em"><span class="avg_ws" style="color:<%=wscolor%>"><%=d.avg_ws%></span>/<span class="max_ws" style="color:<%=wgcolor%>"><%=d.max_ws%></span></span></td>
         <td class="avg_wd" title="<%=dn%>"><span class="grid-cell-title">Suund:&nbsp;</span><span class="arrow <%=dn%>"></span><span class="grid-em"><%=d.avg_wd%></span></td>
         <td class="avg_temp"><span class="grid-cell-title">Temp:&nbsp;</span><span class="grid-em"><%=d.avg_temp%></span></td>
         <td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td>
-        <td class="avg_wtemp d-none d-lg-table-cell"><span class="grid-cell-title">Vtemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td>
-        <td class="avg_rain d-none d-lg-table-cell"><span class="grid-cell-title">Sadu:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td></tr>`,
+        <td class="avg_wtemp"><span class="grid-cell-title">Vtemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td>
+        <td class="avg_rain"><span class="grid-cell-title">Sadu:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td></tr>`,
         gridHeadTemplate: `<thead><tr style="background-color:white">
         <th><span class="data-menu-order change btn btn-sm btn-primary" style="position:absolute;display:table-cell;background-color:white;border-radius:5px;color:black;top:1.5rem">+</span></th>
         <th class="sortable-is-active d-none"></th>
-        <th scope="col">Tuul</th>
-        <th scope="col">Suund</th>
-        <th scope="col">Temp</th>
-        <th scope="col">Vesi</th>
-        <th scope="col" class="d-none d-lg-table-cell">Vtemp</th>
-        <th scope="col" class="d-none d-lg-table-cell">Sadu</th>
-        <th scope="col">Aeg</th></tr></thead>`,
+        <th scope="col" class="avg_ws">Tuul</th>
+        <th scope="col" class="avg_wd">Suund</th>
+        <th scope="col" class="avg_temp">Temp</th>
+        <th scope="col" class="avg_wl">Vesi</th>
+        <th scope="col" class="avg_wtemp">Vtemp</th>
+        <th scope="col" class="avg_rain">Sadu</th>
+        <th scope="col" class="time">Aeg</th></tr></thead>`,
         gridRowTemplate: `<td class="sortable-is-active d-none">-</td>
-        <td><span class="grid-em"><%=first%><span class="d-xs-none">&nbsp;<%=last%></span></span></td>
+        <td><span class="grid-em"><%=first%><span class="desc">&nbsp;<%=last%></span></span></td>
         <td><span class="grid-cell-title">Tuul:&nbsp;</span><span class="trend"><%=d.trend=="u"?"&uarr;":d.trend=="d"?"&darr;":"&nbsp;"%>&nbsp;</span><span class="grid-em" style="color:<%=wscolor%>"><span class="avg_ws"><%=d.avg_ws%></span>/<span class="max_ws" style="color:<%=wgcolor%>"><%=d.max_ws%></span></span></td>
         <td class="avg_wd" title="<%=dn%>"><span class="grid-cell-title">Suund:&nbsp;</span><span class="arrow <%=dn%>"></span><span class="grid-em"><%=d.avg_wd%></span></td>
         <td class="avg_temp"><span class="grid-cell-title">Temp:&nbsp;</span><span class="grid-em"><%=d.avg_temp%></span></td>
         <td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td>
-        <td class="avg_wtemp d-none d-lg-table-cell"><span class="grid-cell-title">Vtemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td>
-        <td class="avg_rain hide-edge"><span class="grid-cell-title">Sademed:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td>
-        <td class="time hide-edge-xs"><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span class="hide-edge hide-edge-lg"><span class="day"><%=day%>&nbsp;</span><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td>`,
+        <td class="avg_wtemp"><span class="grid-cell-title">Vtemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td>
+        <td class="avg_rain"><span class="grid-cell-title">Sademed:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td>
+        <td class="time"><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span"><span class="day"><%=day%>&nbsp;</span><span class="date"><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td>`,
         chartContainerTemplate: `<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="curplace" class="btn btn-secondary btn-xs navbar-btn">Andmed <b><%=title%></b></a><a id="curtime" class="btn btn-secondary btn-xs navbar-btn"><%=date%></a><a id="cursel" style="" data-toggle="dropdown" class="btn btn-secondary btn-xs navbar-btn dropdown-toggle"><span class="caret"></span></a><ul id="curmenu" role="menu" class="curmenu dropdown-menu">
         <li><a href="#" name="arhiiv_saadjarv_saadjarve" class="curplace-select active">Saadjärve Saadjärv</a></li>
         <!--li><a href="#" name="flydog_aksi" class="curplace-select active">Saadjärv Äksi</a></li-->
@@ -837,8 +848,13 @@ var ilm = (function(my) {
         <li><a href="#" name="emhi_heltermaa" class="curplace-select">Heltermaa EMHI</a></li>
         <li><a href="#" name="ttu_heltermaa" class="curplace-select">Heltermaa TTU</a></li>
         </ul></div>
-        <input id="datepicker" type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0" class="hasDatepicker"><div class="meta"><div id="curmeta" class="ilm-meta"></div></div></div>`,
-        chart2Container: '<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="fctitle" class="btn btn-secondary btn-xs navbar-btn"><%=title%></a><a id="fcsel" data-toggle="dropdown" class="btn btn-secondary btn-xs navbar-btn dropdown-toggle"><%=date%><span class="caret"></span></a><ul id="fcmenu" role="menu" class="fcmenu dropdown-menu"></ul></div><div class="meta"><div id="yrmeta" class="ilm-meta"><a href="http://www.yr.no/place/Estonia/Tartumaa/Äksi/hour_by_hour.html" onclick="window.open(this.href);return false;">Yr.no</a> andmed viimati uuendatud: 26.07.2017 22:32, Järgmine uuendus: 27.07.2017 11:00</div><div id="wgmeta" class="ilm-meta"><a href="http://www.windguru.cz/ee/?go=1&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: 27.07.2017 01:24, Järgmine uuendus: 27.07.2017 01:24</div></div></div>',
+        <input id="datepicker" type="text" style="visibility:hidden;height:0;width:0;padding:0;margin:0" class="hasDatepicker hist-datepicker"><div class="meta"><div id="curmeta" class="ilm-meta"></div></div></div>`,
+        chart2Container: `<div class="float">
+        <div class="title btn-group"><a id="fctitle" class="btn btn-secondary btn-xs navbar-btn"><%=title%></a><a id="fcsel" data-toggle="dropdown" class="btn btn-secondary btn-xs navbar-btn dropdown-toggle"><%=date%><span class="caret"></span></a><ul id="fcmenu" role="menu" class="fcmenu dropdown-menu"></ul></div>
+        <div class="meta">
+        <div id="yrmeta" class="ilm-meta"><a href="http://www.yr.no/place/Estonia/Tartumaa/Äksi/hour_by_hour.html" onclick="window.open(this.href);return false;">Yr.no</a> andmed viimati uuendatud: 26.07.2017 22:32, Järgmine uuendus: 27.07.2017 11:00</div>
+        <div id="wgmeta" class="ilm-meta"><a href="http://www.windguru.cz/ee/?go=1&amp;sc=266923&amp;wj=msd&amp;tj=c&amp;fhours=180&amp;odh=3&amp;doh=22" onclick="window.open(this.href);return false;">Windguru.cz</a> andmed viimati uuendatud: 27.07.2017 01:24, Järgmine uuendus: 27.07.2017 01:24</div>
+        </div></div>`,
         gridintval: 0,
         getDayLetter: function(date) {
             var day = new Date(date).getDay();
@@ -1213,12 +1229,28 @@ var ilm = (function(my) {
             }
             return 'last.txt';
         },
+        getDateString: function(d, e) {
+            if (!d) d = new Date();
+            if (typeof d !== 'object') d = new Date(d);
+            
+            var year = d.getFullYear();
+            var month = (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1);
+            var day = (d.getDate() < 10 ? '0' : '') + d.getDate();
+            if(e){
+                var hours = (d.getHours() < 10 ? '0' : '') + d.getHours();
+                var minutes = (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+                var seconds = (d.getSeconds() < 10 ? '0' : '') + d.getSeconds();
+                return year + '-' + month + '-' + day + 'T' + hours + '.' + minutes + '.' + seconds;
+            }
+            else 
+                return day + '.' + month + '.' + year;
+        },
         setHistDataUrl: function(place, d) {
             var self = this;
             if (/emu/.test(place)) {
                 return 'emu_data/' + self.setTxtFileName(d);
             } else {
-                return place.replace(/^(ut|ttu|zoig|emhi|mnt|arhiiv|flydog|)_(.*)$/, function(match, dir, name) {
+                return place.replace(/^(ut|ttu|emhi|mnt|arhiiv|flydog|)_(.*)$/, function(match, dir, name) {
                     return dir + (dir === 'arhiiv' ? '' : '_data') + '/' + name + '/' + self.setTxtFileName(d);
                 });
             }
@@ -1383,7 +1415,7 @@ var ilm = (function(my) {
             if (d && (/^\d*[-.]\d*[-.]\d*/).test(d)) {
                 dd = d.split(/[\sT]/)[0];
                 dd = dd.split(/[-.]/, 3);
-                if (dd[0].length === 4) {
+                if (dd[0] > 2000) {
                     d = dd[0] + '-' + dd[1] + '-' + dd[2];
                 } else {
                     d = dd[2] + '-' + dd[1] + '-' + dd[0];
@@ -1403,6 +1435,7 @@ var ilm = (function(my) {
             if (ret) {
                 this.historyactive = (cur - (3600 * 1000) > ret) ? true : false;
                 this.start = this.date = ret;
+                $('.startdate-control>input').val(this.getDateString(ret));
                 if (load === 'ja') this.doReload('curplace');
             }
         },
@@ -1457,7 +1490,7 @@ var ilm = (function(my) {
                 z = '';
             if (my.state.attr) {
                 z = my.getFrame();
-                html += '<form class="setting-form px-4 py-3"><div><label for="timeframe">Ajaraam</label> <select class="form-control input-sm" onchange="ilm.setFrame(this.options[this.selectedIndex].value);ilm.reload();return true;" id="timeframe" name="timeframe">' +
+                html += '<div><label for="timeframe">Ajaraam</label> <select class="form-control input-sm" onchange="ilm.setFrame(this.options[this.selectedIndex].value);ilm.reload();return true;" id="timeframe" name="timeframe">' +
                     '<option value="12h"' + (z === '12h' ? ' selected' : '') + '>12 tundi</option><option value="1d"' + (z === '1d' ? ' selected' : '') + '>1 päev</option><option value="2d"' + (z === '2d' ? ' selected' : '') + '>2 päeva</option><option value="3d"' + (z === '3d' ? ' selected' : '') + '>3 päeva</option>' +
                     '</select></div>';
                 html += '<div><label for="history">Andmed</label> <select class="form-control input-sm" onchange="ilm.setCurPlace(this.options[this.selectedIndex].value);ilm.settingTemplate(\'#ilm-seaded-dropdown\');return false;" id="history-sel" name="history-sel">';
@@ -1479,7 +1512,7 @@ var ilm = (function(my) {
                 html += '</ul></div><div class="checkbox"><label>Näita viiteid menüüs <input type="checkbox" onclick="ilm.setLinksAsMenu(this.checked);return true;" id="linksasmenu" name="linksasmenu"></label></div>';
                 html += '<div class="checkbox"><label>Näita ennustust tabelis <input type="checkbox" onclick="ilm.setFcAsTable(this.checked);return true;" id="samplemode" name="samplemode"></label></div>';
                 html += '<div class="checkbox"><label>Näita öist ennustust <input type="checkbox" onclick="ilm.setFcShowNight(this.checked);return true;" id="fcshownight" name="fcshownight"></label></div>';
-                html += '</form>';
+                html += '<div class="histdate"><label>Kuupäeva andmed <input class="datepicker" onchange="ilm.setDate(this.value);return true;" id="histdate" name="histdate" value="'+my.getDateString(my.start)+'"></label></div>';
             }
             if (div) {
                 if (Object.prototype.toString.call(div) === '[object String]') {
@@ -1627,7 +1660,7 @@ var ilm = (function(my) {
                     r.avg_rain = my.ntof2p((e) ? my.getavg([c[6], e[6]]) : c[6]);
                     r.avg_humid = my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2]);
                     r.avg_press = my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3]);
-                } else if (/(emu|zoig)/.test(place)) {
+                } else if (/(emu)/.test(place)) {
                     r.avg_ws = my.conv_kmh2ms(my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7]));
                     r.max_ws = my.conv_kmh2ms(my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8]));
                     r.avg_wd = my.ntof2p((e) ? my.wdavg([c[9], e[9]]) : c[9]);

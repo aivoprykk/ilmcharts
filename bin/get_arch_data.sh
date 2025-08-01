@@ -56,7 +56,7 @@ title=$2
 coord=$(echo "${3}"|tr -d '[:space:]');
 lat=${coord/,*/};
 lon=${coord/*,/};
-names="wg:$4 yr:$5 emhi:$6 mnt:$7 zoig:$8 emu:$9 ut:${10} my:${11} empg:${12} flydog:${13} ttu:${14}"
+names="wg:$4 yr:$5 emhi:$6 mnt:$7 emu:$8 ut:${9} my:${10} empg:${11} flydog:${12} ttu:${13}"
 [ x"$place" = x"" ] && continue;
 [ x"$title" = x"" ] && title=$place;
 [ x"$lat" = x"" -o x"$lon" = x"" ] && { echo "No coordinates for $place"; continue; }
@@ -88,10 +88,6 @@ ut)
 	url="$url&9=1&12=1&10=1&15=1&16=1"
 	out=ut_data/$place
 	#continue;
-	;;
-zoig)
-	url="http://ilm.zoig.ee/arhiiv/"$value"/";
-	out=zoig_data/$place
 	;;
 emhi)
 	url='http://www.ilmateenistus.ee/meri/vaatlusandmed/'$value'/10-minuti-andmed/';

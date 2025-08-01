@@ -1,3 +1,283 @@
+/*! jQuery UI - v1.14.1 - 2025-07-31
+* https://jqueryui.com
+* Includes: draggable.css, selectable.css, sortable.css, core.css, datepicker.css
+* Copyright OpenJS Foundation and other contributors; Licensed MIT */
+
+.ui-draggable-handle {
+	touch-action: none;
+}
+.ui-selectable {
+	touch-action: none;
+}
+.ui-selectable-helper {
+	position: absolute;
+	z-index: 100;
+	border: 1px dotted black;
+}
+.ui-sortable-handle {
+	touch-action: none;
+}
+/* Layout helpers
+----------------------------------*/
+.ui-helper-hidden {
+	display: none;
+}
+.ui-helper-hidden-accessible {
+	border: 0;
+	clip: rect(0 0 0 0);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+}
+.ui-helper-reset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	line-height: 1.3;
+	text-decoration: none;
+	font-size: 100%;
+	list-style: none;
+}
+.ui-helper-clearfix:before,
+.ui-helper-clearfix:after {
+	content: "";
+	display: table;
+	border-collapse: collapse;
+}
+.ui-helper-clearfix:after {
+	clear: both;
+}
+.ui-helper-zfix {
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	position: absolute;
+	opacity: 0;
+}
+
+.ui-front {
+	z-index: 100;
+}
+
+
+/* Interaction Cues
+----------------------------------*/
+.ui-state-disabled {
+	cursor: default !important;
+	pointer-events: none;
+}
+
+
+/* Icons
+----------------------------------*/
+.ui-icon {
+	display: inline-block;
+	vertical-align: middle;
+	margin-top: -.25em;
+	position: relative;
+	text-indent: -99999px;
+	overflow: hidden;
+	background-repeat: no-repeat;
+}
+
+.ui-widget-icon-block {
+	left: 50%;
+	margin-left: -8px;
+	display: block;
+}
+
+/* Misc visuals
+----------------------------------*/
+
+/* Overlays */
+.ui-widget-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+.ui-datepicker {
+	width: 17em;
+	padding: .2em .2em 0;
+	display: none;
+}
+.ui-datepicker .ui-datepicker-header {
+	position: relative;
+	padding: .2em 0;
+}
+.ui-datepicker .ui-datepicker-prev,
+.ui-datepicker .ui-datepicker-next {
+	position: absolute;
+	top: 2px;
+	width: 1.8em;
+	height: 1.8em;
+}
+.ui-datepicker .ui-datepicker-prev-hover,
+.ui-datepicker .ui-datepicker-next-hover {
+	top: 1px;
+}
+.ui-datepicker .ui-datepicker-prev {
+	left: 2px;
+}
+.ui-datepicker .ui-datepicker-next {
+	right: 2px;
+}
+.ui-datepicker .ui-datepicker-prev-hover {
+	left: 1px;
+}
+.ui-datepicker .ui-datepicker-next-hover {
+	right: 1px;
+}
+.ui-datepicker .ui-datepicker-prev span,
+.ui-datepicker .ui-datepicker-next span {
+	display: block;
+	position: absolute;
+	left: 50%;
+	margin-left: -8px;
+	top: 50%;
+	margin-top: -8px;
+}
+.ui-datepicker .ui-datepicker-title {
+	margin: 0 2.3em;
+	line-height: 1.8em;
+	text-align: center;
+}
+.ui-datepicker .ui-datepicker-title select {
+	font-size: 1em;
+	margin: 1px 0;
+}
+.ui-datepicker select.ui-datepicker-month,
+.ui-datepicker select.ui-datepicker-year {
+	width: 45%;
+}
+.ui-datepicker table {
+	width: 100%;
+	font-size: .9em;
+	border-collapse: collapse;
+	margin: 0 0 .4em;
+}
+.ui-datepicker th {
+	padding: .7em .3em;
+	text-align: center;
+	font-weight: bold;
+	border: 0;
+}
+.ui-datepicker td {
+	border: 0;
+	padding: 1px;
+}
+.ui-datepicker td span,
+.ui-datepicker td a {
+	display: block;
+	padding: .2em;
+	text-align: right;
+	text-decoration: none;
+}
+.ui-datepicker .ui-datepicker-buttonpane {
+	background-image: none;
+	margin: .7em 0 0 0;
+	padding: 0 .2em;
+	border-left: 0;
+	border-right: 0;
+	border-bottom: 0;
+}
+.ui-datepicker .ui-datepicker-buttonpane button {
+	float: right;
+	margin: .5em .2em .4em;
+	cursor: pointer;
+	padding: .2em .6em .3em .6em;
+	width: auto;
+	overflow: visible;
+}
+.ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current {
+	float: left;
+}
+
+/* with multiple calendars */
+.ui-datepicker.ui-datepicker-multi {
+	width: auto;
+}
+.ui-datepicker-multi .ui-datepicker-group {
+	float: left;
+}
+.ui-datepicker-multi .ui-datepicker-group table {
+	width: 95%;
+	margin: 0 auto .4em;
+}
+.ui-datepicker-multi-2 .ui-datepicker-group {
+	width: 50%;
+}
+.ui-datepicker-multi-3 .ui-datepicker-group {
+	width: 33.3%;
+}
+.ui-datepicker-multi-4 .ui-datepicker-group {
+	width: 25%;
+}
+.ui-datepicker-multi .ui-datepicker-group-last .ui-datepicker-header,
+.ui-datepicker-multi .ui-datepicker-group-middle .ui-datepicker-header {
+	border-left-width: 0;
+}
+.ui-datepicker-multi .ui-datepicker-buttonpane {
+	clear: left;
+}
+.ui-datepicker-row-break {
+	clear: both;
+	width: 100%;
+	font-size: 0;
+}
+
+/* RTL support */
+.ui-datepicker-rtl {
+	direction: rtl;
+}
+.ui-datepicker-rtl .ui-datepicker-prev {
+	right: 2px;
+	left: auto;
+}
+.ui-datepicker-rtl .ui-datepicker-next {
+	left: 2px;
+	right: auto;
+}
+.ui-datepicker-rtl .ui-datepicker-prev:hover {
+	right: 1px;
+	left: auto;
+}
+.ui-datepicker-rtl .ui-datepicker-next:hover {
+	left: 1px;
+	right: auto;
+}
+.ui-datepicker-rtl .ui-datepicker-buttonpane {
+	clear: right;
+}
+.ui-datepicker-rtl .ui-datepicker-buttonpane button {
+	float: left;
+}
+.ui-datepicker-rtl .ui-datepicker-buttonpane button.ui-datepicker-current,
+.ui-datepicker-rtl .ui-datepicker-group {
+	float: right;
+}
+.ui-datepicker-rtl .ui-datepicker-group-last .ui-datepicker-header,
+.ui-datepicker-rtl .ui-datepicker-group-middle .ui-datepicker-header {
+	border-right-width: 0;
+	border-left-width: 1px;
+}
+
+/* Icons */
+.ui-datepicker .ui-icon {
+	display: block;
+	text-indent: -99999px;
+	overflow: hidden;
+	background-repeat: no-repeat;
+	left: .5em;
+	top: .3em;
+}
+
 /*!
  * Ilmcharts v1.2.3 (http://ilm.majasa.ee)
  * Copyright 2012-2025 Aivo Pruekk
@@ -12033,41 +12313,6 @@ body {
   color: whitesmoke;
 }
 
-.chartbox {
-  width: 100%;
-}
-.chartbox .chart-frame1, .chartbox .chart-frame2 {
-  max-width: 750px;
-  padding-left: 3px;
-  padding-bottom: 3px;
-}
-.chartbox .chart-frame1 {
-  height: 280px;
-}
-.chartbox .chart-frame1 .table {
-  margin-bottom: 0;
-}
-.chartbox .chart-frame2 {
-  height: 230px;
-}
-.chartbox .chart-frame1, .chartbox .chart-frame2 {
-  height: 200px;
-}
-.chartbox .chart-control-box {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  position: relative;
-  font-size: 80%;
-}
-
-.mapbox {
-  position: relative;
-  overflow: hidden;
-  height: 400px;
-  width: 100%;
-}
-
 .ilm-backgr {
   position: fixed;
   top: 0;
@@ -12269,71 +12514,245 @@ a {
   color: blue;
 }
 
-.two-lg {
-  width: 50%;
-  float: left;
+@media (max-width: 510px) {
+  .avg_rain {
+    display: none;
+    visibility: hidden;
+  }
+}
+@media (max-width: 390px) {
+  .avg_wtemp {
+    display: none;
+    visibility: hidden;
+  }
+}
+@media (min-width: 768px) and (max-width: 992px), (min-width: 1200px) and (max-width: 1400px) {
+  .container {
+    max-width: 98%;
+  }
+}
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+.startdate-control {
+  max-width: 100px;
+  left: 30%;
+  top: 3px;
+}
+.startdate-control > input {
+  width: 100px;
+  padding: 0 5px;
+}
+
+th .fchead {
+  position: absolute;
+  right: 2em;
+  font-weight: 600;
+}
+
+tr.fcontainer > th {
   position: relative;
 }
 
-@media (max-width: 1139px) {
-  .two-lg {
-    width: 100%;
-    float: none;
+.fckhead {
+  position: absolute;
+  top: -16px;
+}
+.fckhead > span {
+  display: inline-block;
+  margin-right: 0.3em;
+}
+
+.fcleft {
+  left: 0.5em;
+}
+
+.fcright {
+  right: 0.1em;
+}
+
+.settings-dropdown {
+  overflow-y: scroll;
+  max-height: 90vh;
+  width: 16rem;
+  right: 0;
+  padding: 1rem;
+}
+
+.two-lg {
+  width: 100%;
+  float: none;
+  position: relative;
+}
+.two-lg .avg_wtemp {
+  display: table-cell;
+  visibility: visible;
+}
+
+.chart-control-box {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  position: relative;
+  font-size: 80%;
+}
+.chart-control-box > div {
+  position: absolute;
+  z-index: 1000;
+}
+.chart-control-box > div.timeframe-control {
+  left: 8px;
+  top: -5px;
+}
+.chart-control-box > div.viewmode-control {
+  left: 8px;
+  top: 10px;
+}
+.chart-control-box > div.samplemode-control {
+  right: 8px;
+  top: -5px;
+}
+.chart-control-box .startdate-control {
+  left: 8px;
+  top: -9px;
+}
+
+.chart-frame1, .chart-frame2 {
+  height: 200px;
+}
+
+.chart-table {
+  height: auto;
+}
+.chart-table > table {
+  margin-bottom: 0;
+}
+
+.menu {
+  width: 100%;
+  max-width: 850px;
+  padding: 0;
+}
+@media (min-width: 850px) {
+  .menu {
+    width: 58%;
   }
 }
-@media (max-width: 992px) {
-  .hide-lg {
-    display: none;
-    visibility: hidden;
-  }
-  .two-lg {
-    width: 100%;
-    float: none;
+@media (min-width: 1240px) {
+  .menu {
+    width: 42%;
   }
 }
-@media (min-width: 930px) and (max-width: 1139px) {
-  .hide-edge-lg {
-    display: none;
-    visibility: hidden;
+@media (min-width: 1280px) {
+  .menu {
+    width: 40%;
   }
 }
-@media (max-width: 768px) {
-  .hide-xs {
-    display: none;
-    visibility: hidden;
+.menu .data-menu-order {
+  position: absolute;
+  display: table-cell;
+  background-color: white;
+  border-radius: 5px;
+  color: black;
+  top: 1.7rem;
+}
+
+.chart-container {
+  width: 100%;
+  max-width: 1500px;
+}
+.chart-container .mapbox {
+  position: relative;
+  overflow: hidden;
+  height: 300px;
+  width: 100%;
+}
+.chart-container .chartbox {
+  width: 100%;
+  margin: auto;
+}
+.chart-container .chartbox .chart-control-box > div {
+  top: 5px;
+}
+.chart-container .chartbox .chart-frame1, .chart-container .chartbox .chart-frame2 {
+  max-width: 750px;
+  padding-left: 3px;
+  padding-bottom: 3px;
+}
+.chart-container .chartbox .two-lg {
+  max-width: 750px;
+  position: relative;
+  padding: 0;
+}
+@media (min-width: 1240px) {
+  .chart-container .chartbox .two-lg {
+    width: 50%;
+    float: left;
   }
 }
-@media (min-width: 768px) and (max-width: 992px) {
-  .hide-sm {
-    display: none;
-    visibility: hidden;
+.chart-container .chartbox .chart-control-box > div {
+  top: 5px;
+}
+.chart-container .chartbox .chart-control-box > div.timeframe-control {
+  top: 0px;
+}
+.chart-container .chartbox .chart-control-box > div.viewmode-control {
+  top: 15px;
+}
+.chart-container .chartbox .chart-control-box > div.samplemode-control {
+  top: 0;
+}
+@media (min-width: 400px) {
+  .chart-container .mapbox {
+    height: 400px;
   }
 }
-@media (max-width: 400px) {
-  .hide-edge-xs {
-    display: none;
-    visibility: hidden;
-  }
-  .mapbox {
-    height: 300px;
+@media (min-width: 850px) {
+  .chart-container {
+    width: 42%;
   }
 }
-@media (max-width: 550px) {
-  .hide-edge {
-    display: none;
-    visibility: hidden;
+@media (min-width: 1240px) {
+  .chart-container {
+    width: 58%;
   }
-  /*.chart-frame1, .chart-frame2 {min-width: 450px;}*/
 }
-@media (min-width: 768px) and (max-width: 930px) {
-  .hide-edge {
-    display: none;
-    visibility: hidden;
+@media (min-width: 1280px) {
+  .chart-container {
+    width: 60%;
   }
-  /*.chart-frame1, .chart-frame2 {min-width: 450px;}*/
 }
+
 .data-menu-row:hover {
   cursor: pointer;
+}
+@media (max-width: 440px) {
+  .data-menu-row .desc {
+    display: none;
+    visibility: hidden;
+  }
+}
+@media (max-width: 510px) {
+  .data-menu-row .day {
+    display: none;
+    visibility: hidden;
+  }
+}
+@media (max-width: 550px), (min-width: 576px) and (max-width: 1024px), (min-width: 1240px) and (max-width: 1290px) {
+  .data-menu-row .date {
+    display: none;
+    visibility: hidden;
+  }
+  .data-menu-row.deferred .date {
+    display: inline;
+    visibility: visible;
+  }
+  .data-menu-row.deferred .day, .data-menu-row.deferred .time-str {
+    display: none;
+    visibility: hidden;
+  }
 }
 
 tr.night > * {
@@ -12520,32 +12939,10 @@ tr.deferred > * {
   empty-cells: show;
 }
 
-th .fchead {
-  position: absolute;
-  right: 2em;
-  font-weight: 600;
-}
-
-tr.fcontainer {
-  position: relative;
-}
-
-#graph-timeframe-control .fchead {
-  margin-right: 2em;
-}
-
-.fckhead {
-  position: absolute;
-  top: -1em;
-}
-.fckhead .fcleft {
-  left: 2em;
-}
-.fckhead .fcright {
-  right: 2em;
-}
-@media (max-width: 1400px) {
-  .fckhead .fcright {
-    left: 13em;
-  }
+.ui-datepicker {
+  background: white;
+  border: 1px solid #bababa;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
 }/*# sourceMappingURL=ilm.css.map */

@@ -34,7 +34,7 @@
         tooltip: {
             shared: true,
             valueSuffix: ' m/s',
-            xDateFormat: '%d.%m.%Y, %H:%M'
+            xDateFormat: '%a %d.%m.%Y, %H:%M'
         }
     });
 
@@ -68,7 +68,7 @@
         tooltip: {
             shared: true,
             valueSuffix: '°',
-            xDateFormat: '%d.%m.%Y, %H:%M'
+            xDateFormat: '%a %d.%m.%Y, %H:%M'
         }
     });
 
@@ -104,6 +104,8 @@
         }, {//2 humid
             gridLineWidth: 0,
             tickInterval: 10,
+            min: 0,
+            max: 100,
             labels: {
                 formatter: function () {
                     return this.value + '%';
@@ -134,7 +136,7 @@
         tooltip: {
             shared: true,
             valueSuffix: '°C',
-            xDateFormat: '%d.%m.%Y, %H:%M'
+            xDateFormat: '%a %d.%m.%Y, %H:%M'
         },
         legend: {
             layout: 'vertical',
@@ -528,7 +530,7 @@
                 //var htempl = '<tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Sademed</th><th class="d-xs-none">Rõhk</th></tr>';
                 //var templ = '<tr class="<%=night?"night hide":""%>"><td><span class="day hide"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="d-xs-none"><%=press?press:""%></td></tr>';
                 var str='';
-                var hlinks = '<tr class="fcontainer"><th colspan="6"><span class="fc-source" name="em">Ilmateenistus</span>&nbsp;<span class="fc-source" name="wg">Windguru.cz</span>&nbsp;<span class="fc-source" name="yr">Yr.no</span><span class="right fchead">'+fc.name+'</span></th></tr>';
+                var hlinks = '<tr class="fcontainer"><th colspan="10"><span class="fc-source" name="em">Ilmateenistus</span>&nbsp;<span class="fc-source" name="wg">Windguru.cz</span>&nbsp;<span class="fc-source" name="yr">Yr.no</span><span class="right fchead">'+fc.name+'</span></th></tr>';
                 var keys = Object.keys(has),tnow=new Date().getTime(),o;
 
                 for(i=0,j=dbase.length;i<j;++i) {
@@ -556,7 +558,7 @@
                 var where = $('#'+my.chartorder[0]+'2');
                 if(where) {
                     where.html(_.template(self.dataTableTemplate)({classes:'table table-sm',thead:_.template(self.fcHeadTemplate)({inforows:hlinks}),tbody:str}));
-                    where.css('height','100%');
+                    where.addClass('chart-table');
                 }
                 $('#'+my.chartorder[1]+'2').hide();
                 $('#'+my.chartorder[2]+'2').hide();
