@@ -577,6 +577,18 @@ var ilm = (function(my) {
         loadMap: function(e) {
             var self = this,
                 me = e && e.target ? $(e.target) : e ? $(e) : $('.chart-container');
+            
+            var sampleModes = ['graph', 'table'], container = document.querySelector('.container'), sm;
+            sampleModes.forEach(function(name) {
+                sm = 'samplemode-' + name;
+                if (self.samplemode != name && container && container.classList.contains(sm)) {
+                    container.classList.remove(sm);
+                }
+                else if (self.samplemode === name && container && !container.classList.contains(sm)) {
+                    container.classList.add(sm);
+                }
+            });
+            
             var templ = '<div class="map-container"><div><span class="map-info">&nbsp;</span></div><div class="mapbox" id="map"></div></div>';
             if (me) {
                 me.html(templ);
@@ -768,6 +780,17 @@ var ilm = (function(my) {
                     self.curplace = o;
                 }
             }
+
+            var sampleModes = ['graph', 'table'], container = document.querySelector('.container'), sm;
+            sampleModes.forEach(function(name) {
+                sm = 'samplemode-' + name;
+                if (self.samplemode != name && container && container.classList.contains(sm)) {
+                    container.classList.remove(sm);
+                }
+                else if (self.samplemode === name && container && !container.classList.contains(sm)) {
+                    container.classList.add(sm);
+                }
+            });
             if (me && self.getWidth() < 850) {
                 var tmp = me;
                 while (tmp && tmp.length && !tmp.hasClass('data-menu-row') && !tmp.hasClass('chart-container')) {

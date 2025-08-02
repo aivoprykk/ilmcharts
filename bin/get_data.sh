@@ -184,7 +184,7 @@ title=$2
 coord=$(echo "${3}"|tr -d '[:space:]');
 lat=${coord/,*/};
 lon=${coord/*,/};
-names="wg:${4} yr:${5} emhi:${6} mnt:${7} zoig:${8} emu:${9} ut:${10} my:${11} empg:${12} flydog:${13} ttu:${14}"
+names="wg:${4} yr:${5} emhi:${6} mnt:${7} emu:${8} ut:${9} my:${10} empg:${11} flydog:${12} ttu:${13}"
 IFS=' '
   IFS=','; coord=($value); IFS=' ';
 
@@ -241,13 +241,14 @@ fi
 if [ $force -gt 0 -o $t -le 0 ]; then
   #[ $name = "wg" ] && rotate json ${out} ${file}
   #[ $name = "yr" ] && rotate xml ${out} ${file}
+  wgetcmd="wget -t1 -T10 -U '$meinfo' -q -O $out"
   if [ $lab -gt 0 -o x$dry != x ]; then
-    echo wget -T10 --tries=1 -U "$meinfo" -q -O ${out}/${file}.tmp "${url}"
+    echo ${wgetcmd}/${file}.tmp "${url}"
   fi
   if [ x"$dry" = x"" ]; then
-    wget -T10 --tries=1 -U "$meinfo" -q -O ${out}/${file}.tmp "${url}"
+    ${wgetcmd}/${file}.tmp "${url}"
     if [ x"$file2" != x"" ]; then
-      wget -T10 --tries=1 -U "$meinfo" -q -O ${out}/${file2}.tmp "${url2}"
+      ${wgetcmd}/${file2}.tmp "${url2}"
     fi
   fi
   t=`xtime ${out} ${file}.tmp ${name} "${t0}"`
