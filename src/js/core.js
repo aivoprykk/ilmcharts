@@ -6,30 +6,26 @@ var ilm = (function(my) {
         $ = w.$,
         _ = w._,
         console = w.console,
-        SunCalc = w.SunCalc,
-        fcmax=72;
+        SunCalc = w.SunCalc;
 
     function State(opt) {
         opt = opt || {};
         var defaults = {
             id: 'ilmchartsstore01',
-            datamode: opt.datamode || 'arhiiv_saadjarv_saadjarve',
             timeframe: opt.timeframe || 0,
-            fcsources: opt.fcsources || ['wg', 'yr', 'em'],
-            fcplace: opt.fcplace || 'aksi',
-            curplace: opt.curplace || 'arhiiv_saadjarv_saadjarve',
+            curplace: opt.curplace || 'aksi',
             chartorder: opt.chartorder || ['temp', 'wind_speed', 'wind_dir'],
             gridorder: opt.gridorder || [],
+            gridindex: opt.gridindex || [],
             showgroup: opt.showgroup || '',
             binded: opt.binded || false,
             linksasmenu: opt.linksasmenu || false,
             timezone: opt.timezone || 2,
             viewmode: opt.viewmode || 'cur',
             samplemode: opt.samplemode || 'table',
-            sampletype: opt.sampletype || 'detail',
-            fcsource: opt.fcsource || 'wg',
-            fcmax: opt.fcmax || fcmax,
-            fcshownight: opt.fcshownight || false
+            fctimeframe: opt.fctimeframe || 3, // days
+            fcshownight: opt.fcshownight || true,
+            viewStates: opt.viewStates || {}
         };
         this.id = defaults.id;
         this.attr = defaults;
@@ -55,10 +51,11 @@ var ilm = (function(my) {
             var changed = false,
                 a;
             for (a in this.attr) {
-                if (a !== 'id' && (opt[a] || typeof opt[a] === 'boolean') && opt[a] !== this.attr[a]) {
+                if (a !== 'id' && (opt[a] !== undefined) && 
+                    (typeof opt[a] !== 'object' ? opt[a] !== this.attr[a] : JSON.stringify(opt[a]) !== JSON.stringify(this.attr[a]))) {
                     this.attr[a] = (opt[a] === 'none') ? '' : opt[a];
                     changed = true;
-                    console.log(a + ' ' + opt[a]);
+                    console.log(a + ' ' + (typeof opt[a] === 'object' ? JSON.stringify(opt[a]) : opt[a]));
                 }
             }
             if (changed) {
@@ -84,100 +81,406 @@ var ilm = (function(my) {
     };
 
     function App(placeholder) {
-        this.deffcmax=fcmax;
         this.state = new State().load();
         this.placeholder = placeholder || '#container';
-        this.dataurl = '/cgi-bin/cpp/ilm/image.cgi?t=json';
+        this.datadir = 'archive';
         this.digits = 1;
         this.graphs = ['temp', 'wind_speed', 'wind_dir'];
-        this.fcsources = this.state.attr.fcsources;
-        this.fcsources_available = ['yr', 'wg', 'em'];
-        this.fcsource = this.state.attr.fcsource || 'wg';
-        this.fcmax = this.state.attr.fcmax || this.deffcmax;
-        this.fcshownight = this.state.attr.fcshownight || false;
         this.samplemode = this.state.attr.samplemode || 'table';
-        this.sampletype = this.state.attr.sampletype || 'detail';
+        this.fctimeframe = this.state.attr.fctimeframe || 3;
         this.viewmode = this.state.attr.viewmode || 'cur';
-        this.fcplace = this.state.attr.fcplace;
         this.timezone = this.state.attr.timezone;
-        this.curplace = this.state.attr.curplace;
-        this.datamode = this.state.attr.datamode;
         this.timeframe = this.state.attr.timeframe;
         this.showgroup = this.state.attr.showgroup;
         this.binded = this.state.attr.binded;
         this.linksasmenu = this.state.attr.linksasmenu;
         this.chartorder = this.state.attr.chartorder;
-        this.fcsourcesdata = {
-            yr: { name: 'Yr', url: 'http://www.yr.no', datadir: 'yr_data2', fc_file: 'yr_forecast.json', datatype: 'json' },
-            wg: { name: 'WindGuru', url: 'http://www.windguru.cz', datadir: 'wg_data', fc_file: 'windguru_forecast.json', datatype: 'json' },
-            em: { name: 'Ilmateenistus', url: 'http://www.ilmateenistus.ee', datadir: 'empg_data', fc_file: 'empg_forecast.json', datatype: 'json' }
+        
+        this.curplace = this.state.attr.curplace || 'aksi';
+        this.req_curplace = '';
+        this.initialized = false;
+        this.curplaces = {
+            aksi: { 
+                id: 'saadjarv_saadjarve', name: 'Saadjärve', group: 'saadjarv', bind: 'aksi', location: [58.535, 26.666],
+                // directory name for historical sources we get hstations.key + hstations.id + '_data'
+                hstations: {
+                    wsds: { id: 'saadjarv_saadjarve', location: [58.54048, 26.68177] },
+                    ut: { id: 'tartu', location: [58.365945, 26.690791] },
+                    emu: { id: 'emu', location: [58.388575, 26.694013] }
+                },
+                hstations_new: {
+                    wsds: { id: 'saadjarv_saadjarve', location: [58.9578, 23.4901] }
+                },
+                fcstations: {
+                    wg: { id: 'aksi', link: '266923', location: [58.535, 26.666] },
+                    yr: { id: 'aksi', location: [58.535, 26.666] },
+                    emhi: { id: 'aksi', location: [58.529725, 26.639348] }
+                }
+            },
+            tartu: { id: 'tartu', name: 'Tartu', group: 'koht', bind: 'tartu', location: [58.365945, 26.690791],
+                hstations: {
+                    ut: { id: 'tartu', location: [58.365945, 26.690791] },
+                    emu: { id: 'emu', location: [58.388575, 26.694013] },
+                    mnt: { id: 'tartu', location: [58.9578, 23.4901] }
+                },
+                hstations_new: {
+                    ut: { id: 'tartu', location: [58.9578, 23.4901] },
+                    emu: { id: 'emu', location: [58.388575, 26.694013] },
+                    emhi: { id: 'Tartu', location: [58.9578, 23.4901] },
+                    mnt: { id: 'tartu', location: [58.9578, 23.4901] }
+                },
+                fcstations: {
+                    yr: { id: 'tartu', location: [58.380756, 26.723452] },
+                    emhi: { id: 'tartu', location: [58.365945, 26.690791] }
+                }
+            },
+            tamme: { 
+                id: 'vortsjarv_tamme', name: 'Tamme', group: 'vortsjarv', bind: 'tamme', location: [58.271306, 26.134923],
+                hstations: {
+                    wsds: { id: 'vortsjarv_tamme', location: [58.271306, 26.134923] },
+                    mnt: { id: 'tamme', location: [58.331664, 26.187807] }
+                },
+                hstations_new: {
+                    wsds: [
+                        { id: 'vortsjarv_tamme', location: [58.9578, 23.4901] }, 
+                    ],
+                    emhi: { id: 'Tartu_Tõravere', location: [58.9578, 23.4901] },
+                },
+                fcstations: {
+                    wg: { id: 'tamme', link: '192609', location: [58.271306, 26.134923] },
+                    yr: { id: 'tamme', location: [58.271, 26.132] },
+                    emhi: { id: 'tamme', location: [58.224666, 26.135578] }
+                }
+            },
+            joesuu: { 
+                id: 'vortsjarv_joesuu', name: 'Jõesuu', group: 'vortsjarv', bind: 'joesuu', location: [58.384,26.127],
+                hstations: {
+                    wsds: { id: 'vortsjarv_joesuu', location: [58.384,26.127] }
+                },
+                hstations_new: {
+                    wsds: [
+                        { id: 'vortsjarv_joesuu', location: [58.9578, 23.4901] },
+                    ],
+                    emhi: { id: 'Rannu_Jõesuu', location: [58.9578, 23.4901] },
+                },
+                fcstations: {
+                    wg: { id: 'joesuu', link: '692681', location: [58.386441, 26.131942] },
+                    yr: { id: 'joesuu', location: [58.384, 26.127] },
+                    emhi: { id: 'joesuu', location: [58.405000, 26.076182] }
+                }
+            },
+            nina: { id: 'peipsi_nina', name: 'Nina', group: 'peipsi', bind: 'nina', location: [58.598889, 27.209722],
+                hstations: {
+                    wsds: { id: 'peipsi_nina', location: [58.598889, 27.209722] }
+                },
+                hstations_new: {
+                    wsds: { id: 'peipsi_nina', location: [58.598889, 27.209722] },
+                    emhi: { id: 'Peipsi_Nina', location: [58.598889, 27.209722] },
+                },
+                fcstations: {
+                    wg: { id: 'nina', link: '20401', location: [58.598889, 27.209722] },
+                    yr: { id: 'nina', link: '2-589982', location: [58.598889, 27.209722] },
+                    emhi: { id: 'nina', location: [58.606881, 27.203583] }
+                }
+            },
+            rapina: { id: 'peipsi_rapina',  name: 'Räpina Sadam', group: 'peipsi', bind: 'rapina', location: [58.126,27.532],
+                hstations: {
+                    wsds: { id: 'peipsi_rapina', location: [58.126,27.532] },
+                    mnt: { id: 'rapina', location: [57.957275, 27.626020] },
+                    ttu: { id: 'rapina', location: [57.957275, 27.626020] }
+                },
+                hstations_new: {
+                    wsds: { id: 'peipsi_rapina', location: [58.9578, 23.4901] },
+                    emhi: [
+                        { id: 'Räpina', location: [58.9578, 23.4901] },
+                        { id: 'Praaga', location: [58.9578, 23.4901] }
+                    ],
+                    ttu: { id: 'laaksaare', location: [58.9578, 23.4901] },
+                },
+                fcstations: {
+                    wg: { id: 'rapina', link: '183648', location: [58.124988, 27.530086] },
+                    yr: { id: 'rapina', location: [58.126,27.532] },
+                    emhi: { id: 'rapina', location: [58.235806,27.470503] }
+                }
+            },
+            haademeeste: { id: 'haademeeste', name: 'Häädemeeste', group: 'meri', bind: 'haademeeste', location: [58.071644, 24.478816],
+                hstations: {
+                    emhi: { id: 'haademeeste', location: [58.071644, 24.478816] },
+                    mnt: { id: 'haademeeste', location: [58.071644, 24.478816] }
+                },
+                hstations_new: {
+                    emhi: { id: 'Häädemeeste', location: [58.071644, 24.478816] },
+                    mnt: { id: 'haademeeste', location: [58.071644, 24.478816] }
+                },
+                fcstations: {
+                    wg: { id: 'haademeeste', link: '246420', location: [58.071644, 24.478816] },
+                    yr: { id: 'haademeeste', link: '2-592231', location: [58.071644, 24.478816] },
+                    emhi: { id: 'haademeeste', location: [58.079101, 24.493466] }
+                }
+            },
+            parnu: { id: 'parnu', name: 'Pärnu', group: 'meri', bind: 'parnu', location: [58.365958, 24.526257],
+                hstations: {
+                    ttu: { id: 'parnu', location: [58.365958, 24.526257] },
+                    emhi: { id: 'parnu', location: [58.365958, 24.526257] },
+                    mnt: { id: 'parnu', location: [58.365958, 24.526257] },
+                },
+                hstations_new: {
+                    ttu: { id: 'parnu', location: [58.365958, 24.526257] },
+                    emhi: { id: 'Pärnu', location: [58.365958, 24.526257] },
+                    mnt: { id: 'parnu', location: [58.365958, 24.526257] },
+                },
+                fcstations: {
+                    wg: { id: 'parnu', link: '92781', location: [58.365958, 24.526257] },
+                    yr: { id: 'parnu', link: '2-592231', location: [58.35, 24.545] },
+                    emhi: { id: 'parnu', location: [58.382515, 24.510179] }
+                }
+            },
+            paatsalu: { id: 'paatsalu', name: 'Virtsu', group: 'meri', bind: 'paatsalu', location: [58.508902, 23.663027],
+                hstations: {
+                    ttu: { id: 'paatsalu', location: [58.508902, 23.663027] },
+                    emhi: { id: 'paatsalu', location: [58.508902, 23.663027] },
+                },
+                hstations_new: {
+                    ttu: { id: 'virtsusadam', location: [58.508902, 23.663027] },
+                    emhi: { id: 'Virtsu', location: [58.508902, 23.663027] },
+                },
+                fcstations: {
+                    wg: { id: 'paatsalu', link: '479054', location: [58.508902, 23.663027] },
+                    yr: { id: 'paatsalu', link: '2-589817', location: [58.508902, 23.663027] },
+                    emhi: { id: 'paatsalu', location: [58.529210, 23.700999] }
+                }
+            },
+            sorve: { id: 'sorve', name: 'Sõrve', group: 'meri', bind: 'sorve', location: [57.909984, 22.055313],
+                hstations: {
+                    emhi: [
+                        { id: 'sorve', location: [57.909984, 22.055313] }
+                    ],
+                    mnt: { id: 'sorve', location: [57.909984, 22.055313] }
+                },
+                hstations_new: {
+                    emhi: [
+                        { id: 'Sõrve', location: [57.909984, 22.055313] },
+                        { id: 'Mõntu', location: [57.909984, 22.055313] }
+                    ],
+                    mnt: { id: 'sorve', location: [57.909984, 22.055313] }
+                },
+                fcstations: {
+                    wg: { id: 'sorve', link: '108163', location: [57.906, 22.045] },
+                    yr: { id: 'sorve', link: '2-589817', location: [57.906, 22.045] },
+                    emhi: { id: 'sorve', location: [57.918654, 22.059625] }
+                }
+            },
+            saaretirp: { id: 'saaretirp', name: 'Heltermaa', group: 'meri', bind: 'saaretirp', location: [58.866845079804946, 23.04607326381741],
+                hstations: {
+                    ttu: { id: 'saaretirp', location: [58.866845079804946, 23.04607326381741] },
+                    emhi: { id: 'saaretirp', location: [58.866845079804946, 23.04607326381741] }
+                },
+                hstations_new: {
+                    ttu: { name: 'Heltermaa', id: 'heltermaa', location: [58.9578, 23.4901] },
+                    emhi: { id: 'Heltermaa', location: [58.9578, 23.4901] },
+                },
+                fcstations: {
+                    wg: { id: 'saaretirp', link: '1299399', location: [58.758, 22.789] },
+                    yr: { id: 'saaretirp', link: '2-589817', location: [58.758, 22.789] },
+                    emhi: { id: 'saaretirp', location: [58.758, 22.789] }
+                }
+            },
+            ristna: { id: 'ristna', name: 'Ristna', group: 'meri', bind: 'ristna', location: [58.927304, 22.041023],
+                hstations: {
+                    emhi: { id: 'ristna', location: [58.927304, 22.041023] },
+                    mnt: { id: 'ristna', location: [58.927304, 22.041023] }
+                },
+                hstations_new: {
+                    emhi: { id: 'Ristna', location: [58.9578, 23.4901] },
+                    mnt: { name: 'Ristna', id: 'ristna', location: [58.9578, 23.4901] }
+                },
+                fcstations: {
+                    wg: { id: 'ristna', link: '96592', location: [58.927304, 22.041023] },
+                    yr: { id: 'ristna', link: '2-794818', location: [58.927304, 22.041023] },
+                    emhi: { id: 'ristna', location: [58.928326, 22.069358] }
+                }
+            },
+            rohukyla: { id: 'rohukyla', name: 'Rohuküla', group: 'meri', link: '', bind: 'rohukyla', location: [58.9578, 23.4901],
+                hstations: {
+                    ttu: { id: 'rohukyla', location: [58.9578, 23.4901] }
+                },
+                hstations_new: {
+                    ttu: { name: 'Rohuküla', id: 'rohukyla', location: [58.9578, 23.4901] },
+                    emhi: { id: 'Rohuküla', location: [58.9578, 23.4901] },
+                },
+                fcstations: {
+                    wg: { id: 'rohukyla', link: '245713', location: [58.911, 23.420] },
+                    yr: { id: 'rohukyla', link: '2-794818', location: [58.911, 23.420] },
+                    emhi: { id: 'rohukyla', location: [58.911, 23.420] }
+                }
+            },
+            dirhami: { id: 'dirhami', name: 'Dirhami', group: 'meri', bind: 'dirhami', location: [59.2133, 23.5031],
+                hstations: {
+                    emhi: { id: 'dirhami', location: [59.2133, 23.5031] }
+                },
+                hstations_new: {
+                    emhi: { id: 'Dirhami', location: [58.9578, 23.4901] },
+                },
+                fcstations: {
+                    wg: { id: 'dirhami', link: '261785', location: [59.2133, 23.5031] },
+                    yr: { id: 'dirhami', link: '2-796115', location: [59.2133, 23.5031] },
+                    emhi: { id: 'dirhami', location: [59.208078, 23.496537] }
+                }
+            },
+            pirita: { id: 'pirita', name: 'Pirita', group: 'meri', bind: 'pirita', location: [59.471562, 24.825608],
+                hstations: {
+                    emhi: { id: 'pirita', location: [59.471562, 24.825608] },
+                    ttu: { id: 'pirita', location: [59.471562, 24.825608] }
+                },
+                hstations_new: {
+                    emhi: { id: 'Pirita', location: [58.9578, 23.4901] },
+                    ttu: { name: 'Vanasadam', id: 'vanasadam', location: [58.9578, 23.4901] }
+                },
+                fcstations: {
+                    wg: { id: 'pirita', link: '125320', location: [59.471562, 24.825608] },
+                    yr: { id: 'pirita', link: '2-798565', location: [59.471562, 24.825608] },
+                    emhi: { id: 'pirita', location: [59.465992, 24.834083] }
+                }
+            },
+            rohuneeme: { id: 'rohuneeme', name: 'Rohuneeme', group: 'meri', bind: 'rohuneeme', location: [59.551945, 24.794094],
+                hstations: {
+                    emhi: { id: 'rohuneeme', location: [59.551945, 24.794094] },
+                    ttu: { id: 'rohuneeme', location: [59.551945, 24.794094] }
+                },
+                hstations_new: {
+                    emhi: { id: 'Rohuneeme', location: [59.551945, 24.794094] },
+                    ttu: { id: 'rohuneeme', location: [59.551945, 24.794094] }
+                },
+                fcstations: {
+                    wg: { id: 'rohuneeme', link: '70524', location: [59.554, 24.791] },
+                    yr: { id: 'rohuneeme', link: '2-798565', location: [59.554, 24.791] },
+                    emhi: { id: 'rohuneeme', location: [59.554, 24.791] }
+                }
+            },
+            loksa: { id: 'loksa', name: 'Loksa', group: 'meri', bind: 'koipsi', location: [59.5872, 25.6943],
+                hstations: {
+                    ttu: { id: 'koipsi', location: [58.9578, 23.4901] },
+                    emhi: { id: 'loksa', location: [59.5872, 25.6943] },
+                },
+                hstations_new: {
+                    ttu: { id: 'muuga', location: [58.9578, 23.4901] },
+                    emhi: { id: 'Loksa', location: [58.9578, 23.4901] },
+                },
+                fcstations: {
+                    wg: { id: 'loksa', link: '1299411', location: [59.581387, 25.722052] },
+                    yr: { id: 'loksa', link: '2-591227', location: [59.581387, 25.722052] },
+                    emhi: { id: 'koipsi', location: [59.581387, 25.722052] }
+                }
+            },
+            haapsalu: { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', group: 'meri', bind: 'haapsalu', location: [58.9578, 23.4901],
+                hstations: {
+                    emhi: { id: 'haapsalu', location: [58.9578, 23.4901] },
+                },
+                hstations_new: {
+                    emhi: [
+                        { id: 'Haapsalu_sadam', location: [58.9578, 23.4901] },
+                        { id: 'Haapsalu', location: [58.9578, 23.4901] }
+                    ]
+                },
+                fcstations: {
+                    wg: { id: 'haapsalu', link: '245713', location: [58.9578, 23.4901] },
+                    yr: { id: 'haapsalu', link: '2-591227', location: [58.957, 23.543] },
+                    emhi: { id: 'haapsalu', location: [58.9578, 23.4901] }
+                }
+            },
+            jogeva: { id: 'jogeva', name: 'Jõgeva', group: 'koht', bind: 'jogeva', location: [58.764849, 26.404618],
+                hstations: {
+                    mnt: { id: 'jogeva', location: [58.764849, 26.404618] }
+                },
+                hstations_new: {
+                    emhi: { id: 'Jõgeva', location: [58.764849, 26.404618] },
+                    mnt: { id: 'jogeva', location: [58.764849, 26.404618] }
+                },
+                fcstations: {
+                    yr: { id: 'jogeva', link: '2-591902', location: [58.764849, 26.404618] },
+                    emhi: { id: 'jogeva', location: [58.746083, 26.395523] }
+                }
+            },
+            uhmardu: { id: 'uhmardu', name: 'Uhmardu', group: 'koht', bind: 'uhmardu', location: [58.640605, 26.791860],
+                hstations: {
+                    mnt: { id: 'uhmardu', location: [58.640605, 26.791860] }
+                },
+                hstations_new: {
+                    mnt: { id: 'uhmardu', location: [58.640605, 26.791860] },
+                    emhi: { id: 'Kääpa', location: [58.640605, 26.791860] }
+                },
+                fcstations: {
+                    yr: { id: 'uhmardu', link: '2-793979', location: [58.640605, 26.791860] },
+                    emhi: { id: 'uhmardu', location: [58.625507, 26.767479] }
+                }
+            },
+            mustvee: {
+                id: 'mustvee', name: 'Mustvee', group: 'peipsi', bind: 'mustvee', location: [58.848164, 26.937750],
+                hstations: {
+                    emhi: { id: 'mustvee', location: [58.7578, 26.7278] }
+                },
+                hstations_new: {
+                    emhi: { id: 'Mustvee', location: [58.7578, 26.7278] }
+                },
+                fcstations: {
+                    yr: { id: 'mustvee', link: '2-590066', location: [58.848,26.952] },
+                    emhi: { id: 'mustvee', location: [58.848164,26.937750] }
+                }
+            }
         };
-        this.histsourcesdata = {
-            emhi: 'ilmateenistus.ee',
-            emu: 'energia.emu.ee',
-            ut: 'meteo.physic.ut.ee',
-            arhiiv: 'ilm.majasa.ee',
-            mnt: 'balticroads.net',
-            flydog: 'databuoys.sensornest.com',
-            ttu: 'on-line.msi.ttu.ee',
+
+        // Forecast settings
+        this.fcshownight = this.state.attr.fcshownight || false;
+        this.fcprovidersmeta = {
+            yr: { name: 'Yr.no', url: 'http://www.yr.no/en/details/table/', datadir: 'yr_data2', fc_file: 'yr_forecast.json', datatype: 'json' },
+            wg: { name: 'Windguru', url: 'http://www.windguru.cz/', datadir: 'wg_data', fc_file: 'windguru_forecast.json', datatype: 'json' },
+            emhi: { name: 'EMHI', url: 'http://www.ilmateenistus.ee/ilm/prognoosid/asukoha-prognoos/?coordinates=', datadir: 'empg_data', fc_file: 'empg_forecast.json', datatype: 'json' }
         };
+        this.fcproviders_available = [];
         this.fcplaces = {
             tartu: { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: '2-588335', emlink: '58.380052;26.722116', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
-            aksi: { id: 'aksi', name: 'Äksi Saadjärv', wglink: '266923', yrlink: '58.535,26.669', emlink: '58.529725;26.639348', group: 'saadjarv', bind: 'arhiiv_saadjarv_saadjarve', location: [58.534918, 26.643429] },
+            aksi: { id: 'aksi', name: 'Äksi Saadjärv', wglink: '266923', yrlink: '58.535,26.666', emlink: '58.529725;26.639348', group: 'saadjarv', bind: 'wsds_saadjarv_saadjarve', location: [58.535, 26.666] },
             uhmardu: { id: 'uhmardu', name: 'Uhmardu', yrlink: '2-793979', emlink: '58.625507;26.767479', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
             jogeva: { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: '2-591902', emlink: '58.746083;26.395523', link: '', bind: 'mnt_jogeva', location: [58.764849, 26.404618] },
-            tamme: { id: 'tamme', name: 'Tamme Võrtsjärv', wglink: 192609, yrlink: '2-587687', emlink: '58.224666;26.135578', group: 'vortsjarv-tamme', bind: 'arhiiv_vortsjarv_tamme', location: [58.271306, 26.134923] },
-            joesuu: { id: 'joesuu', name: 'Jõesuu Võrtsjärv', wglink: 692681, yrlink: '2-591907', emlink: '58.405000;26.076182', group: 'vortsjarv-joesuu', bind: 'arhiiv_vortsjarv_joesuu', location: [58.386441, 26.131942] },
-            rapina: { id: 'rapina', name: 'Räpina Peipsi', wglink: 183648, yrlink: '58.122,27.535', emlink: '58.235806;27.470503', group: 'peipsi', bind: 'arhiiv_peipsi_rapina', location: [58.124988, 27.530086] },
-            nina: { id: 'nina', name: 'Nina Peipsi', wglink: 20401, yrlink: '2-589982', emlink: '58.606881;27.203583', group: 'peipsi', bind: 'arhiiv_peipsi_nina', location: [58.598889, 27.209722] },
+            tamme: { id: 'tamme', name: 'Tamme Võrtsjärv', wglink: 192609, yrlink: '58.271,26.132', emlink: '58.224666;26.135578', group: 'vortsjarv-tamme', bind: 'wsds_vortsjarv_tamme', location: [58.271, 26.132] },
+            joesuu: { id: 'joesuu', name: 'Jõesuu Võrtsjärv', wglink: 692681, yrlink: '58.384,26.127', emlink: '58.405000;26.076182', group: 'vortsjarv-joesuu', bind: 'wsds_vortsjarv_joesuu', location: [58.384, 26.127] },
+            rapina: { id: 'rapina', name: 'Räpina Peipsi', wglink: 183648, yrlink: '58.126,27.532', emlink: '58.235806;27.470503', group: 'peipsi', bind: 'wsds_peipsi_rapina', location: [58.126, 27.532] },
+            nina: { id: 'nina', name: 'Nina Peipsi', wglink: 20401, yrlink: '2-589982', emlink: '58.606881;27.203583', group: 'peipsi', bind: 'wsds_peipsi_nina', location: [58.598889, 27.209722] },
             pirita: { id: 'pirita', name: 'Pirita Tallinn', wglink: 125320, yrlink: '2-798565', emlink: '59.465992;24.834083', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
-            rohuneeme: { id: 'rohuneeme', name: 'Rohuneeme Viimsi', wglink: 70524, yrlink: '2-588984', group: 'meri', bind: 'emhi_rohuneeme', location: [59.551945, 24.794094] },
+            rohuneeme: { id: 'rohuneeme', name: 'Rohuneeme Viimsi', wglink: 70524, yrlink: '59.554,24.791', group: 'meri', bind: 'emhi_rohuneeme', location: [59.554,24.791] },
             haapsalu: { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', wglink: 245713, yrlink: '58.957,23.543', emlink: '183', group: 'meri', bind: 'emhi_haapsalu', location: [58.9578, 23.4901] },
-            rohukyla: { id: 'rohukyla', name: 'Rohuküla', wglink: 245713, yrlink: '58.911,23.420', emlink: '58.907889;23.428161', group: 'meri', bind: 'ttu_rohukyla', location: [58.9578, 23.4901] },
+            rohukyla: { id: 'rohukyla', name: 'Rohuküla', wglink: 245713, yrlink: '58.911,23.420', emlink: '58.907889;23.428161', group: 'meri', bind: 'ttu_rohukyla', location: [58.911, 23.420] },
             parnu: { id: 'parnu', name: 'Pärnu', wglink: 92781, yrlink: '58.350,24.545', emlink: '58.382515;24.510179', group: 'meri', bind: 'emhi_parnu', location: [58.365958, 24.526257] },
             haademeeste: { id: 'haademeeste', name: 'Häädemeeste', wglink: 246420, yrlink: '2-592231', emlink: '58.079101;24.493466', group: 'meri', bind: 'emhi_haademeeste', location: [58.071644, 24.478816] },
-            sorve: { id: 'sorve', name: 'Sõrve Saaremaa', wglink: 108163, yrlink: '57.899,22.043', emlink: '57.918654;22.059625', group: 'meri', bind: 'emhi_sorve', location: [57.909984, 22.055313] },
-            saaretirp: { id: 'saaretirp', name: 'Sääretirp Hiiumaa', wglink: 1299399, yrlink: '58.764,22.790', emlink: '7950', group: 'meri', bind: 'ttu_saaretirp', location: [58.758522, 22.789624] },
+            sorve: { id: 'sorve', name: 'Sõrve Saaremaa', wglink: 108163, yrlink: '57.906,22.045', emlink: '57.918654;22.059625', group: 'meri', bind: 'emhi_sorve', location: [57.906, 22.045] },
+            saaretirp: { id: 'saaretirp', name: 'Sääretirp Hiiumaa', wglink: 1299399, yrlink: '58.758,22.789', emlink: '7950', group: 'meri', bind: 'ttu_saaretirp', location: [58.758, 22.789] },
             ristna: { id: 'ristna', name: 'Ristna Hiiumaa', wglink: 96592, yrlink: '2-794818', emlink: '58.928326;22.069358', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
             koipsi: { id: 'koipsi', name: 'Koipsi', wglink: 1299411, yrlink: '2-591227', emlink: '59.581387;25.722052', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
             dirhami: { id: 'dirhami', name: 'Dirhami', wglink: 261785, yrlink: '2-796115', emlink: '59.208078;23.496537', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
             paatsalu: { id: 'paatsalu', name: 'Paatsalu', wglink: 479054, yrlink: '2-589817', emlink: '58.529210;23.700999', group: 'meri', bind: 'ttu_paatsalu', location: [58.508902, 23.663027] }
         };
-        this.curplaces = {
-            arhiiv_saadjarv_saadjarve: { id: 'arhiiv_saadjarv_saadjarve', cid: '', name: 'Saadjärve Saadjärv', group: 'saadjarv', link: '', bind: 'aksi', location: [58.54048, 26.68177] },
-            // emu: { id: 'emu', name: 'EMU Tartu', cid: '', group: 'tartu', link: '/weather', bind: 'tartu', location: [58.388575, 26.694013] },
-            ut_tartu: { id: 'ut_tartu', cid: '', name: 'UT Tartu', group: 'koht', link: '', bind: 'tartu', location: [58.365945, 26.690791] },
-            arhiiv_vortsjarv_tamme: { id: 'arhiiv_vortsjarv_tamme', cid: '', name: 'Tamme Võrtsjärv', group: 'vortsjarv-tamme', link: '', bind: 'tamme', location: [58.271306, 26.134923] },
-            mnt_tamme: { id: 'mnt_tamme', cid: '', name: 'Tamme (V-Rakke) MNT', group: 'vortsjarv', link: '', bind: 'tamme', location: [58.331664, 26.187807] },
-            arhiiv_vortsjarv_joesuu: { id: 'arhiiv_vortsjarv_joesuu', cid: '', name: 'Jõesuu Võrtsjärv', group: 'vortsjarv-joesuu', link: '', bind: 'joesuu', location: [58.386441, 26.131942] },
-            arhiiv_peipsi_nina: { id: 'arhiiv_peipsi_nina', cid: '', name: 'Nina Peipsi', group: 'peipsi-nina', link: '', bind: 'nina', location: [58.598889, 27.209722] },
-            arhiiv_peipsi_rapina: { id: 'arhiiv_peipsi_rapina', cid: '', name: 'Räpina Peipsi', group: 'peipsi-rapina', link: '', bind: 'rapina', location: [58.124988, 27.530086] },
-            mnt_rapina: { id: 'mnt_rapina', cid: '', name: 'Räpina MNT', group: 'peipsi', link: '', bind: 'rapina', location: [57.957275, 27.626020] },
-            emhi_haademeeste: { id: 'emhi_haademeeste', cid: 'haademeeste', name: 'Häädemeeste EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haademeeste', location: [58.071644, 24.478816] },
-            // arhiiv_parnu_aloha: { id: 'arhiiv_parnu_aloha', cid: '', name: 'Pärnu Aloha', group: 'meri', link: '', bind: 'parnu', location: [58.371146, 24.508807] },
-            emhi_parnu: { id: 'emhi_parnu', cid: 'parnu', name: 'Pärnu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'parnu', location: [58.365958, 24.526257] },
-            ttu_parnu: { id: 'ttu_parnu', cid: 'parnu', name: 'Pärnu TTU', group: 'meri', link: '', bind: 'parnu', location: [58.365958, 24.526257] },
-            emhi_paatsalu: { id: 'emhi_paatsalu', cid: 'virtsu', name: 'Virtsu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'paatsalu', location: [58.508902, 23.663027] },
-            // ttu_paatsalu: { id: 'ttu_paatsalu', cid: 'virtsu', name: 'Virtsu TTU', group: 'meri', link: '', bind: 'paatsalu', location: [58.508902, 23.663027] },
-            emhi_sorve: { id: 'emhi_sorve', cid: 'montu', name: 'Sõrve EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'sorve', location: [57.909984, 22.055313] },
-            emhi_saaretirp: { id: 'emhi_saaretirp', cid: 'heltermaa', name: 'Heltermaa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'saaretirp', location: [58.866845079804946, 23.04607326381741] },
-            ttu_saaretirp: { id: 'ttu_saaretirp', cid: 'heltermaa', name: 'Heltermaa TTU', group: 'meri', link: '', bind: 'saaretirp', location: [58.866845079804946, 23.04607326381741] },
-            emhi_ristna: { id: 'emhi_ristna', cid: 'ristna-2', name: 'Ristna EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'ristna', location: [58.927304, 22.041023] },
-            ttu_rohukyla: { id: 'ttu_rohukyla', cid: 'rohukyla', name: 'Rohuküla TTU', group: 'meri', link: '', bind: 'rohukyla', location: [58.9578, 23.4901] },
-            emhi_dirhami: { id: 'emhi_dirhami', cid: 'dirhami', name: 'Dirhami EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'dirhami', location: [59.2133, 23.5031] },
-            emhi_pirita: { id: 'emhi_pirita', cid: 'pirita', name: 'Pirita EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'pirita', location: [59.471562, 24.825608] },
-            emhi_rohuneeme: { id: 'emhi_rohuneeme', cid: 'rohuneeme', name: 'Rohuneeme EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'rohuneeme', location: [59.551945, 24.794094] },
-            emhi_loksa: { id: 'emhi_loksa', cid: 'loksa', name: 'Loksa EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'koipsi', location: [59.5872, 25.6943] },
-            emhi_haapsalu: { id: 'emhi_haapsalu', previd: 'emhi_topu', cid: 'haapsalu-sadam', name: 'Haapsalu EMHI', group: 'meri', link: '/meri/vaatlusandmed/', bind: 'haapsalu', location: [58.9578, 23.4901] },
-            mnt_jogeva: { id: 'mnt_jogeva', cid: '', name: 'Jõgeva MNT', group: 'koht', link: '', bind: 'jogeva', location: [58.764849, 26.404618] },
-            mnt_uhmardu: { id: 'mnt_uhmardu', cid: '', name: 'Uhmardu MNT', group: 'koht', link: '', bind: 'uhmardu', location: [58.640605, 26.791860] },
+
+        // History settings
+        this.hprovidersmeta = {
+            emhi: { name:'Emhi', url: 'https://www.ilmateenistus.ee/ilm/ilmavaatlused/vaatlusandmed/'},
+            emu: { name:'Emu', url: 'https://energia.emu.ee/'},
+            ut: { name:'UT', url: 'https://meteo.physic.ut.ee/'},
+            wsds: { name:'WSDS', url: 'https://ilm.majasa.ee/'},
+            mnt: { name:'MNT', url: 'https://balticroads.net/'},
+            flydog: { name:'Flydog', url: 'https://databuoys.sensornest.com/'},
+            ttu: { name:'TTU', url: 'http://on-line.msi.ttu.ee/'},
         };
+        this.hproviders_available = [];
+        
+        this.useNewHistPlaces = true;
+                
         this.addDst = this.isDst();
         this.lastdate = this.getTime(); //-(4*24*3600);
         this.date = 0;
         this.start = this.lastdate;
         this.historyactive = false;
         this.logo = 'Ilmainfo';
+
         this.chartoptions = {
             chart: {
                 zoomType: 'x',
@@ -245,23 +548,467 @@ var ilm = (function(my) {
 
     App.prototype = {
         changed: '',
+        normalizeHistValue: (v) => (Array.isArray(v) ? v : (v && typeof v === 'object') ? [v] : []),
+        buildHistStationIndex: function(places, { useNew = false, ingridOnly = false } = {}) {
+            const idx = new Map();
+
+            for (const [placeKey, place] of Object.entries(places || {})) {
+                if (!place) continue;
+                const parent = {
+                    placeKey,
+                    id: place.id,
+                    name: place.name,
+                    group: place.group,
+                    bind: place.bind,
+                    location: place.location
+                };
+                const push = (srcKey, value) => {
+                    for (const item of this.normalizeHistValue(value)) {
+                        if (!item) continue;
+                        if (ingridOnly && !item.ingrid) continue;
+                        const key = `${srcKey}_${item.id}`;
+                        const station = {
+                            id: item.id,
+                            location: item.location || null,
+                            ingrid: !!item.ingrid,
+                            source: srcKey,
+                            parent
+                        };
+                        // Prefer ingrid=true if duplicates appear
+                        if (!idx.has(key) || (station.ingrid && !idx.get(key).station.ingrid)) {
+                            idx.set(key, { name: key, source: srcKey, id: item.id, station });
+                        }
+                    }
+                };
+
+                if (!useNew && place.hstations && typeof place.hstations === 'object') {
+                    for (const [src, val] of Object.entries(place.hstations)) push(src, val);
+                }
+                else if (useNew && place.hstations_new && typeof place.hstations_new === 'object') {
+                    for (const [src, val] of Object.entries(place.hstations_new)) push(src, val);
+                }
+            }
+
+            return idx;
+        },
+        // Sorted list of "source_id" keys (stable, natural-ish order: by source then id)
+        getSortedHistStationKeys: function(index, comparator) {
+            const keys = Array.from(index.keys());
+            keys.sort(
+                comparator ||
+                ((a, b) => {
+                    const [as, ai] = a.split('_');
+                    const [bs, bi] = b.split('_');
+                    return as === bs
+                        ? ai.localeCompare(bi, undefined, { numeric: true, sensitivity: 'base' })
+                        : as.localeCompare(bs, undefined, { sensitivity: 'base' });
+                })
+            );
+            return keys;
+        },
+
+        // Map a list of keys to the requested structure
+        selectStationsByKeys: function(keys, index) {
+            const out = [];
+            for (const k of keys) {
+                const rec = index.get(k);
+                if (rec) out.push({ name: rec.name, station: rec.station });
+            }
+            return out;
+        },
+        // Normalize an id into a safe ASCII slug for DOM ids and serialization
+        normalizeId: function(s) {
+            if (typeof s !== 'string') return '';
+            // NFD to split accents, then strip marks, keep a-z0-9_-, collapse spaces, lowercase
+            return s
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, '_')
+                .replace(/[^a-zA-Z0-9_-]/g, '_')
+                .replace(/_+/g, '_')
+                .replace(/^_+|_+$/g, '')
+                .toLowerCase();
+        },
+        // Iterate all historical stations once in a unified way
+        // fn receives { placeKey, place, srcKey, baseKey, item } and may return a non-undefined value to break and return that value
+        // options: { useNew: false, ingridOnly: false, sourceMatch: (srcKey, baseKey) => boolean, placeMatch: (placeKey, place) => boolean }
+        forEachHistStations: function(fn, options) {
+            options = options || {};
+            var useNew = (typeof options.useNew === 'boolean') ? options.useNew : false;
+            var ingridOnly = !!options.ingridOnly;
+            var sourceMatch = typeof options.sourceMatch === 'function' ? options.sourceMatch : null;
+            var placeMatch = typeof options.placeMatch === 'function' ? options.placeMatch : null;
+
+            var placesOrder = Object.keys(this.curplaces || {});
+            for (var i = 0; i < placesOrder.length; i++) {
+                var placeKey = placesOrder[i];
+                var place = this.curplaces[placeKey];
+                if (!place) continue;
+                if (placeMatch && !placeMatch(placeKey, place)) continue;
+                // gather sources from both collections
+                var collections = [];
+                if (!useNew && place.hstations && typeof place.hstations === 'object') collections.push(place.hstations);
+                else if (useNew && place.hstations_new && typeof place.hstations_new === 'object') collections.push(place.hstations_new);
+                for (var c = 0; c < collections.length; c++) {
+                    var coll = collections[c];
+                    var keys = Object.keys(coll);
+                    for (var k = 0; k < keys.length; k++) {
+                        var srcKey = keys[k];
+                        var baseKey = srcKey;
+                        if (sourceMatch && !sourceMatch(srcKey, baseKey)) continue;
+                        var list = this.normalizeHistValue(coll[srcKey]);
+                        for (var t = 0; t < list.length; t++) {
+                            var item = list[t];
+                            if (!item || !item.id) continue;
+                            if (ingridOnly && !item.ingrid) continue;
+                            var ret = fn({ placeKey: placeKey, place: place, srcKey: srcKey, baseKey: baseKey, item: item });
+                            if (typeof ret !== 'undefined') return ret;
+                        }
+                    }
+                }
+            }
+            return undefined;
+        },
+        // Resolve normalized row-key back to raw id from current data
+        resolveRawId: function(source, idFromRowKey, rowKey) {
+            // Direct mapping filled when listing rows
+            if (this.rowKeyRawMap && rowKey && this.rowKeyRawMap[rowKey]) return this.rowKeyRawMap[rowKey];
+            var self = this;
+            var wantedSource = source;
+            
+            // First try to find exact match with raw ID
+            var found = self.forEachHistStations(function(ctx) {
+                if (ctx.item.id === idFromRowKey && ctx.baseKey === wantedSource) {
+                    return ctx.item.id;
+                }
+            }, { useNew: self.useNewHistPlaces });
+            if (typeof found !== 'undefined') return found;
+            
+            // If not found, try normalized lookup (backward compatibility)
+            var normalizedId = self.normalizeId(idFromRowKey);
+            found = self.forEachHistStations(function(ctx) {
+                if (self.normalizeId(ctx.item.id) === normalizedId && ctx.baseKey === wantedSource) {
+                    return ctx.item.id;
+                }
+            }, { useNew: self.useNewHistPlaces });
+            if (typeof found !== 'undefined') return found;
+            
+            // Try with older data if new data didn't work
+            found = self.forEachHistStations(function(ctx) {
+                if (self.normalizeId(ctx.item.id) === normalizedId && ctx.baseKey === wantedSource) {
+                    return ctx.item.id;
+                }
+            }, { useNew: false });
+            
+            return typeof found !== 'undefined' ? found : idFromRowKey; // fallback to original
+        },
+        // Build available stations for grid index - returns [{key: curplace_key, name: display_name, hprovider: source}]
+        buildAvailableStations: function(ingridOnly) {
+            var self = this;
+            var stations = [];
+            var seen = new Set();
+            
+            self.forEachHistStations(function(ctx) {
+                if (ingridOnly !== false && !ctx.item.ingrid) return;
+                
+                var key = ctx.placeKey;
+                var name = (ctx.item.name || ctx.place.name);
+                var hprovider = ctx.baseKey; // emhi, wsds, etc.
+                var stationKey = key + '_' + hprovider + '_' + ctx.item.id;
+                
+                if (!seen.has(stationKey)) {
+                    seen.add(stationKey);
+                    stations.push({
+                        key: key,
+                        name: name,
+                        hprovider: hprovider,
+                        stationId: ctx.item.id,
+                        displayName: name + ' ' + ((hprovider === 'wsds') ? 'WS' : hprovider.toUpperCase())
+                    });
+                }
+            }, { useNew: self.useNewHistPlaces });
+            
+            return stations;
+        },
+        
+        // Get current grid index from state or build default
+        getGridIndex: function() {
+            var persisted = this.state.attr.gridindex || [];
+            if (persisted.length > 0) {
+                // Build stations for persisted place keys, applying viewStates
+                var validIndex = [];
+                var viewStates = this.state.attr.viewStates || {};
+                
+                for (var i = 0; i < persisted.length; i++) {
+                    var placeKey = persisted[i];
+                    if (this.curplaces[placeKey]) {
+                        var station = this.buildStationForPlace(placeKey, viewStates[placeKey]);
+                        if (station) {
+                            validIndex.push(station);
+                        }
+                    }
+                }
+                
+                return validIndex;
+            } else {
+                // Default to one station per curplaces key: first provider's first station
+                return this.buildInitialGridIndex();
+            }
+        },
+        
+        // Helper to build a station object for a specific place, using viewState or defaults
+        buildStationForPlace: function(placeKey, savedState) {
+            var place = this.curplaces[placeKey];
+            if (!place) return null;
+            
+            // If we have a saved state, try to use it
+            if (savedState && savedState.hprovider && savedState.hstation_id) {
+                var stationFromState = this.getStationInfoFromViewState(placeKey, savedState);
+                if (stationFromState) return stationFromState;
+            }
+            
+            // Fallback to first available provider's first station
+            var hStationsSrc = this.useNewHistPlaces ? place.hstations_new : place.hstations;
+            if (!hStationsSrc) return null;
+            
+            var providers = Object.keys(hStationsSrc);
+            if (providers.length === 0) return null;
+            
+            var firstProvider = providers[0];
+            var stationList = this.normalizeHistValue(hStationsSrc[firstProvider]);
+            if (stationList.length === 0) return null;
+            
+            var firstStation = stationList[0];
+            return {
+                key: placeKey,
+                name: firstStation.name || place.name,
+                hprovider: firstProvider,
+                stationId: firstStation.id,
+                displayName: (firstStation.name || place.name) + ' ' + ((firstProvider === 'wsds') ? 'WS' : firstProvider.toUpperCase())
+            };
+        },
+        
+        // Build initial grid index with one station per curplaces key
+        buildInitialGridIndex: function() {
+            var stations = [];
+            var seen = new Set();
+            var viewStates = this.state.attr.viewStates || {};
+            
+            // Iterate through curplaces to get one station per place key
+            for (var placeKey in this.curplaces) {
+                if (!Object.prototype.hasOwnProperty.call(this.curplaces, placeKey)) continue;
+                if (seen.has(placeKey)) continue; // Ensure only one per place key
+                
+                var place = this.curplaces[placeKey];
+                if (!place) continue;
+                
+                // Get hstations (prefer new over old)
+                var hStationsSrc = this.useNewHistPlaces ? place.hstations_new : place.hstations;
+                if (!hStationsSrc || typeof hStationsSrc !== 'object') continue;
+                
+                var selectedStation = null;
+                var selectedProvider = null;
+                
+                // Check if user has a saved viewState for this place
+                var savedState = viewStates[placeKey];
+                if (savedState && savedState.hprovider && savedState.hstation_id && hStationsSrc[savedState.hprovider]) {
+                    var savedStationList = this.normalizeHistValue(hStationsSrc[savedState.hprovider]);
+                    var targetStation = null;
+                    
+                    // Try saved index first if available
+                    if (typeof savedState.hstation_index === 'number' && 
+                        savedState.hstation_index >= 0 && 
+                        savedState.hstation_index < savedStationList.length &&
+                        savedStationList[savedState.hstation_index].id === savedState.hstation_id) {
+                        targetStation = savedStationList[savedState.hstation_index];
+                    } else {
+                        // Fallback to finding by ID
+                        targetStation = savedStationList.find(function(s) { return s.id === savedState.hstation_id; });
+                    }
+                    
+                    if (targetStation) {
+                        selectedStation = targetStation;
+                        selectedProvider = savedState.hprovider;
+                    }
+                }
+                
+                // If no saved state or saved station not found, use first provider's first station
+                if (!selectedStation) {
+                    var providerKeys = Object.keys(hStationsSrc);
+                    for (var p = 0; p < providerKeys.length; p++) {
+                        var provider = providerKeys[p];
+                        var stationList = this.normalizeHistValue(hStationsSrc[provider]);
+                        
+                        // Get first station from this provider
+                        if (stationList.length > 0) {
+                            var station = stationList[0];
+                            if (station && station.id) {
+                                selectedStation = station;
+                                selectedProvider = provider;
+                                break; // Only take first provider's first station
+                            }
+                        }
+                    }
+                }
+                
+                // Add the selected station to grid
+                if (selectedStation && selectedProvider) {
+                    seen.add(placeKey);
+                    stations.push({
+                        key: placeKey,
+                        name: selectedStation.name || place.name,
+                        hprovider: selectedProvider,
+                        stationId: selectedStation.id,
+                        displayName: (selectedStation.name || place.name) + ' ' + ((selectedProvider === 'wsds') ? 'WS' : selectedProvider.toUpperCase())
+                    });
+                }
+            }
+            
+            return stations;
+        },
+        
+        // Update a specific grid row to reflect viewState changes without full reload
+        updateGridRowForPlace: function(placeKey) {
+            if (!this.initialized || !placeKey) return;
+            
+            var viewStates = this.state.attr.viewStates || {};
+            var savedState = viewStates[placeKey];
+            
+            // Find the grid row for this place using the correct ID format (same as loadGrid)
+            var uniqueId = 'grid-node-' + placeKey;
+            var row = document.getElementById(uniqueId);
+            
+            if (row && savedState) {
+                // Update the row's station information based on viewState
+                var place = this.curplaces[placeKey];
+                if (!place) return;
+                
+                var stationInfo = this.getStationInfoFromViewState(placeKey, savedState);
+                if (stationInfo) {
+                    // Update the station display name in the row
+                    var nameElement = row.querySelector('.station-name, .menu-item-name, td:first-child');
+                    if (nameElement) {
+                        nameElement.textContent = stationInfo.displayName;
+                    }
+                    
+                    // Update data attributes for the new station
+                    row.setAttribute('data-hprovider', stationInfo.hprovider);
+                    row.setAttribute('data-stationid', stationInfo.stationId);
+                    row.setAttribute('data-displayname', stationInfo.displayName);
+                    
+                    // If there are provider-specific styling classes, update them
+                    row.className = row.className.replace(/\bhprovider-\w+\b/g, '');
+                    row.classList.add('hprovider-' + stationInfo.hprovider);
+                }
+            }
+        },
+        
+        // Helper to get station info from viewState
+        getStationInfoFromViewState: function(placeKey, savedState) {
+            if (!savedState.hprovider || !savedState.hstation_id) return null;
+            
+            var place = this.curplaces[placeKey];
+            if (!place) return null;
+            
+            var hStationsSrc = this.useNewHistPlaces ? place.hstations_new : place.hstations;
+            if (!hStationsSrc || !hStationsSrc[savedState.hprovider]) return null;
+            
+            var savedStationList = this.normalizeHistValue(hStationsSrc[savedState.hprovider]);
+            var targetStation = null;
+            
+            // Try saved index first if available
+            if (typeof savedState.hstation_index === 'number' && 
+                savedState.hstation_index >= 0 && 
+                savedState.hstation_index < savedStationList.length &&
+                savedStationList[savedState.hstation_index].id === savedState.hstation_id) {
+                targetStation = savedStationList[savedState.hstation_index];
+            } else {
+                // Fallback to finding by ID
+                targetStation = savedStationList.find(function(s) { return s.id === savedState.hstation_id; });
+            }
+            
+            if (targetStation) {
+                return {
+                    key: placeKey,
+                    name: targetStation.name || place.name,
+                    hprovider: savedState.hprovider,
+                    stationId: targetStation.id,
+                    displayName: (targetStation.name || place.name) + ' ' + ((savedState.hprovider === 'wsds') ? 'WS' : savedState.hprovider.toUpperCase())
+                };
+            }
+            
+            return null;
+        },
+        
+        // Helper to get station info for grid display, using viewState or defaults
+        getStationInfoForGrid: function(placeKey, savedState) {
+            // First try to use viewState if available
+            if (savedState) {
+                var stationFromState = this.getStationInfoFromViewState(placeKey, savedState);
+                if (stationFromState) return stationFromState;
+            }
+            
+            // Fallback to buildStationForPlace which handles defaults
+            return this.buildStationForPlace(placeKey, savedState);
+        },
+        
+        // Update grid index in state
+        setGridIndex: function(stations) {
+            if (!Array.isArray(stations)) return;
+            // Only store place keys since we want one row per place that can change stations via viewStates
+            var keys = stations.map(function(s) { return s.key; });
+            this.state.set({ gridindex: keys });
+        },
+        
+        // Add station to grid index (now simplified to work with place keys only)
+        addStationToGrid: function(key, hprovider, stationId, position) {
+            // Since we now only store place keys and one row per place, 
+            // this function adds a place key if it's not already present
+            var current = this.state.attr.gridindex || [];
+            
+            // Check if place key already exists
+            var exists = current.indexOf(key) !== -1;
+            if (exists) return true; // Place already in grid
+            
+            // Add the place key to grid index
+            if (typeof position === 'number' && position >= 0 && position <= current.length) {
+                current.splice(position, 0, key);
+            } else {
+                current.push(key);
+            }
+            this.state.set({ gridindex: current });
+            return true;
+        },
+        
+        // Remove station from grid index (now simplified to work with place keys only)
+        removeStationFromGrid: function(key) {
+            // Since we now only store place keys, this removes the entire place from grid
+            var current = this.state.attr.gridindex || [];
+            var newIndex = current.filter(function(placeKey) { return placeKey !== key; });
+            this.state.set({ gridindex: newIndex });
+            return true;
+        },
         hash_data: function() {
             var changed = {};
             //if(!loc.hash) return false;
             if (loc.hash) {
-                var a = loc.hash.substring(1).split(/[\&\|\/]/);
+                var a = loc.hash.substring(1).split(/[&|/]/);
                 var i = 0;
                 var j = a.length;
-                var places = Object.keys(this.fcplaces);
+                
+                // Get available forecast providers/places
+                var places = Object.keys(this.curplaces);
+
                 if (j) {
                     for (; i < j; ++i) {
                         var b = a[i].split('=');
                         if (b[0]) {
-                            if ((/aeg/.test(b[0]) && b[1]) || (/\d*-\d*-\d/).test(b[0])) {
+                            if ((/aeg/.test(b[0]) && b[1]) || (/\d*[-.]\d*[-.]\d/).test(b[0])) {
                                 changed.aeg = b[1] || b[0];
-                            } else if ((/koht/.test(b[0]) && b[1]) || places.indexOf(b[0]) >= 0) {
-                                this.setEstPlace(b[1] || b[0], 'ei');
+                            } else if ((/koht/.test(b[0]) && b[1]) || places.indexOf(b[0]) >= 0 ) {
                                 changed.place = b[1] || b[0];
+                                if(changed.place && this.curplaces[changed.place])
+                                    this.req_curplace = changed.place;
                             } else if ((/raam/.test(b[0]) && b[1]) || (/\d*[dh]/).test(b[0])) {
                                 changed.raam = b[1] || b[0];
                             }
@@ -270,9 +1017,12 @@ var ilm = (function(my) {
                     //console.log(this.date);
                 }
             }
-            this.setFrame(changed.raam, 'ei', 'ei');
-            this.setDate(changed.aeg, 'ei');
-            this.setEstPlace(changed.place, 'ei');
+            if(changed.raam) this.setFrame(changed.raam, 'ei', 'ja');
+            if(changed.aeg) this.setDate(changed.aeg, 'ei');
+            if(this.initialized && this.req_curplace && this.req_curplace !== this.curplace) {
+                this.loadGraph(this, this.req_curplace);
+                this.req_curplace = '';
+            }
             return false;
         },
         graph_name: function(name) {
@@ -368,9 +1118,19 @@ var ilm = (function(my) {
                         var nl = swp.sortable('toArray', { attribute: 'name' });
                         if (fn) fn(nl);
                         else {
-                            if (nl.join(':') !== self.state.attr.gridorder.join(':')) {
-                                self.state.set({ gridorder: nl });
+                            // Update grid index based on new order
+                            var newStations = [];
+                            var currentIndex = self.getGridIndex();
+                            var stationMap = {};
+                            for (var i = 0; i < currentIndex.length; i++) {
+                                stationMap[currentIndex[i].key] = currentIndex[i];
                             }
+                            for (var j = 0; j < nl.length; j++) {
+                                if (stationMap[nl[j]]) {
+                                    newStations.push(stationMap[nl[j]]);
+                                }
+                            }
+                            self.setGridIndex(newStations);
                         }
                     }
                 });
@@ -581,37 +1341,55 @@ var ilm = (function(my) {
                 }
             });
             
-            var templ = '<div class="map-container"><div><span class="map-info">&nbsp;</span></div><div class="mapbox" id="map"></div></div>';
+            var templ = '<div class="x-container map-container"><div><span class="map-info">&nbsp;</span></div><div class="mapbox" id="map"></div></div>';
             if (me) {
                 me.html(templ);
                 self.initGoogleMap('map', self.curplaces);
             }
             return false;
         },
+        mapHistStations: function(fn) {
+            if(!fn) return;
+            var self = this;
+            self.forEachHistStations(function(ctx) {
+                fn({ id: ctx.srcKey, station: ctx.item, parent: ctx.place });
+            }, { useNew: self.useNewHistPlaces });
+        },
         loadGrid: function(div) {
             var self = this,
                 el = null,
-                i, j, co = 'grid-node-';
+                co = 'grid-node-';
             if (!div) { div = this.grid_placeholder || 'menu-container'; }
             el = doc.getElementById(div);
             if (el) {
-                var html = '<tbody>',
-                    n = '';
-                var gridorder = self.state.attr.gridorder;
-                var orig_gridorder = Object.keys(this.curplaces);
-                var sorted_orig_gridorder = Array.prototype.slice.call(orig_gridorder).sort();
-                var sorted_gridorder = Array.prototype.slice.call(gridorder).sort();
-                if (sorted_gridorder !== sorted_orig_gridorder) {
-                    gridorder = orig_gridorder;
-                    self.state.set({ gridorder: gridorder });
-                }
-                for (i = 0, j = gridorder.length; i < j; ++i) {
-                    n = this.curplaces[gridorder[i]];
-                    if (n) {
-                        html += '<tr id="' + co + n.id + '" name="' + n.id + '" class="data-menu-row" style="background-color:white">';
-                        html += '<td class="sortable-is-active d-none">-</td><td colspan="100">' + n.name + '</td>';
-                        html += '</tr>';
+                var html = '<tbody>';
+                
+                // Get current grid index
+                var stations = self.getGridIndex();
+                
+                // Get all viewStates for efficiency
+                var viewStates = this.state.attr.viewStates || {};
+                
+                // Render rows using station index and apply viewStates
+                for (var i = 0; i < stations.length; i++) {
+                    var station = stations[i];
+                    var placeKey = station.key;
+                    var uniqueId = co + station.key; // Only use place key since we want one row per place
+                    
+                    // Get saved viewState for this place
+                    var savedState = viewStates[placeKey];
+                    var displayName = station.displayName;
+                    var rowClass = 'data-menu-row';
+                    
+                    // Enhance display name with saved provider info if different from current
+                    if (savedState && savedState.hprovider && savedState.hprovider !== station.hprovider) {
+                        displayName += ' (saved: ' + savedState.hprovider.toUpperCase() + ')';
                     }
+                    
+                    // Only store place key in DOM - all provider info comes from savedState
+                    html += '<tr id="' + uniqueId + '" name="' + placeKey + '" class="' + rowClass + '" style="background-color:white">';
+                    html += '<td class="sortable-is-active d-none">-</td><td colspan="100">' + displayName + '</td>';
+                    html += '</tr>';
                 }
                 html += '</tbody>';
                 el.innerHTML = '<div>&nbsp;</div>' + _.template(self.dataTableTemplate)({ classes: 'table sortable-table table-sm', thead: self.gridHeadTemplate, tbody: html });
@@ -622,7 +1400,63 @@ var ilm = (function(my) {
                     $('.data-menu-row').on('click', function() {
                         _.each($('.data-menu-row'), function(a) { a.style['background-color'] = 'white'; });
                         $(this).css({ 'background-color': 'rgb(236, 236, 236)' });
-                        self.loadGraph(this, $(this).attr('name'));
+                        var placeKey = $(this).attr('name');
+                        
+                        // Set place first to update available providers
+                        self.setCurPlace(placeKey, true, false);
+                        
+                        // Get saved provider info from viewStates using helper functions
+                        var hStruct = self.getCurrentHProviderStruct(placeKey);
+                        var fcStruct = self.getCurrentFcProviderStruct(placeKey);
+                        
+                        // Apply saved historical provider if available for this place
+                        if (hStruct && hStruct.provider && self.hproviders_available.indexOf(hStruct.provider) !== -1) {
+                            self.setHProvider(hStruct.provider, false);
+                            if (hStruct.currentStation && hStruct.currentIndex !== undefined) {
+                                // Verify that the saved station still exists at the saved index
+                                var currentPlace = self.curplaces[placeKey];
+                                var hStations = self.useNewHistPlaces ? currentPlace.hstations_new : currentPlace.hstations;
+                                if (hStations && hStations[hStruct.provider]) {
+                                    var hStationList = self.normalizeHistValue(hStations[hStruct.provider]);
+                                    if (hStruct.currentIndex < hStationList.length && 
+                                        hStationList[hStruct.currentIndex].id === hStruct.currentStation.id) {
+                                        self.setHStationIndex(hStruct.currentIndex, false);
+                                    } else {
+                                        // Fallback to finding by ID
+                                        var actualIndex = hStationList.findIndex(function(s) { return s.id === hStruct.currentStation.id; });
+                                        if (actualIndex !== -1) {
+                                            self.setHStationIndex(actualIndex, false);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Apply saved forecast provider if available for this place
+                        if (fcStruct && fcStruct.provider && self.fcproviders_available.indexOf(fcStruct.provider) !== -1) {
+                            self.setFcProvider(fcStruct.provider, false);
+                            if (fcStruct.currentStation && fcStruct.currentIndex !== undefined) {
+                                // Verify that the saved station still exists
+                                var currentPlace2 = self.curplaces[placeKey];
+                                if (currentPlace2.fcstations && currentPlace2.fcstations[fcStruct.provider]) {
+                                    var fcStationList = self.normalizeHistValue(currentPlace2.fcstations[fcStruct.provider]);
+                                    if (fcStruct.currentIndex < fcStationList.length && 
+                                        fcStationList[fcStruct.currentIndex].id === fcStruct.currentStation.id) {
+                                        // Station still exists at saved index, use it directly
+                                        // (fcplace is managed internally by setFcProvider)
+                                    } else {
+                                        // Station moved or was removed, find it by ID
+                                        var targetFcStation = fcStationList.find(function(s) { return s.id === fcStruct.currentStation.id; });
+                                        if (targetFcStation) {
+                                            // Station exists but at different index - it will be handled by setFcProvider
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Load the graph with applied viewState
+                        self.loadGraph(this, placeKey);
                     });
                     $('.data-menu-order').on('click', function() {
                         if ($(this).hasClass('change')) {
@@ -635,37 +1469,53 @@ var ilm = (function(my) {
                             $('.sortable-is-active').each(function(i, a) { $(a).addClass('d-none'); });
                         }
                     });
+                    if(self.req_curplace) {
+                        self.loadGraph(this, self.req_curplace);
+                        self.req_curplace = '';
+                        self.doReload('both');
+                    }
                 });
             }
+            this.initialized = true;
         },
         loadGraph: function(e, name) {
             var self = this,
                 o = '',
-                n = self.curplaces[name] || self.curplaces[self.curplace],
+                n = (self.curplaces[name] || self.curplaces[self.curplace]),
                 m = self.getWidth() < 850 ? $('.chart-box') : $('.chartbox'),
                 me = e && e.target ? $(e.target) : e ? $(e) : null,
+                
+                // When called from grid with a curplaces key, update current place
                 func = function(el, n) {
+                    var oldHProvider = self.hprovider;
+                    var oldFcProvider = self.fcprovider;
+                    var shouldReload = false;
+                    
+                    // If name is a valid curplaces key, just set it - setCurPlace handles all provider updates
+                    if (name && self.curplaces[name]) {
+                        self.setCurPlace(name, true, false); // Don't reload yet - DOM not ready
+                        shouldReload = true;
+                    }
                     n = n || {};
                     var u = 0,
                         xlarge = (self.getWidth() >= 1240) ? true : false,
                         s = '';
-                    s += '<div class="chartbox">';
-                    s += '<div class="chart-control-box">&nbsp;';
-                    if (self.samplemode !== 'table' && (self.viewmode === 'cur' || xlarge)) {
-                        s += '<div id="graph-timeframe-control" class="timeframe-control">';
-                        //s += '<span class="fchead badge bg-primary"> '+n.name+' </span>';
-                        s += '&nbsp;<span class="hist-length badge bg-primary" name="4"> 4h </span>&nbsp;<span class="hist-length badge bg-primary" name="6"> 6h </span>&nbsp;<span class="hist-length badge bg-primary" name="12"> 12h </span>&nbsp;<span class="hist-length badge bg-primary" name="24"> 24h </span>&nbsp;<span class="hist-length badge bg-primary" name="48"> 2p </span>&nbsp;<span class="hist-length badge bg-primary" name="72"> 3p </span>';
-                        s += '</div>';
+                    if(self.samplemode==='table') s+= '<style>.chart-control-box{min-height:2em;}</style>';
+                    else {
+                        s+= '<style>.chart-control-box{min-height:' + (self.viewmode === 'cur' || xlarge ? '4' : '3') + '.5em;}';
+                        if(self.viewmode === 'cur' || xlarge)
+                            s+= '.ctrlhead{top:-' + (!xlarge ? '2':'3') + 'em;}';
+                        s+='</style>';
                     }
-                    s += '<div class="viewmode-control">';
+                    s += '<div class="x-container chartbox">';
+                    s += `<div class="chart-control-box">
+                        <div>
+                        <div class="viewmode-control">`;
                     s += '<span class="title-chart"></span>&nbsp;<span class="change-chart badge bg-primary" name="' + (self.viewmode === 'cur' ? 'est' : 'cur') + '">Näita ' + (self.viewmode === 'cur' ? 'Prognoosi' : 'Ajalugu') + '</span>';
                     s += '</div>';
                     s += '<div class="samplemode-control">';
-                    //s += (self.samplemode !== 'table') ? '<span class="fchead badge bg-primary"> '+my.fcplaces[n.bind].name+' </span>&nbsp;' : '';
-                    s += (self.samplemode === 'table') ? ('<span class="night-chart badge bg-primary" name="' + (self.fcshownight ? 'fcsnf' : 'fcsnt') + '"> ' + (self.fcshownight ? '-' : '+') + 'Ööd</span>&nbsp;') : '&nbsp;';
                     s += '<span class="sample-chart badge bg-primary" name="' + (self.samplemode === 'table' ? 'graph' : 'table') + '">Näita ' + (self.samplemode === 'table' ? 'Graafikut' : 'Tabelit') + '</span>&nbsp;';
-                    s += (self.viewmode !== 'cur' || xlarge) ? ('<span class="long-chart badge bg-primary" name="' + (self.sampletype === 'long' ? 'detail' : 'long') + '">Näita ' + (self.sampletype === 'long' ? 'Detailset' : 'Pikaajalist') + '</span>&nbsp;') : '&nbsp;';
-                    s += '</div>';
+                    s += '</div></div>';
                     el.html(s);
                     var v = self.getWidth(null, el[0]);
                     if (!self.timeframe) {
@@ -674,58 +1524,38 @@ var ilm = (function(my) {
                         else if (v < 600) self.timeframe = 12 * 3600 * 1000;
                         else self.timeframe = 24 * 3600 * 1000;
                     }
-                    s = '<div class="float two-lg"><div class="meta"></div><div class="fckhead fcright">';
-                    if (self.viewmode === 'cur' || xlarge) {
-                        s += '<span class="startdate-control"><input type="text" class="form-control datepicker" id="datepicker" name="datepicker" value="' + self.getDateString(my.start) + '" placeholder="Vali kuupäev" onchange="ilm.setDate(this.value);return false;"></span>';
-                    }
-                    s += '<span class="badge bg-info cur-name"';
-                    if (self.samplemode == 'table') s += ' style="visibility:hidden"';
-                    s += '> '+n.name+'</span>';
-                    s += '</div>';
-                    s += '</div></div>';
+                    s = '<div class="float two-lg';
+                    s += (!xlarge) ? ' ' + (self.viewmode==='est'?'fc':'cur') : ' cur';
+                    s += '"><div class="meta"></div><div class="ctrlhead" ></div></div></div>';
                     if (xlarge) {
-                        s += '<div class="float two-lg"><div class="meta"></div><div class="fckhead fcleft">';
-                        if (self.samplemode !== 'table') s += '<span class="badge bg-info fc-name"> '+my.fcplaces[n.bind].name+'</span>';
-                        s += '</div></div>';
+                        s += '<div class="float two-lg fc"><div class="meta"></div><div class="ctrlhead"></div></div>';
                     }
                     u = $(el).find('.chartbox');
                     u.append(s);
                     self.loadBase(u[0], xlarge ? null : self.viewmode === 'cur' ? 1 : 2);
-                    if (self.viewmode === 'cur' || xlarge) {
-                        w.ilm.setCurPlace(n.id);
-                    }
-                    if (self.viewmode !== 'cur' || xlarge) {
-                        if (n.bind) w.ilm.setEstPlace(n.bind);
+                    
+                    // Now that DOM is built, trigger reload if place was changed
+                    if (shouldReload) {
+                        self.reloadAfterPlaceChange(oldHProvider, oldFcProvider);
                     }
 
                     //$('span.title-chart').html(n.name);
-                    var tfc = $('#graph-timeframe-control');
-                    //tfc.find('.hist-length[name="'+(self.timeframe/3600/1000)+'"]').addClass('label-primary');
                     if (!xlarge) {
                         $('span.change-chart[name="' + self.viewmode + '"]').addClass('label-primary');
                         $('.change-chart').on('click', function(e) {
                             var a = $(this).attr('name');
                             if (a === my.viewmode) return false;
                             self.loadGraph(e, a);
+                            self.doReload('both');
                         });
                     } else {
-                        tfc.css({ top: '5px' });
                         $('span.change-chart').css({ display: 'none' });
                     }
-                    $('.long-chart').on('click', function(e) {
-                        var a = $(this).attr('name');
-                        if (a === my.sampletype) return false;
-                        self.loadGraph(e, a);
-                    });
                     $('.sample-chart').on('click', function(e) {
                         var a = $(this).attr('name');
                         if (a === my.samplemode) return false;
                         self.loadGraph(e, a);
-                    });
-                    $('.night-chart').on('click', function(e) {
-                        var a = $(this).attr('name');
-                        if (('fcsnf' === a && !my.fcshownight) || ('fcsnt' === a && my.fcshownight)) return false;
-                        self.loadGraph(e, a);
+                        self.doReload('both');
                     });
                     return false;
                 },
@@ -737,12 +1567,12 @@ var ilm = (function(my) {
                 modechanged = true;
                 $('.change-chart').off('click');
                 self.changed = 'viewmode';
-            } else if (/(detail|long)$/.test(name)) {
-                self.sampletype = name;
-                self.state.set({ sampletype: name });
+            } else if (/fctimeframe-\d+$/.test(name)) {
+                var c = name.match(/fctimeframe-(\d+)/)[1], b = parseInt(c,10);
+                self.state.set({ fctimeframe: b });
                 modechanged = true;
-                $('.long-chart').off('click');
-                self.changed = 'sampletype';
+                _.each($('.fc-length'), function(el) { $(el).off('click'); });
+                self.changed = 'fctimeframe';
             } else if (/(fcsnt|fcsnf)$/.test(name)) {
                 self.fcshownight = name === 'fcsnt' ? true : false;
                 self.state.set({ fcshownight: self.fcshownight });
@@ -753,8 +1583,8 @@ var ilm = (function(my) {
                 self.samplemode = name;
                 self.state.set({ samplemode: name });
                 modechanged = true;
-                self.changed = 'samplemode';
                 $('.sample-chart').off('click');
+                self.changed = 'samplemode';
             } else {
                 o = name;
             }
@@ -764,11 +1594,12 @@ var ilm = (function(my) {
                 }
                 _.each($('.chart-box'), function(a) { a.remove(); });
                 _.each($('.chartbox'), function(a) { a.remove(); });
-                if (o === self.curplace && !modechanged) {
-                    _.each($('.data-menu-row'), function(a) { a.style['background-color'] = 'white'; });
-                    self.loadMap();
-                    return false;
-                } else if (!modechanged) {
+                // if (o === self.curplace && !modechanged) {
+                //     _.each($('.data-menu-row'), function(a) { a.style['background-color'] = 'white'; });
+                //     self.loadMap();
+                //     return false;
+                // } else 
+                if (!modechanged) {
                     self.curplace = o;
                 }
             }
@@ -849,14 +1680,14 @@ var ilm = (function(my) {
         <td class="avg_rain"><span class="grid-cell-title">Sademed:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td>
         <td class="time"><span class="grid-cell-title">Aeg:&nbsp;</span><span class="grid-em"><span"><span class="day"><%=day%>&nbsp;</span><span class="date"><%=date%>&nbsp;</span><span class="time-str"><%=time%></span></span></td>`,
         chartContainerTemplate: `<div class="floa-t col-lg-6 col-md-12 col-xs-12"><div class="title btn-group"><a id="curplace" class="btn btn-secondary btn-xs navbar-btn">Andmed <b><%=title%></b></a><a id="curtime" class="btn btn-secondary btn-xs navbar-btn"><%=date%></a><a id="cursel" style="" data-toggle="dropdown" class="btn btn-secondary btn-xs navbar-btn dropdown-toggle"><span class="caret"></span></a><ul id="curmenu" role="menu" class="curmenu dropdown-menu">
-        <li><a href="#" name="arhiiv_saadjarv_saadjarve" class="curplace-select active">Saadjärve Saadjärv</a></li>
+        <li><a href="#" name="wsds_saadjarv_saadjarve" class="curplace-select active">Saadjärve Saadjärv</a></li>
         <!--li><a href="#" name="flydog_aksi" class="curplace-select active">Saadjärv Äksi</a></li-->
         <li><a href="#" name="emu" class="curplace-select active">Tartu EMU</a></li>
         <li><a href="#" name="ut_tartu" class="curplace-select">Tartu UT</a></li>
-        <li><a href="#" name="arhiiv_vortsjarv_joesuu" class="curplace-select">Võrtsjärv Jõesuu</a></li>
-        <li><a href="#" name="arhiiv_vortsjarv_tamme" class="curplace-select">Võrtsjärv Tamme</a></li>
+        <li><a href="#" name="wsds_vortsjarv_joesuu" class="curplace-select">Võrtsjärv Jõesuu</a></li>
+        <li><a href="#" name="wsds_vortsjarv_tamme" class="curplace-select">Võrtsjärv Tamme</a></li>
         <li><a href="#" name="mnt_tamme" class="curplace-select">V-Rakke MNT</a></li>
-        <li><a href="#" name="arhiiv_peipsi_rapina" class="curplace-select">Peipsi Räpina</a></li>
+        <li><a href="#" name="wsds_peipsi_rapina" class="curplace-select">Peipsi Räpina</a></li>
         <li><a href="#" name="mnt_rapina" class="curplace-select">Räpina MNT</a></li>
         <li><a href="#" name="mnt_uhmardu" class="curplace-select">Uhmardu MNT</a></li>
         <li><a href="#" name="mnt_jogeva" class="curplace-select">Jõgeva MNT</a></li>
@@ -886,18 +1717,20 @@ var ilm = (function(my) {
         fillGridLast: function(scope, div) {
             var self = scope || this,
                 el = null,
-                i, co = 'grid-node-',
                 now = new Date();
             if (!div) { div = self.grid_placeholder || 'menu-container'; }
             el = doc.getElementById(div);
             if (el) {
-                var func = function(url, n, e) {
+                var func = function(url, n, provider, e) {
                     var $e = $(e);
                     $.ajax({
                         type: 'get',
                         url: url,
                     }).always(function(json, type) {
-                        if (!(/error|timeout/).test(type)) {
+                        if ((/error|timeout/).test(type)) {
+                            $e.addClass('hide');
+                        }
+                        else {
                             var attachMarkerMessage = function(marker, message) {
                                 var infowindow = new w.google.maps.InfoWindow({
                                     content: message,
@@ -924,7 +1757,7 @@ var ilm = (function(my) {
                                     infowindow.close();
                                 });
                             };
-                            self.normalizeData(n, json, function(obj) {
+                            self.normalizeData(n, provider, json, function(obj) {
                                 if (obj) {
                                     var deferred = false,
                                         time = self.getTimeStr(obj.time).split(/\s/),
@@ -952,24 +1785,24 @@ var ilm = (function(my) {
                                     if (!deferred) {
                                         var elf = $e.find('.avg_ws');
                                         elf.attr('title', wsbf.label.text);
-                                        if (self.markers[n.id]) {
-                                            var label = self.markers[n.id].getLabel() || {};
+                                        if (self.markers[n.placeKey]) {
+                                            var label = self.markers[n.placeKey].getLabel() || {};
                                             label.text = obj.avg_ws ? '' + obj.avg_ws : '0';
                                             label.color = wsbf.label.style.color || 'gray';
                                             label.fontSize = '80%';
                                             label.wd = obj.avg_wd ? obj.avg_wd : 0;
-                                            self.markers[n.id].setLabel(label);
+                                            self.markers[n.placeKey].setLabel(label);
                                         }
 
                                         elf = $e.find('.max_ws');
                                         elf.attr('title', wgbf.label.text);
-                                        if (self.markers[n.id]) {
-                                            var icon = self.markers[n.id].getIcon() || {};
+                                        if (self.markers[n.placeKey]) {
+                                            var icon = self.markers[n.placeKey].getIcon() || {};
                                             icon.strokeColor = wgbf.label.style.color || 'gray';
-                                            self.markers[n.id].setIcon(icon);
+                                            self.markers[n.placeKey].setIcon(icon);
                                             var str = $e.html().replace(/td>/ig, 'div>').replace(/<td/ig, '<div');
                                             //str = '<div>Tuul:'+obj.avg_ws+'/'+obj.max_ws+'</div><div>Suund:'+obj.avg_ws+'/'+obj.max_ws+'</div>';
-                                            attachMarkerMessage(self.markers[n.id], '<div class="infowindow">' + str + '</div>');
+                                            attachMarkerMessage(self.markers[n.placeKey], '<div class="infowindow">' + str + '</div>');
                                         }
                                         if (obj.avg_temp < 10) $e.find('.avg_temp').addClass('chilli');
                                         setTimeout(function() { $e.find('.time-str').css({ color: 'gray' }); }, 60000);
@@ -980,10 +1813,38 @@ var ilm = (function(my) {
                         }
                     });
                 };
-                for (i in self.curplaces) {
-                    var n = self.curplaces[i],
-                        url = self.setHistDataUrl(n.id) + '?' + now.getTime();
-                    func(url, n, '#' + co + n.id);
+                // Build a name map for all possible row keys so we can label rows nicely
+                // Get available places for display names
+                var placeDisplayNames = {};
+                for (var pk in self.curplaces) {
+                    var place = self.curplaces[pk];
+                    if (place) placeDisplayNames[pk] = place.name;
+                }
+                
+                // Update only the rows currently rendered in the grid
+                var trs = $('.data-menu-row');
+                var viewStates = self.state.attr.viewStates || {};
+                
+                for (var ti = 0; ti < trs.length; ti++) {
+                    var $tr = $(trs[ti]);
+                    var placeKey = $tr.attr('name');
+                    if (!placeKey || !self.curplaces[placeKey]) continue;
+                    
+                    // Get provider and station info from viewStates or fallback to defaults
+                    var stationInfo = self.getStationInfoForGrid(placeKey, viewStates[placeKey]);
+                    if (!stationInfo) continue;
+                    
+                    var hprovider = stationInfo.hprovider;
+                    var stationId = stationInfo.stationId;
+                    var displayName = stationInfo.displayName;
+                    
+                    // Use the raw station ID for URL construction (preserves UTF-8 characters)
+                    var rowKey = hprovider + '_' + stationId;
+                    var n = { id: rowKey, name: displayName, placeKey: placeKey };
+                    var url = self.setHistDataUrl(rowKey) + '?' + now.getTime();
+                    // Use simplified grid row ID (only place key)
+                    var uniqueId = 'grid-node-' + placeKey;
+                    func(url, n, hprovider, '#' + uniqueId);
                 }
             }
         },
@@ -1215,21 +2076,23 @@ var ilm = (function(my) {
             return max;
         },
         setFrame: function(d, persist, load) {
-            var x = '';
-            persist = persist || 'ja';
-            load = load || 'ja';
-            if (d && (/^\d*d/).test(d)) {
-                x = d.replace(/d*$/, '');
-                this.timeframe = x * 24 * 3600 * 1000;
-            } else if (d && (/^\d*h/).test(d)) {
-                x = d.replace(/h*$/, '');
-                this.timeframe = x * 3600 * 1000;
-            } else if (d && (/^\d+$/).test(d)) {
-                this.timeframe = d;
+            if(d) {
+                var x = '';
+                persist = persist !== 'ei';
+                load = load !== 'ei';
+                if (d && (/^\d+[dp]/).test(d)) {
+                    x = d.replace(/[dp]*$/, '');
+                    this.timeframe = x * 24 * 3600 * 1000;
+                } else if (d && (/^\d+[ht]/).test(d)) {
+                    x = d.replace(/[ht]*$/, '');
+                    this.timeframe = x * 3600 * 1000;
+                } else if (d && (/^\d+$/).test(d)) {
+                    this.timeframe = d;
+                }
+                if (persist) this.state.set({ 'timeframe': this.timeframe });
+                else if (!d) this.timeframe = this.state.attr.timeframe;
+                if (load) this.doReload('curplace');
             }
-            if (persist === 'ja') this.state.set({ 'timeframe': this.timeframe });
-            else if (!d) this.timeframe = this.state.attr.timeframe;
-            if (load === 'ja') this.doReload('curplace');
             return false;
         },
         getFrame: function() {
@@ -1252,6 +2115,13 @@ var ilm = (function(my) {
             }
             return 'last.txt';
         },
+        // Parse a row key of form "source_id" into parts
+        parseRowKey: function(rowKey) {
+            if (typeof rowKey !== 'string') return null;
+            var idx = rowKey.indexOf('_');
+            if (idx === -1) return {source: this.getCurrentHProvider(), id: rowKey};
+            return { source: rowKey.substring(0, idx), id: rowKey.substring(idx + 1) };
+        },
         getDateString: function(d, e) {
             if (!d) d = new Date();
             if (typeof d !== 'object') d = new Date(d);
@@ -1270,68 +2140,794 @@ var ilm = (function(my) {
         },
         setHistDataUrl: function(place, d) {
             var self = this;
-            if (/emu/.test(place)) {
-                return 'emu_data/' + self.setTxtFileName(d);
-            } else {
-                return place.replace(/^(ut|ttu|emhi|mnt|arhiiv|flydog|)_(.*)$/, function(match, dir, name) {
-                    return dir + (dir === 'arhiiv' ? '' : '_data') + '/' + name + '/' + self.setTxtFileName(d);
-                });
+            // If place is a row key like "emhi_dirhami" use it directly
+            var parsed = this.parseRowKey(place) || place;
+            var dirext = '_data' + (my.useNewHistPlaces ? '_new' : '');
+            if (my.getProviderNum(parsed) === my.HPROVIDER.UT || /^ut/.test(place)) {
+                return [self.datadir, 'ut_data/tartu', self.setTxtFileName(d)].join('/');
+            } else if (my.getProviderNum(parsed) === my.HPROVIDER.EMU || /emu/.test(place)) {
+                return [self.datadir, 'emu_data/tartu', self.setTxtFileName(d)].join('/');
+            } else if (parsed && parsed.source) {
+                var dir = parsed.source;
+                var name = this.resolveRawId(parsed.source, parsed.id, place);
+                return [self.datadir, (dir + dirext), encodeURIComponent(name), self.setTxtFileName(d)].join('/');
             }
-            //place = place.replace(/arhiiv_/, '');
-            //return 'arhiiv/' + place + '/' + self.setTxtFileName(d);
+            
+            return place.replace(/^(\w+)_(.*)$/, function(match, dir, name) {
+                return [self.datadir, (dir + dirext), encodeURIComponent(name), self.setTxtFileName(d)].join('/');
+            });
+        
         },
-        setCurPlace: function(d, persist, load) {
-            this.setPlace(d, 'curplace', persist, load);
-            return false;
-        },
-        setEstPlace: function(d, persist, load) {
-            this.setPlace(d, 'fcplace', persist, load);
-            return false;
-        },
-        setFcSource: function(fn) {
-            var self = w.ilm,
-                fc = self.fcsources;
-            if (fc.indexOf(fn) < 0) return false;
-            if (fn !== self.fcsource) {
-                self.fcsource = fn;
-                self.state.set({ fcsource: fn });
-                w.ilm.reloadest();
-            }
-            return false;
-        },
-        setPlace: function(d, name, persist, load) {
-            name = name || 'fcplace';
-            persist = persist || 'ja';
-            load = load || 'ja';
-            var places = this[name + 's'] || this.fcplaces,
-                j = {},
-                i, reload = '';
-            if (name === 'fcplace' && d) {
-                if (d === 'saadjarv') d = 'aksi';
-                else if (d === 'vortsjarv') d = 'tamme';
-                //else if(d==='haapsalu') d='topu';
-                else if (d === 'tallinn') d = 'pirita';
-            }
-            if (!d) d = this.state.attr[name];
-            if (d) {
-                for (i in places) {
-                    if (i === d) {
-                        this[name] = d;
-                        if (this.state.attr[name] !== d) j[name] = d;
-                        reload = name;
-                        if (this.binded && places[i].bind) {
-                            var other = /fc/.test(name) ? 'curplace' : 'fcplace';
-                            this[other] = places[i].bind;
-                            if (this.state.attr[other] !== places[i].bind) j[other] = places[i].bind;
-                            reload = 'both';
+        // Update available historical providers for current place
+        // Get available historical stations for current place
+        getAvailableHStations: function() {
+            var stations = [];
+            if (!this.curplace || !this.curplaces[this.curplace]) return stations;
+            
+            var place = this.curplaces[this.curplace];
+            var sources = this.useNewHistPlaces ? place.hstations_new : place.hstations;
+            
+            if (sources && typeof sources === 'object') {
+                for (var provider in sources) {
+                    var stationList = this.normalizeHistValue(sources[provider]);
+                    for (var i = 0; i < stationList.length; i++) {
+                        var station = stationList[i];
+                        if (station && station.id) {
+                            stations.push({
+                                provider: provider,
+                                id: station.id,
+                                name: station.name || station.id,
+                                location: station.location,
+                                ingrid: !!station.ingrid
+                            });
                         }
-                        break;
                     }
                 }
             }
-            if (reload) {
-                if (persist === 'ja') this.state.set(j);
-                if (load === 'ja') this.doReload(reload);
+            return stations;
+        },
+        updateHProvidersAvailable: function() {
+            this.hproviders_available = [];
+            if (this.curplace && this.curplaces[this.curplace]) {
+                var place = this.curplaces[this.curplace];
+                var sources = [];
+                if (this.useNewHistPlaces && place.hstations_new && typeof place.hstations_new === 'object') {
+                    sources = sources.concat(Object.keys(place.hstations_new));
+                } else if (!this.useNewHistPlaces && place.hstations && typeof place.hstations === 'object') {
+                    sources = sources.concat(Object.keys(place.hstations));
+                }
+                // Remove duplicates
+                this.hproviders_available = sources.filter(function(item, pos) {
+                    return sources.indexOf(item) === pos;
+                });
+            }
+            return this.hproviders_available;
+        },
+        
+        // Update available forecast providers for current place
+        updateFcProvidersAvailable: function() {
+            this.fcproviders_available = [];
+            if (this.curplace && this.curplaces[this.curplace]) {
+                var place = this.curplaces[this.curplace];
+                if (place.fcstations && typeof place.fcstations === 'object') {
+                    this.fcproviders_available = Object.keys(place.fcstations);
+                }
+            }
+            return this.fcproviders_available;
+        },
+        
+        // Get available forecast stations for current place
+        getAvailableFcStations: function() {
+            var stations = [];
+            if (!this.curplace || !this.curplaces[this.curplace]) return stations;
+            
+            var place = this.curplaces[this.curplace];
+            if (place.fcstations && typeof place.fcstations === 'object') {
+                for (var provider in place.fcstations) {
+                    var stationList = this.normalizeHistValue(place.fcstations[provider]);
+                    for (var i = 0; i < stationList.length; i++) {
+                        var station = stationList[i];
+                        if (station && station.id) {
+                            stations.push({
+                                provider: provider,
+                                id: station.id,
+                                name: station.name || station.id,
+                                location: station.location,
+                                group: station.group
+                            });
+                        }
+                    }
+                }
+            }
+            return stations;
+        },
+        
+        // Enhanced setFcProvider - uses new forecast station system when available, falls back to old system
+        setFcProvider: function(provider, persist) {
+            persist = persist !== 'ei';
+            if (this.fcproviders_available.indexOf(provider) === -1) return false;
+            var currentProvider = this.getCurrentFcProvider();
+            if (provider !== currentProvider) {
+                // Update fcplace to respect array indices for the new provider
+                this.updateFcPlace(persist, provider);
+                if (persist) {
+                    this.saveViewState(this.curplace);
+                }
+            }
+            return true;
+        },
+        
+        // Get historical station object based on station ID
+        getHistStationById: function(stationId, provider, place) {
+            provider = provider || this.getCurrentHProvider();
+            place = place || this.curplaces[this.curplace];
+            var sources = this.useNewHistPlaces ? place.hstations_new : place.hstations;
+            if (!stationId || !provider || !place || !sources || !sources[provider]) {
+                return null;
+            }
+            
+            var stationList = this.normalizeHistValue(sources[provider]);
+            return stationList.find(function(s) { return s.id === stationId; });
+        },
+        
+        // Get forecast station object based on station ID
+        getFcStationById: function(stationId, provider, place) {
+            provider = provider || this.getCurrentFcProvider();
+            place = place || this.curplaces[this.curplace];
+            
+            if (!stationId || !provider || !place || !place.fcstations || !place.fcstations[provider]) {
+                return null;
+            }
+            
+            var stationList = this.normalizeHistValue(place.fcstations[provider]);
+            return stationList.find(function(s) { return s.id === stationId; });
+        },
+        
+        setFcPlace: function() {
+            return false;
+        },
+
+        // Update fcplace based on current fcprovider and curplace
+        updateFcPlace: function(persist, provider) {
+            persist = persist !== 'ei';
+            provider = provider || this.getCurrentFcProvider();
+            if (!this.curplace || !this.curplaces[this.curplace] || !provider) {
+                return;
+            }
+            var place = this.curplaces[this.curplace];
+            if (place.fcstations && place.fcstations[provider]) {
+                var stationList = this.normalizeHistValue(place.fcstations[provider]);
+                var targetStation = null;
+                
+                // Check if we have a saved viewState
+                var viewStates = this.state.attr.viewStates || {};
+                var savedState = viewStates[this.curplace];
+                
+                // Case 1: Provider matches saved state - try to restore saved station
+                if (savedState && savedState.fcprovider === provider && savedState.fcstation_id) {
+                    // Try saved index first if available
+                    if (typeof savedState.fcstation_index === 'number' && 
+                        savedState.fcstation_index >= 0 && 
+                        savedState.fcstation_index < stationList.length &&
+                        stationList[savedState.fcstation_index].id === savedState.fcstation_id) {
+                        targetStation = stationList[savedState.fcstation_index];
+                    } else {
+                        // Fallback to finding by ID
+                        targetStation = stationList.find(function(s) { return s.id === savedState.fcstation_id; });
+                    }
+                }
+                
+                // Case 2: Provider changed, no saved state, or saved station not found - use first station
+                if (!targetStation && stationList.length > 0) {
+                    targetStation = stationList[0];
+                    
+                    // If provider changed from saved state, we should update the saved state
+                    if (savedState && savedState.fcprovider && savedState.fcprovider !== provider) {
+                        // Provider changed - reset to first station and update saved state
+                        savedState.fcprovider = provider;
+                        savedState.fcstation_id = targetStation.id;
+                        savedState.fcstation_index = 0;
+                    }
+                }
+                
+                // Store the selection in viewState (not in this.fcplace)
+                if (targetStation && persist) {
+                    if (!this.state.attr.viewStates) {
+                        this.state.attr.viewStates = {};
+                    }
+                    if (!this.state.attr.viewStates[this.curplace]) {
+                        this.state.attr.viewStates[this.curplace] = {};
+                    }
+                    this.state.attr.viewStates[this.curplace].fcprovider = provider;
+                    this.state.attr.viewStates[this.curplace].fcstation_id = targetStation.id;
+                    this.state.attr.viewStates[this.curplace].fcstation_index = stationList.indexOf(targetStation);
+                }
+            }
+            if (persist) {
+                this.saveViewState(this.curplace);
+            }
+            return false;
+        },
+        
+        // Set historical provider and update hplace to the corresponding station
+        setHProvider: function(provider, persist) {
+            persist = persist !== 'ei';
+            if (this.hproviders_available.indexOf(provider) === -1) return false;
+            var currentProvider = this.getCurrentHProvider();
+            if (provider !== currentProvider) {
+                // Update hplace to respect array indices for the new provider
+                this.updateHPlace(persist, provider);
+                if (persist) {
+                    this.saveViewState(this.curplace);
+                }
+            }
+            return true;
+        },
+        // Update hplace based on current hprovider and curplace
+        updateHPlace: function(persist, provider) {
+            persist = persist !== 'ei';
+            provider = provider || this.getCurrentHProvider();
+            if (!this.curplace || !this.curplaces[this.curplace] || !provider) {
+                return;
+            }
+            var place = this.curplaces[this.curplace];
+            var stations = this.useNewHistPlaces ? place.hstations_new : place.hstations;
+            if (stations && stations[provider]) {
+                var stationList = this.normalizeHistValue(stations[provider]);
+                var targetStation = null;
+                
+                // Check if we have a saved viewState
+                var viewStates = this.state.attr.viewStates || {};
+                var savedState = viewStates[this.curplace];
+                
+                // Case 1: Provider matches saved state - try to restore saved station
+                if (savedState && savedState.hprovider === provider && savedState.hstation_id) {
+                    // Try saved index first if available
+                    if (typeof savedState.hstation_index === 'number' && 
+                        savedState.hstation_index >= 0 && 
+                        savedState.hstation_index < stationList.length &&
+                        stationList[savedState.hstation_index].id === savedState.hstation_id) {
+                        targetStation = stationList[savedState.hstation_index];
+                    } else {
+                        // Fallback to finding by ID
+                        targetStation = stationList.find(function(s) { return s.id === savedState.hstation_id; });
+                    }
+                }
+                
+                // Case 2: Provider changed, no saved state, or saved station not found - use first station
+                if (!targetStation && stationList.length > 0) {
+                    targetStation = stationList[0];
+                    
+                    // If provider changed from saved state, we should update the saved state
+                    if (savedState && savedState.hprovider && savedState.hprovider !== provider) {
+                        // Provider changed - reset to first station and update saved state
+                        savedState.hprovider = provider;
+                        savedState.hstation_id = targetStation.id;
+                        savedState.hstation_index = 0;
+                    }
+                }
+                
+                // Store the selection in viewState (not in this.hplace)
+                if (targetStation && persist) {
+                    if (!this.state.attr.viewStates) {
+                        this.state.attr.viewStates = {};
+                    }
+                    if (!this.state.attr.viewStates[this.curplace]) {
+                        this.state.attr.viewStates[this.curplace] = {};
+                    }
+                    this.state.attr.viewStates[this.curplace].hprovider = provider;
+                    this.state.attr.viewStates[this.curplace].hstation_id = targetStation.id;
+                    this.state.attr.viewStates[this.curplace].hstation_index = stationList.indexOf(targetStation);
+                }
+            }
+            if (persist) {
+                this.saveViewState(this.curplace);
+            }
+        },
+        
+        // Set specific station index within the current provider's array
+        setHStationIndex: function(index, persist) {
+            persist = persist !== 'ei';
+            var currentProvider = this.getCurrentHProvider();
+            if (!this.curplace || !this.curplaces[this.curplace] || !currentProvider) {
+                return false;
+            }
+            
+            var place = this.curplaces[this.curplace];
+            var stations = this.useNewHistPlaces ? place.hstations_new : place.hstations;
+            if (!stations || !stations[currentProvider]) {
+                return false;
+            }
+            
+            var stationList = this.normalizeHistValue(stations[currentProvider]);
+            if (typeof index !== 'number' || index < 0 || index >= stationList.length) {
+                return false;
+            }
+            
+            var targetStation = stationList[index];
+            if (targetStation && targetStation.id) {
+                if (persist) {
+                    // Update viewState with the specific index
+                    var viewStates = this.state.attr.viewStates || {};
+                    if (!viewStates[this.curplace]) {
+                        viewStates[this.curplace] = {};
+                    }
+                    var provider = this.getCurrentHProvider();
+                    viewStates[this.curplace].hprovider = provider;
+                    viewStates[this.curplace].hstation_id = targetStation.id;
+                    viewStates[this.curplace].hstation_index = index;
+                    this.saveViewState(this.curplace);
+                }
+                return true;
+            }
+            
+            return false;
+        },
+        
+        // Get available stations for current provider as array with indices
+        getAvailableHStationsForCurrentProvider: function() {
+            var provider = this.getCurrentHProvider();
+            if (!this.curplace || !this.curplaces[this.curplace] || !provider) {
+                return [];
+            }
+            
+            var place = this.curplaces[this.curplace];
+            var stations = this.useNewHistPlaces ? place.hstations_new : place.hstations;
+            if (!stations || !stations[provider]) {
+                return [];
+            }
+            
+            var stationList = this.normalizeHistValue(stations[provider]);
+            return stationList.map(function(station, index) {
+                return {
+                    index: index,
+                    id: station.id,
+                    name: station.name || place.name,
+                    displayName: (station.name || place.name) + ' ' + ((provider === 'wsds') ? 'WS' : provider.toUpperCase()) + (stationList.length > 1 ? ' #' + (index + 1) : ''),
+                    station: station
+                };
+            });
+        },
+        
+        // Get current historical provider structure with station info and index
+        getCurrentHProviderStruct: function(placeKey) {
+            placeKey = placeKey || this.curplace;
+            if (!placeKey || !this.curplaces[placeKey]) {
+                return null;
+            }
+            
+            var viewStates = this.state.attr.viewStates || {};
+            var savedState = viewStates[placeKey];
+            var place = this.curplaces[placeKey];
+            
+            // Get current provider
+            var provider = this.getCurrentHProvider(placeKey);
+            if (!provider) return null;
+            
+            var sources = this.useNewHistPlaces ? place.hstations_new : place.hstations;
+            if (!sources || !sources[provider]) return null;
+            
+            var stationList = this.normalizeHistValue(sources[provider]);
+            if (stationList.length === 0) return null;
+            
+            var result = {
+                provider: provider,
+                stations: stationList,
+                currentStation: null,
+                currentIndex: 0
+            };
+            
+            // If we have saved state, try to find the exact station and index
+            if (savedState && savedState.hprovider === provider && savedState.hstation_id) {
+                // Try saved index first if available
+                if (typeof savedState.hstation_index === 'number' && 
+                    savedState.hstation_index >= 0 && 
+                    savedState.hstation_index < stationList.length &&
+                    stationList[savedState.hstation_index].id === savedState.hstation_id) {
+                    
+                    result.currentStation = stationList[savedState.hstation_index];
+                    result.currentIndex = savedState.hstation_index;
+                } else {
+                    // Find by ID if index doesn't match
+                    for (var i = 0; i < stationList.length; i++) {
+                        if (stationList[i].id === savedState.hstation_id) {
+                            result.currentStation = stationList[i];
+                            result.currentIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // If no saved state or station not found, use first station
+            if (!result.currentStation && stationList.length > 0) {
+                result.currentStation = stationList[0];
+                result.currentIndex = 0;
+            }
+            
+            return result;
+        },
+        
+        // Get current forecast provider structure with station info and index
+        getCurrentFcProviderStruct: function(placeKey) {
+            placeKey = placeKey || this.curplace;
+            if (!placeKey || !this.curplaces[placeKey]) {
+                return null;
+            }
+            
+            var viewStates = this.state.attr.viewStates || {};
+            var savedState = viewStates[placeKey];
+            var place = this.curplaces[placeKey];
+            
+            // Get current provider
+            var provider = this.getCurrentFcProvider(placeKey);
+            if (!provider) return null;
+            
+            if (!place.fcstations || !place.fcstations[provider]) return null;
+            
+            var stationList = this.normalizeHistValue(place.fcstations[provider]);
+            if (stationList.length === 0) return null;
+            
+            var result = {
+                provider: provider,
+                stations: stationList,
+                currentStation: null,
+                currentIndex: 0
+            };
+            
+            // If we have saved state, try to find the exact station and index
+            if (savedState && savedState.fcprovider === provider && savedState.fcstation_id) {
+                // Try saved index first if available
+                if (typeof savedState.fcstation_index === 'number' && 
+                    savedState.fcstation_index >= 0 && 
+                    savedState.fcstation_index < stationList.length &&
+                    stationList[savedState.fcstation_index].id === savedState.fcstation_id) {
+                    
+                    result.currentStation = stationList[savedState.fcstation_index];
+                    result.currentIndex = savedState.fcstation_index;
+                } else {
+                    // Find by ID if index doesn't match
+                    for (var i = 0; i < stationList.length; i++) {
+                        if (stationList[i].id === savedState.fcstation_id) {
+                            result.currentStation = stationList[i];
+                            result.currentIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // If no saved state or station not found, use first station
+            if (!result.currentStation && stationList.length > 0) {
+                result.currentStation = stationList[0];
+                result.currentIndex = 0;
+            }
+            
+            return result;
+        },
+        
+        // Helper to get current historical provider from viewStates or fallback
+        getCurrentHProvider: function(placeKey) {
+            placeKey = placeKey || this.curplace;
+            if (!placeKey) return '';
+            
+            var viewStates = this.state.attr.viewStates || {};
+            var savedState = viewStates[placeKey];
+            
+            if (savedState && savedState.hprovider) {
+                return savedState.hprovider;
+            }
+            
+            // Fallback to first available provider for this place
+            if (this.curplaces[placeKey]) {
+                var place = this.curplaces[placeKey];
+                var sources = this.useNewHistPlaces ? place.hstations_new : place.hstations;
+                if (sources && typeof sources === 'object') {
+                    var providers = Object.keys(sources);
+                    if (providers.length > 0) {
+                        return providers[0];
+                    }
+                }
+            }
+            
+            return '';
+        },
+        
+        // Helper to get current forecast provider from viewStates or fallback
+        getCurrentFcProvider: function(placeKey) {
+            placeKey = placeKey || this.curplace;
+            if (!placeKey) return '';
+            
+            var viewStates = this.state.attr.viewStates || {};
+            var savedState = viewStates[placeKey];
+            
+            if (savedState && savedState.fcprovider) {
+                return savedState.fcprovider;
+            }
+            
+            // Fallback to first available provider for this place
+            if (this.curplaces[placeKey]) {
+                var place = this.curplaces[placeKey];
+                if (place.fcstations && typeof place.fcstations === 'object') {
+                    var providers = Object.keys(place.fcstations);
+                    if (providers.length > 0) {
+                        return providers[0];
+                    }
+                }
+            }
+            
+            return '';
+        },
+        
+        // View state persistence system for place-specific provider/station selections
+        saveViewState: function(placeKey) {
+            if (!placeKey) placeKey = this.curplace;
+            if (!placeKey || !this.curplaces[placeKey]) return;
+            
+            // Ensure viewStates exists in state
+            if (!this.state.attr.viewStates) {
+                this.state.attr.viewStates = {};
+            }
+            
+            // Update timestamp in existing state (state is updated by updateHPlace/updateFcPlace)
+            if (!this.state.attr.viewStates[placeKey]) {
+                this.state.attr.viewStates[placeKey] = {};
+            }
+            this.state.attr.viewStates[placeKey].timestamp = Date.now();
+            
+            this.state.save(); // Trigger save directly
+            
+            // Update the existing grid row if it exists, without full reload
+            this.updateGridRowForPlace(placeKey);
+        },
+        
+        restoreViewState: function(placeKey) {
+            if (!placeKey || !this.curplaces[placeKey]) return false;
+            
+            var viewStates = this.state.attr.viewStates || {};
+            var savedState = viewStates[placeKey];
+            
+            if (!savedState) return false;
+            
+            var restored = false;
+            var place = this.curplaces[placeKey];
+            
+            // Restore historical provider/station if available and valid
+            if (savedState.hprovider && savedState.hstation_id && 
+                this.hproviders_available.indexOf(savedState.hprovider) !== -1) {
+                
+                var hStations = this.useNewHistPlaces ? place.hstations_new : place.hstations;
+                if (hStations && hStations[savedState.hprovider]) {
+                    var hStationList = this.normalizeHistValue(hStations[savedState.hprovider]);
+                    var hStation = null;
+                    
+                    // If we have a saved index, try that first
+                    if (typeof savedState.hstation_index === 'number' && 
+                        savedState.hstation_index >= 0 && 
+                        savedState.hstation_index < hStationList.length &&
+                        hStationList[savedState.hstation_index].id === savedState.hstation_id) {
+                        hStation = hStationList[savedState.hstation_index];
+                    } else {
+                        // Fallback to finding by ID
+                        hStation = hStationList.find(function(s) { return s.id === savedState.hstation_id; });
+                    }
+                    
+                    if (hStation) {
+                        // Use setHStationIndex to properly set both hplace and track the index
+                        if (typeof savedState.hstation_index === 'number' && 
+                            savedState.hstation_index >= 0 && 
+                            savedState.hstation_index < hStationList.length &&
+                            hStationList[savedState.hstation_index] === hStation) {
+                            this.setHStationIndex(savedState.hstation_index, false);
+                        } else {
+                            // Find the actual index and use setHStationIndex
+                            var actualIndex = hStationList.findIndex(function(s) { return s.id === savedState.hstation_id; });
+                            if (actualIndex !== -1) {
+                                this.setHStationIndex(actualIndex, false);
+                            }
+                        }
+                        restored = true;
+                    }
+                }
+            }
+            
+            // Restore forecast provider/station if available and valid
+            if (savedState.fcprovider && savedState.fcstation_id &&
+                this.fcproviders_available.indexOf(savedState.fcprovider) !== -1) {
+                
+                if (place.fcstations && place.fcstations[savedState.fcprovider]) {
+                    var fcStationList = this.normalizeHistValue(place.fcstations[savedState.fcprovider]);
+                    var fcStation = null;
+                    
+                    // If we have a saved index, try that first
+                    if (typeof savedState.fcstation_index === 'number' && 
+                        savedState.fcstation_index >= 0 && 
+                        savedState.fcstation_index < fcStationList.length &&
+                        fcStationList[savedState.fcstation_index].id === savedState.fcstation_id) {
+                        fcStation = fcStationList[savedState.fcstation_index];
+                    } else {
+                        // Fallback to finding by ID
+                        fcStation = fcStationList.find(function(s) { return s.id === savedState.fcstation_id; });
+                    }
+                    
+                    if (fcStation) {
+                        // fcStation found - state will be restored by getCurrentFcProviderStruct
+                        restored = true;
+                    }
+                }
+            }
+            
+            return restored;
+        },
+        
+        clearViewState: function(placeKey) {
+            if (!placeKey) placeKey = this.curplace;
+            if (!placeKey) return;
+            
+            if (this.state.attr.viewStates && this.state.attr.viewStates[placeKey]) {
+                delete this.state.attr.viewStates[placeKey];
+                this.state.save(); // Trigger save directly
+            }
+        },
+        
+        // Get saved view state for a place - useful for loadGraph to recreate graphs/tables
+        getSavedViewState: function(placeKey) {
+            if (!placeKey) placeKey = this.curplace;
+            if (!placeKey) return null;
+            
+            var viewStates = this.state.attr.viewStates || {};
+            var savedState = viewStates[placeKey];
+            
+            if (!savedState) return null;
+            
+            var place = this.curplaces[placeKey];
+            if (!place) return null;
+            
+            var result = {
+                placeKey: placeKey,
+                place: place,
+                timestamp: savedState.timestamp
+            };
+            
+            // Restore historical station object from ID
+            if (savedState.hprovider && savedState.hstation_id) {
+                var hStations = this.useNewHistPlaces ? place.hstations_new : place.hstations;
+                if (hStations && hStations[savedState.hprovider]) {
+                    var hStationList = this.normalizeHistValue(hStations[savedState.hprovider]);
+                    var hStation = null;
+                    
+                    // If we have a saved index, try that first
+                    if (typeof savedState.hstation_index === 'number' && 
+                        savedState.hstation_index >= 0 && 
+                        savedState.hstation_index < hStationList.length &&
+                        hStationList[savedState.hstation_index].id === savedState.hstation_id) {
+                        hStation = hStationList[savedState.hstation_index];
+                    } else {
+                        // Fallback to finding by ID
+                        hStation = hStationList.find(function(s) { return s.id === savedState.hstation_id; });
+                    }
+                    
+                    if (hStation) {
+                        result.hprovider = savedState.hprovider;
+                        result.hstation = hStation;
+                    }
+                }
+            }
+            
+            // Restore forecast station object from ID
+            if (savedState.fcprovider && savedState.fcstation_id) {
+                if (place.fcstations && place.fcstations[savedState.fcprovider]) {
+                    var fcStationList = this.normalizeHistValue(place.fcstations[savedState.fcprovider]);
+                    var fcStation = null;
+                    
+                    // If we have a saved index, try that first
+                    if (typeof savedState.fcstation_index === 'number' && 
+                        savedState.fcstation_index >= 0 && 
+                        savedState.fcstation_index < fcStationList.length &&
+                        fcStationList[savedState.fcstation_index].id === savedState.fcstation_id) {
+                        fcStation = fcStationList[savedState.fcstation_index];
+                    } else {
+                        // Fallback to finding by ID
+                        fcStation = fcStationList.find(function(s) { return s.id === savedState.fcstation_id; });
+                    }
+                    
+                    if (fcStation) {
+                        result.fcprovider = savedState.fcprovider;
+                        result.fcstation = fcStation;
+                    }
+                }
+            }
+            
+            return result;
+        },
+        
+        setCurPlace: function(d, persist, load) {
+            persist = persist === true || persist === 'ja' ? 'ja' : 'ei';
+            
+            this.setPlace(d, 'curplace', persist);
+
+            // Update available providers for current place
+            this.updateHProvidersAvailable();
+            this.updateFcProvidersAvailable();
+            
+            // If place changed, try to restore previous view state
+            var stateRestored = this.restoreViewState(this.curplace);
+            
+            if (!stateRestored) {
+                // If no saved state, use default provider selection logic
+                
+                // Historical provider fallback
+                var currentHProvider = this.getCurrentHProvider();
+                if (this.hproviders_available.length > 0 && this.hproviders_available.indexOf(currentHProvider) === -1) {
+                    this.setHProvider(this.hproviders_available[0], persist !== 'ei');
+                }
+                
+                // Forecast provider fallback  
+                var currentFcProvider = this.getCurrentFcProvider();
+                if (this.fcproviders_available.length > 0 && this.fcproviders_available.indexOf(currentFcProvider) === -1) {
+                    this.setFcProvider(this.fcproviders_available[0]);
+                }
+            }
+            
+            // Update places and save state if providers/places changed
+            this.updateHPlace(persist !== 'ei');
+            this.updateFcPlace(persist !== 'ei');
+        
+            // Only reload if explicitly requested and DOM is ready
+            if (load === 'ja' || load === true) {
+                this.reloadAfterPlaceChange();
+            }
+            
+            return false;
+        },
+        
+        // Separate function to handle reload logic after place changes
+        reloadAfterPlaceChange: function() {
+            this.doReload('both');
+        },
+        
+        // Get forecast station display name for current place and provider
+        getFcStationDisplayName: function(curplace) {
+            var currentFcProvider = this.getCurrentFcProvider();
+            if (!curplace || !currentFcProvider) return '';
+            
+            // Try to get the specific selected forecast station first using provider struct
+            var fcStruct = this.getCurrentFcProviderStruct();
+            if (fcStruct && fcStruct.currentStation && fcStruct.currentStation.name) {
+                return fcStruct.currentStation.name;
+            }
+            
+            // Fallback to place name
+            if (curplace.name) {
+                return curplace.name;
+            }
+
+            // Fallback to old bind system
+            if (curplace.bind && this.fcplaces && this.fcplaces[curplace.bind]) {
+                return this.fcplaces[curplace.bind].name;
+            }
+            
+            // Fallback to provider name
+            if (this.fcprovidersmeta[currentFcProvider]) {
+                return this.fcprovidersmeta[currentFcProvider].name;
+            }
+            
+            return '';
+        },
+        setPlace: function(d, name, persist) {
+            // Simplified function - just saves the place
+            // Provider-specific logic should be handled in setCurPlace
+            name = name || 'curplace';
+            persist = persist !== 'ei';
+            
+            if (!d) d = this.state.attr[name];
+            if (d) {
+                this[name] = d;
+                if (persist === 'ja') {
+                    var j = {};
+                    j[name] = d;
+                    this.state.set(j);
+                }
             }
             return false;
         },
@@ -1340,9 +2936,27 @@ var ilm = (function(my) {
         },
         nextPlace: function(name) {
             name = name || 'fcplace';
-            var places = this[name + 's'] || this.fcplaces,
-                place = this[name] || this.fcplace,
-                p = '',
+            
+            var places, place;
+            if (name === 'fcplace') {
+                // Use new forecast station structure
+                places = this.getAvailableFcStations();
+                place = this.getCurrentFcProvider();
+                
+                // Convert to object format for compatibility
+                var placesObj = {};
+                places.forEach(function(station) {
+                    placesObj[station.id] = station;
+                });
+                places = placesObj;
+            } else {
+                places = this[name + 's'] || this.fcplaces;
+                // For compatibility, get current place from provider struct
+                var fcStruct = this.getCurrentFcProviderStruct();
+                place = this[name] || (fcStruct && fcStruct.currentStation ? fcStruct.currentStation.id : '');
+            }
+            
+            var p = '',
                 that = false,
                 j = '',
                 i;
@@ -1376,7 +2990,24 @@ var ilm = (function(my) {
                 this.showgroup = d;
                 this.state.set({ showgroup: (d ? d : 'none') });
                 if (!d) return false;
-                if (this.fcplaces[this.fcplace].group !== this.showgroup) this.setEstPlace(this.nextPlace());
+                
+                // Check if current forecast provider is in the right group
+                var fcStations = this.getAvailableFcStations();
+                var currentFcProvider = this.getCurrentFcProvider();
+                var currentFcStation = fcStations.find(function(station) {
+                    return station.id === currentFcProvider;
+                });
+                
+                if (currentFcStation && currentFcStation.group !== this.showgroup) {
+                    // Find next suitable forecast provider
+                    var nextFcStation = fcStations.find(function(station) {
+                        return station.group === my.showgroup;
+                    });
+                    if (nextFcStation) {
+                        this.setFcProvider(nextFcStation.id);
+                    }
+                }
+                
                 if (this.curplaces[this.curplace].group !== this.showgroup) this.setCurPlace(this.nextCurPlace());
                 //this.doReload("both");
             }
@@ -1410,13 +3041,13 @@ var ilm = (function(my) {
             }
             return false;
         },
-        setFcAsTable: function(value) {
+        setAsTable: function(value) {
             if (/(0|false)/.test(value)) value = 'graph';
             if (/(1|true)/.test(value)) value = 'table';
             if (this.samplemode !== value) {
                 this.samplemode = value;
                 this.state.set({ samplemode: this.samplemode });
-                this.reloadest();
+                this.reload();
             }
             return false;
         },
@@ -1431,6 +3062,7 @@ var ilm = (function(my) {
             return false;
         },
         setDate: function(d, load) {
+            if(!d) return;
             load = load || 'ja';
             var ret = 0,
                 dd = '',
@@ -1519,8 +3151,25 @@ var ilm = (function(my) {
                 html += '<div><label for="history">Andmed</label> <select class="form-control input-sm" onchange="ilm.setCurPlace(this.options[this.selectedIndex].value);ilm.settingTemplate(\'#ilm-seaded-dropdown\');return false;" id="history-sel" name="history-sel">';
                 html += _.map(my.curplaces, function(a) { if (!my.showgroup || my.curplaces[a.id].group === my.showgroup) { return '<option value="' + a.id + '" ' + (a.id === my.curplace ? ' selected' : '') + '>' + a.name + '</option>'; } }).join('');
                 html += '</select></div>';
-                html += '<div><label for="forecast">Ennustus</label> <select class="form-control input-sm" onchange="ilm.setEstPlace(this.options[this.selectedIndex].value);ilm.settingTemplate(\'#ilm-seaded-dropdown\');return false;" id="forecast-sel" name="forecast-sel">';
-                html += _.map(my.fcplaces, function(a) { if (!my.showgroup || my.fcplaces[a.id].group === my.showgroup) { return '<option value="' + a.id + '" ' + (a.id === my.fcplace ? ' selected' : '') + '>' + a.name + '</option>'; } }).join('');
+                html += '<div><label for="forecast">Ennustus</label> <select class="form-control input-sm" onchange="ilm.setFcProvider(this.options[this.selectedIndex].value);ilm.settingTemplate(\'#ilm-seaded-dropdown\');return false;" id="forecast-sel" name="forecast-sel">';
+                
+                // Use new forecast station structure
+                if (my.curplace && my.curplaces[my.curplace] && my.curplaces[my.curplace].fcstations) {
+                    var fcStations = my.getAvailableFcStations();
+                    var currentFcProvider = my.getCurrentFcProvider();
+                    html += _.map(fcStations, function(station) {
+                        if (!my.showgroup || !station.group || station.group === my.showgroup) {
+                            return '<option value="' + station.id + '" ' + (station.id === currentFcProvider ? ' selected' : '') + '>' + station.name + '</option>';
+                        }
+                    }).join('');
+                } else {
+                    // Fallback to legacy fcplaces
+                    html += _.map(my.fcplaces, function(a) { 
+                        if (!my.showgroup || my.fcplaces[a.id].group === my.showgroup) { 
+                            return '<option value="' + a.id + '" ' + (a.id === my.fcplace ? ' selected' : '') + '>' + a.name + '</option>'; 
+                        } 
+                    }).join('');
+                }
                 html += '</select></div>';
                 html += '<div><label for="groups">Ennustuse ja andmete seos</label> <select class="form-control input-sm" onchange="ilm.setBinded(this.options[this.selectedIndex].value);return false;" id="binding-sel" name="binding-sel">';
                 html += _.map({ ei: { id: false, name: 'Ei ole seotud' }, jah: { id: true, name: 'On seotud' } }, function(a) { return '<option value="' + a.id + '" ' + (a.id === my.binded ? ' selected' : '') + '>' + a.name + '</option>'; }).join('');
@@ -1533,7 +3182,7 @@ var ilm = (function(my) {
                 html += '</ul></div><div><ul id="order-sel2" class="order itemlist drag-box">';
                 html += _.map(my.graphs, function(a) { return (my.chartorder.indexOf(a) < 0) ? '<li class="drag-item" name="' + a + '">' + my.graph_name(a) + '</li>' : ''; }).join('');
                 html += '</ul></div><div class="checkbox"><label>Näita viiteid menüüs <input type="checkbox" onclick="ilm.setLinksAsMenu(this.checked);return true;" id="linksasmenu" name="linksasmenu"></label></div>';
-                html += '<div class="checkbox"><label>Näita ennustust tabelis <input type="checkbox" onclick="ilm.setFcAsTable(this.checked);return true;" id="samplemode" name="samplemode"></label></div>';
+                html += '<div class="checkbox"><label>Näita ennustust tabelis <input type="checkbox" onclick="ilm.setAsTable(this.checked);return true;" id="samplemode" name="samplemode"></label></div>';
                 html += '<div class="checkbox"><label>Näita öist ennustust <input type="checkbox" onclick="ilm.setFcShowNight(this.checked);return true;" id="fcshownight" name="fcshownight"></label></div>';
                 html += '<div class="histdate"><label>Kuupäeva andmed <input class="datepicker" onchange="ilm.setDate(this.value);return true;" id="histdate" name="histdate" value="'+my.getDateString(my.start)+'"></label></div>';
             }
@@ -1554,14 +3203,14 @@ var ilm = (function(my) {
                                 w.ilm.setOrder(nl);
                             }
                         }
-                    }).disableSelection();
+                    });
                 }
                 if (w.ilm.linksasmenu) $('#linksasmenu').attr({ 'checked': 'checked' });
                 if (w.ilm.samplemode === 'table') $('#samplemode').attr({ 'checked': 'checked' });
             }
             return html;
         },
-        normalizeData: function(place, data, fn, last, start) {
+        normalizeData: function(place, hprovider, data, fn, last, start) {
             var b, d, i, j, k, lastdate, prev = null,
                 obj = null;
             if (!fn) return 0;
@@ -1581,9 +3230,8 @@ var ilm = (function(my) {
                     lastdate = parseInt(data.data[j - 1].time_stamp, 10) * 1000;
                 }
             } else if (data) {
-                var c, e, g, h = /^ut/.test(place),
-                    z = /\d+:\d[012346789]\s/.test(data);
-                var reg = new RegExp(h ? ',\\s*' : '\\s+?');
+                var c, e, g, h = (my.getProviderNum(hprovider) === my.HPROVIDER.UT || /^ut/.test(place)), z = /\d+:\d[012346789]\s/.test(data);
+                var reg = new RegExp(h ? '[,\\t]\\s*' : '\\s+?');
                 var rtmp = data.split('\n');
                 var rows = _.filter(rtmp, function(a) { return a && (/^(\d\d)/).test(a); });
                 for (i = last ? rows.length - 2 : 0, j = rows.length, k = rows.length - 1; i < j; ++i) {
@@ -1667,12 +3315,25 @@ var ilm = (function(my) {
                 r.avg_humid = my.ntof2p(c.outdoor_humidity);
                 r.avg_press = my.ntof2p(c.avg_absolute_pressure);
             } else {
+                const pdata = my.state.attr.viewStates[place];
+                const hprovider = pdata ? pdata.hprovider : 
+                    /ut_/.test(place) ? 'ut' : 
+                        /emhi_/.test(place) ? 'emhi' : 
+                            /ttu_/.test(place) ? 'ttu' : 
+                                /mnt_/.test(place) ? 'mnt' : 
+                                    /wsds_/.test(place) ? 'wsds' : '';
+                    
+                // Fast numeric provider lookup
+                const providerNum = my.getProviderNum(hprovider);
+                
                 for (var i = 0, j = c.length; i < j; ++i) {
                     c[i] = c[i] || null;
                     if (e) { e[i] = e[i] || null; }
                 }
                 r.time = d || new Date(c[0].replace(/(\d\d\d\d)(\d\d)(\d\d)/, '$1/$2/$3') + ' ' + c[1]).getTime();
-                if (/^ut/.test(place)) {
+                
+                // Use fast numeric comparisons instead of string comparisons
+                if (providerNum === my.HPROVIDER.UT) {
                     r.time = d || new Date(c[0].replace(/(\d\d\d\d)-?(\d\d)-?(\d\d)/, '$1/$2/$3')).getTime();
                     c[1] = (c[1] && (c[1] < -49 || c[1] > 49)) ? null : c[1];
                     c[4] = (c[4] && (c[4] < 0 || c[4] > 49)) ? null : c[4];
@@ -1683,7 +3344,7 @@ var ilm = (function(my) {
                     r.avg_rain = my.ntof2p((e) ? my.getavg([c[6], e[6]]) : c[6]);
                     r.avg_humid = my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2]);
                     r.avg_press = my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3]);
-                } else if (/(emu)/.test(place)) {
+                } else if (providerNum === my.HPROVIDER.EMU) {
                     r.avg_ws = my.conv_kmh2ms(my.ntof2p((e) ? my.getavg([c[7], e[7]]) : c[7]));
                     r.max_ws = my.conv_kmh2ms(my.ntof2p((e) ? my.getmax([c[8], e[8]]) : c[8]));
                     r.avg_wd = my.ntof2p((e) ? my.wdavg([c[9], e[9]]) : c[9]);
@@ -1693,7 +3354,25 @@ var ilm = (function(my) {
                     r.avg_rain = my.ntof2p((e) ? my.getavg([c[10], e[10]]) : c[10]);
                     r.avg_humid = my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5]);
                     r.avg_press = my.ntof2p((e) ? my.getavg([c[11], e[11]]) : c[11]);
-                } else if (/emhi/.test(place)) {
+                } 
+                else if(my.useNewHistPlaces) {
+                    // waterlevel bk77 pos 2
+                    r.avg_wl = my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2]);
+                    if(r.avg_wl === null) {
+                        // or waterlevel eh2000 pos 3
+                        r.avg_wl = my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3]);
+                        if(r.avg_wl !== null) r.avg_wl -= 23; // convert eh2000 to bk77
+                    }
+                    r.avg_wtemp = my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4]);
+                    if (c[5] !== null) r.avg_temp = my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5]);
+                    r.avg_ws = my.ntof2p((e) ? my.getavg([c[6], e[6]]) : c[6]);
+                    r.max_ws = my.ntof2p((e) ? my.getmax([c[7], e[7]]) : c[7]);
+                    r.avg_wd = my.ntof2p((e) ? my.wdavg([c[8], e[8]]) : c[8]);
+                    r.avg_rain = my.ntof2p((e) ? my.getavg([c[9], e[9]]) : c[9]);
+                    r.avg_humid = my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4]);
+                    r.avg_press = my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3]);
+                }
+                else if (providerNum === my.HPROVIDER.EMHI) {
                     /*
 <tr>
 <th>Aeg</th>
@@ -1732,7 +3411,7 @@ temp 5 <td class="number">9,8</td>
                     if (c[5] !== null) r.avg_temp = my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5]);
                     r.avg_wtemp = my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4]);
                     r.avg_wl = my.ntof2p((e) ? my.getavg([c[2], e[2]]) : c[2]);
-                } else if (/ttu/.test(place)) {
+                } else if (providerNum === my.HPROVIDER.TTU) {
                     c[5] = (c[5] === null || c[5] === undefined || c[5] < -49) ? null : c[5];
                     c[6] = (c[6] && (c[6] < 0 || c[6] > 49)) ? null : c[6];
                     if (e) e[6] = (e[6] && (e[6] < 0 || e[6] > 49)) ? null : e[6];
@@ -1747,7 +3426,7 @@ temp 5 <td class="number">9,8</td>
                     if (c[9] !== '') r.avg_humid = my.ntof2p((e) ? my.getavg([c[9], e[9]]) : c[9]);
                     if (c[10] !== '') r.avg_press = my.ntof2p((e) ? my.getavg([c[10], e[10]]) : c[10]);
                     if (c[11] !== '') r.avg_rain = my.ntof2p((e) ? my.getavg([c[11], e[11]]) : c[11]);
-                } else if (/mnt/.test(place)) {
+                } else if (providerNum === my.HPROVIDER.MNT) {
                     c[2] = (c[2] === null || c[2] === undefined || c[2] < -49) ? null : c[2];
                     c[8] = (c[8] && (c[8] < 0 || c[8] > 49)) ? null : c[8];
                     if (e) e[8] = (e[8] && (e[8] < 0 || e[8] > 49)) ? null : e[8];
@@ -1760,7 +3439,7 @@ temp 5 <td class="number">9,8</td>
                     if (c[3] !== '') r.avg_rain = my.ntof2p((e) ? my.getavg([c[3], e[3]]) : c[3]);
                     if (c[4] !== '') r.avg_humid = my.ntof2p((e) ? my.getavg([c[4], e[4]]) : c[4]);
                     if (c[5] !== '') r.avg_dp = my.ntof2p((e) ? my.getavg([c[5], e[5]]) : c[5]);
-                } else if (/(arhiiv|flydog)/.test(place)) {
+                } else if (providerNum === my.HPROVIDER.WSDS) {
                     r.avg_ws = my.ntof2p((e) ? my.getavg([c[6], e[6]]) : c[6]);
                     r.max_ws = my.ntof2p((e) ? my.getmax([c[7], e[7]]) : c[7]);
                     r.avg_wd = my.ntof2p((e) ? my.wdavg([c[5], e[5]]) : c[5]);
@@ -2096,6 +3775,31 @@ temp 5 <td class="number">9,8</td>
     } else {
         my = w.ilm;
     }
+    
+    // Provider enum for fast numeric comparisons - accessible from all modules
+    my.HPROVIDER = {
+        UNKNOWN: 0,
+        UT: 1,
+        EMU: 2,
+        EMHI: 3,
+        TTU: 4,
+        MNT: 5,
+        WSDS: 6
+    };
+    
+    // Fast provider lookup - accessible from all modules
+    my.getProviderNum = function(hprovider) {
+        switch (hprovider) {
+        case 'ut': return my.HPROVIDER.UT;
+        case 'emu': return my.HPROVIDER.EMU;
+        case 'emhi': return my.HPROVIDER.EMHI;
+        case 'ttu': return my.HPROVIDER.TTU;
+        case 'mnt': return my.HPROVIDER.MNT;
+        case 'wsds': return my.HPROVIDER.WSDS;
+        default: return my.HPROVIDER.UNKNOWN;
+        }
+    };
+    
     //my.setDate("2014-04-25T00:00:00");
     //my.setFrame('3d');
     //console.log(my.getTimeStr(my.date) + " " + my.timeframe);

@@ -135,7 +135,7 @@
             // return false;
         });
         $('#fctitle').on('click',function(){
-            w.ilm.setEstPlace(w.ilm.nextPlace());
+            w.ilm.setFcPlace(w.ilm.nextPlace());
             //w.ilm.reloadest();
             return false;
         });

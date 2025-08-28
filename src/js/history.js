@@ -267,7 +267,7 @@
             var self=my, d, s = {};
             //var table = $('<div>&nbsp;</div><table class="table" style="background-color:white;font-size:80%"><thead></thead><tbody class="tbody"></tbody></table>');
             var html = '<tbody>';
-            my.lastdate = my.normalizeData(my.curplace, json, function(obj,count,i){
+            my.lastdate = my.normalizeData(my.curplace, my.getCurrentHProvider(), json, function(obj,count,i){
                 //if(count-i>20) return false;
                 var loc = my.curplaces[my.curplace].location,
                     sun = SunCalc.getPosition(new Date(obj.time), loc[0], loc[1]);
@@ -286,41 +286,17 @@
             html += '</tbody>';
             var $html = $(html);
             //var rev = _.filter($html.children('.item').get().reverse(),function(a,i){return i<15;});
-            var ln = my.curplaces[my.curplace].name;
-            var hlinks = `<tr class="fcontainer">
-            <th colspan="10">
-            <span class="hist-length" name="4"> 4h </span>&nbsp;
-            <span class="hist-length" name="6"> 6h </span>&nbsp;
-            <span class="hist-length" name="12"> 12h </span>&nbsp;
-            <span class="hist-length" name="24"> 24h </span>&nbsp;
-            <span class="hist-length" name="48"> 2p </span>&nbsp;
-            <span class="hist-length" name="72"> 3p </span>
-            <span class="fchead right">${ln}</span>
-            </th></tr>`;
+            var hlinks = '<tr class="ctrlcontainer"><th colspan="10"></th></tr>';
             var rev = $html.children('.item').get().reverse();
             $html.html(rev);
             d = new Date(my.lastdate);
             var where = $('#'+my.chartorder[0]+'1');
             where.html(_.template(self.dataTableTemplate)({classes:'table table-sm',thead:_.template(self.histHeadTemplate)({inforows:hlinks}),tbody:$html.html()}));
             where.addClass('chart-table');
-            var where2 = where.find('.table')[0];
             $('#'+my.chartorder[1]+'1').hide();
             $('#'+my.chartorder[2]+'1').hide();
-            var metadata = get.histlink(my.curplace,my.lastdate,(my.lastdate + updateinterval));
-            get.dohmeta(my.curplace, metadata);
-            $('#pagelogo').html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+'</span>');
-            where = $('.hist-length');
-            _.each(where,function(a){
-                var d=$(a), c = d.attr('name'), b = parseInt(c,10)*3600*1000;
-                d.off('click');
-                d.on('click',function(e){
-                    var c = d.attr('name'), b = parseInt(c,10)*3600*1000;
-                    if(b===self.timeframe) return false;
-                    self.setFrame(c+'h');
-                });
-                if(b===my.timeframe) d.css('font-weight','600');
-                else d.css('font-weight','400');
-            });
+
+            
         },
    		done: function (json) {
             var d_series = {
@@ -360,7 +336,7 @@
             s.avg_wc_series = $.extend(true, {}, d_series, {name: 'Tuuletemp', color: '#8bbc21', lineWidth: 1});
             
 
-            my.lastdate = my.normalizeData(my.curplace, json, function(o){
+            my.lastdate = my.normalizeData(my.curplace, my.getCurrentHProvider(), json, function(o){
                 var x = Object.keys(s)[0];
                 if(!x || !s[x].data || !s[x].data.length) get.datalen[0]=o.time;
                 else get.datalen[1]=o.time;
@@ -389,9 +365,9 @@
 				+ '</div><div class="row-fix"><b>Tartu ilm</b> ' + my.getTimeStr(d,1) + "</div>"
 
 			);*/
-            $('#curplace').html('Andmed <b>'+my.curplaces[my.curplace].name+'</b>').show();
+            $('#curplace').html('Andmed <b>'+(my.curplaces[my.curplace].name)+'</b>').show();
             $('#curtime').html(my.getTimeStr(d,1,my.historyactive?1:0)).show();
-            var list = _.map(my.curplaces,function(a){if(!my.showgroup||my.curplaces[a.id].group===my.showgroup) {
+            var list = _.map((my.curplaces),function(a){if(!my.showgroup||my.curplaces[a.id].group===my.showgroup) {
                 return '<li><a href="#" name="'+a.id+'" class="curplace-select'+(a.id===my.curplace?' active':'')+'">'+a.name+'</a></li>';
             }}).join('');
             $('#curmenu').html(list);
@@ -480,48 +456,40 @@
 					', Järgmine uuendus: ' +
 					my.getTimeStr(my.lastdate + updateinterval)
 			);*/
-            var metadata = get.histlink(my.curplace,my.lastdate,(my.lastdate + updateinterval));
-            get.dohmeta(my.curplace, metadata);
-            $('#pagelogo').html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+'</span>');
-            var where = $('.hist-length');
-            _.each(where,function(a){
-                var d=$(a), c = d.attr('name'), b = parseInt(c,10)*3600*1000;
-                d.off('click');
-                d.on('click',function(e){
-                    var c = d.attr('name'), b = parseInt(c,10)*3600*1000;
-                    if(b===self.timeframe) return false;
-                    my.setFrame(c+'h');
-                });
-                var islabel = d.hasClass('btn');
-                if(islabel) {
-                    d.removeClass('btn-light');
-                }
-                if(b===my.timeframe) {
-                    if(islabel) {
-                        d.addClass('btn-primary');
-                    }
-                    d.css('font-weight','600');
-                }
-                else {
-                    d.css('font-weight','400');
-                }
-            });
     	},
-    	histlink: function(fc,last,next) {
-    		var cid=my.curplaces[fc],link=cid.link,fcid=cid.cid;
-            var base = /emhi/.test(fc) ? 'emhi' :
-                /emu/.test(fc) ? 'emu' :
-                    /flydog/.test(fc) ? 'flydog' :
-                        /^ut/.test(fc) ? 'ut' :
-                            /arhiiv/.test(fc) ? 'arhiiv' :
-                                /mnt/.test(fc) ? 'mnt' : 
-                                    /ttu/.test(fc) ? 'ttu':'';
-            var url = base ? my.histsourcesdata[base] : '';
-            var title=url.charAt(0).toUpperCase() + url.slice(1);
-            var t = '<a onclick="window.open(this.href);return false;" href="<%=url%>"><%=title%><%if(last){%> <%=last%><%}if(next){%>, järgmine <%=next%><%}%></a>';
-            //var meta = '';
-            var xurl = 'http://' + url + link + (base==='emhi' ? fcid+'/': (base==='ttu' ? '/'+fcid : ''));
-            return _.template(t)({title:title,url:xurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
+    	histlink: function(curplace,last,next) {
+            // Use getCurrentHProviderStruct to get complete provider info
+            var providerStruct = my.getCurrentHProviderStruct(curplace);
+            var link, provider, t, xurl, providerNum;
+            
+            if (providerStruct && providerStruct.provider && providerStruct.currentStation) {
+                // Use provider and station from current provider structure
+                provider = providerStruct.provider;
+                var station = providerStruct.currentStation;
+                
+                // Fast numeric provider lookup for better performance
+                providerNum = my.getProviderNum(provider);
+                
+                // Build appropriate link based on provider using fast numeric comparisons
+                if (providerNum === my.HPROVIDER.TTU) {
+                    link = station.id; // TTU uses station ID directly
+                } else {
+                    // For other historical providers, use station link or ID
+                    link = station.link || station.id || station.name;
+                }
+            } else {
+                // Fallback to old method for backward compatibility
+                provider = my.getCurrentHProvider(curplace);
+                var place = my.curplaces[curplace];
+                var sources = my.useNewHistPlaces ? place.hstations_new : place.hstations;
+                link = sources[provider];
+                providerNum = my.getProviderNum(provider);
+            }
+            
+            // Common URL building logic - no duplication
+            t = '<a onclick="window.open(this.href);return false;" href="<%=url%>"><%=title%><%if(last){%> <%=last%><%}if(next){%>, järgmine <%=next%><%}%></a>';
+            xurl = my.hprovidersmeta[provider].url + (providerNum === my.HPROVIDER.EMHI ? '' : (providerNum === my.HPROVIDER.TTU ? link : ''));
+            return _.template(t)({title:my.hprovidersmeta[provider].name, url:xurl, last:last ? my.getTimeStr(last) : null, next:next ? my.getTimeStr(next) : null});
         },
         dohmeta: function(box,data){
             var cnt = $('#curmeta'), cntn=null;
@@ -532,6 +500,95 @@
                 if (cntn) cntn.append('<div class="'+box+'-history-meta-info">'+data+'</div>');
             }
         },
+        afterdone: function() {
+            var metadata = get.histlink(my.curplace,my.lastdate,(my.lastdate + updateinterval));
+            get.dohmeta(my.curplace, metadata);
+            $('#pagelogo').html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+'</span>');
+            
+            var where = my.samplemode==='table' ? '.cur .ctrlcontainer th' : '.cur .ctrlhead';
+            $(where).html('<div class="left-side"></div><div class="right-side"></div>');
+
+            $(where).children().each(function(item, child){
+                $(child).html(function() {
+                    var links = '';
+                    if(item === 0) {
+                        links += `<div class="timeframe-control hist-timeframe-control">
+                        <span class="hist-length" name="4"> 4h </span>&nbsp;
+                        <span class="hist-length" name="6"> 6h </span>&nbsp;
+                        <span class="hist-length" name="12"> 12h </span>&nbsp;
+                        <span class="hist-length" name="24"> 24h </span>&nbsp;
+                        <span class="hist-length" name="48"> 2p </span>&nbsp;
+                        <span class="hist-length" name="72"> 3p </span>&nbsp;
+                        </div>`;
+                        //if(my.samplemode === 'table') {
+                        links += '<div class="sources-control hist-sources-control">';
+                        for( var i=0, j=my.hproviders_available.length; i<j; i++) {
+                            var hsrc = my.hproviders_available[i];
+                            
+                            // Use the normalized approach to get stations for any provider
+                            var place = my.curplaces[my.curplace];
+                            var sources = my.useNewHistPlaces ? place.hstations_new : place.hstations;
+                            var hstations = sources && sources[hsrc] ? my.normalizeHistValue(sources[hsrc]) : [];
+                            
+                            if (hstations && hstations.length > 1) {
+                                for(var k = 0; k < hstations.length; k++) {
+                                    links += '<span class="h-source" name="'+hsrc+'-'+k+'">'+ hstations[k].id+'</span>&nbsp;';
+                                }
+                            } else {
+                                links += '<span class="h-source" name="'+hsrc+'">'+ my.hprovidersmeta[hsrc].name+'</span>&nbsp;';
+                            }
+                        }
+                        links += '</div>';
+                        //}
+                    } 
+                    else {
+                        links += '<div class="title-control cur-name';
+                        if (my.samplemode !== 'table') links += ' badge bg-info';
+                        links += '"> '+my.curplaces[my.curplace].name+'</div>';
+                        links += `<div class="startdate-control">
+                        <input type="text" class="form-control datepicker" id="datepicker" name="datepicker" value="` + my.getDateString(my.start) + `" placeholder="Vali kuupäev" onchange="ilm.setDate(this.value);return false;">
+                        </div>`;
+                    }
+                    return links;
+                });
+                var el = $(child), where;
+                if(item === 0) {
+                    where = el.find('.hist-length');
+                    _.each(where,function(a){
+                        var member = $(a), c = member.attr('name'), b = parseInt(c,10)*3600*1000;
+                        if(my.samplemode == 'graph') member.addClass('badge bg-primary');
+                        if(b===my.timeframe) {
+                            member.css('font-weight','600');
+                        }
+                        else {
+                            member.css('font-weight','400');
+                        }
+                        member.off('click');
+                        member.on('click',function(){
+                            var c = member.attr('name'), b = parseInt(c,10)*3600*1000;
+                            if(b===my.timeframe) return false;
+                            my.setFrame(c+'h', true, true);
+                        });
+                    });
+                    where = el.find('.h-source');
+                    _.each(where,function(a){
+                        var member = $(a), c = member.attr('name'), b = c.split('-');
+                        if(my.samplemode == 'graph') member.addClass('badge bg-primary');
+                        var providerStruct = my.getCurrentHProviderStruct(my.curplace);
+                        if(b[0] == providerStruct.provider && ((b.length > 1 && b[1]==providerStruct.currentIndex) || b.length < 2)) member.css('font-weight','600');
+                        else member.css('font-weight','400');
+                        member.off('click');
+                        member.on('click',function(){
+                            w.ilm.setHProvider(b[0], true);
+                            if(b.length > 1) {
+                                w.ilm.setHStationIndex(parseInt(b[1], 10), true);
+                            }
+                            w.ilm.reload();
+                        });
+                    });
+                }
+            });
+        }
     };
     my.loadCur = function (url) {
         if(!$('#'+my.chartorder[0]+'1').length) return;
@@ -540,13 +597,26 @@
         if(!my.historyactive) my.start = now;
         var json_full='';
         var cb = function(d) {
-            my.dataurl=my.setHistDataUrl(my.curplace,d)+'?'+d;
+            // Use getCurrentHProviderStruct to get complete provider info  
+            var providerStruct = my.getCurrentHProviderStruct(my.curplace);
+            var dataUrl;
+            
+            if (providerStruct && providerStruct.provider && providerStruct.currentStation) {
+                // Build URL from current historical provider and station
+                var rowKey = providerStruct.provider + '_' + providerStruct.currentStation.id;
+                dataUrl = my.setHistDataUrl(rowKey, d);
+            } else {
+                // Fallback to old method for backward compatibility
+                dataUrl = my.setHistDataUrl(my.curplace, d);
+            }
+            
+            my.dataurl = dataUrl + '?' + d;
             $.ajax({url: my.dataurl, data: ajaxopt}).always(function (json,type) {
                 if(!/error|timeout/.test(type)){
                     json_full += json;
                 }
                 var x = new Date(now).getDate() !== new Date(d).getDate();
-                if(/(ttu|emhi|emu|mnt|arhiiv|flydog|ut_)/.test(my.curplace) && x) {
+                if(x) {
                     d += (24 * 3600 * 1000);
                     cb(d);
                 } else {
@@ -554,6 +624,7 @@
                     if(cnt[0]) cnt[0].innerHTML='';
                     if(my.samplemode==='table') get.donetable(json_full);
                     else get.done(json_full);
+                    get.afterdone();
                 }
             });
         };

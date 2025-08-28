@@ -1,0 +1,873 @@
+{
+    "aksi": {
+        "id": "saadjarv_saadjarve",
+        "name": "Saadjärve",
+        "group": "saadjarv",
+        "location": [58.535, 26.666],
+        "hstations": {
+            "wsds": {
+                "id": "saadjarv_saadjarve",
+                "location": [58.54048, 26.68177]
+            },
+            "ut": {
+                "id": "tartu",
+                "location": [58.365945, 26.690791]
+            },
+            "emu": {
+                "id": "emu",
+                "location": [58.388575, 26.694013]
+            }
+        },
+        "hstations_new": {
+            "wsds": {
+                "id": "saadjarv_saadjarve",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "aksi",
+                "link": "266923",
+                "location": [58.535, 26.666]
+            },
+            "yr": {
+                "id": "aksi",
+                "location": [58.535, 26.666]
+            },
+            "emhi": {
+                "id": "aksi",
+                "location": [58.529725, 26.639348]
+            }
+        }
+    },
+    "tartu": {
+        "id": "tartu",
+        "name": "Tartu",
+        "group": "koht",
+        "location": [58.365945, 26.690791],
+        "hstations": {
+            "ut": {
+                "id": "tartu",
+                "location": [58.365945, 26.690791]
+            },
+            "emu": {
+                "id": "emu",
+                "location": [58.388575, 26.694013]
+            },
+            "mnt": {
+                "id": "tartu",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "hstations_new": {
+            "ut": {
+                "id": "tartu",
+                "location": [58.9578, 23.4901]
+            },
+            "emu": {
+                "id": "emu",
+                "location": [58.388575, 26.694013]
+            },
+            "emhi": {
+                "id": "Tartu",
+                "location": [58.9578, 23.4901]
+            },
+            "mnt": {
+                "id": "tartu",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "fcstations": {
+            "yr": {
+                "id": "tartu",
+                "location": [58.380756, 26.723452]
+            },
+            "emhi": {
+                "id": "tartu",
+                "location": [58.365945, 26.690791]
+            }
+        }
+    },
+    "tamme": {
+        "id": "vortsjarv_tamme",
+        "name": "Tamme",
+        "group": "vortsjarv",
+        "location": [58.271306, 26.134923],
+        "hstations": {
+            "wsds": {
+                "id": "vortsjarv_tamme",
+                "location": [58.271306, 26.134923]
+            },
+            "mnt": {
+                "id": "tamme",
+                "location": [58.331664, 26.187807]
+            }
+        },
+        "hstations_new": {
+            "wsds": [
+                {
+                    "id": "vortsjarv_tamme",
+                    "location": [58.9578, 23.4901]
+                }
+            ],
+            "emhi": {
+                "id": "Tartu_Tõravere",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "tamme",
+                "link": "192609",
+                "location": [58.271306, 26.134923]
+            },
+            "yr": {
+                "id": "tamme",
+                "location": [58.271, 26.132]
+            },
+            "emhi": {
+                "id": "tamme",
+                "location": [58.224666, 26.135578]
+            }
+        }
+    },
+    "joesuu": {
+        "id": "vortsjarv_joesuu",
+        "name": "Jõesuu",
+        "group": "vortsjarv",
+        "location": [58.384, 26.127],
+        "hstations": {
+            "wsds": {
+                "id": "vortsjarv_joesuu",
+                "location": [58.384, 26.127]
+            }
+        },
+        "hstations_new": {
+            "wsds": [
+                {
+                    "id": "vortsjarv_joesuu",
+                    "location": [58.9578, 23.4901]
+                }
+            ],
+            "emhi": {
+                "id": "Rannu_Jõesuu",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "joesuu",
+                "link": "692681",
+                "location": [58.386441, 26.131942]
+            },
+            "yr": {
+                "id": "joesuu",
+                "location": [58.384, 26.127]
+            },
+            "emhi": {
+                "id": "joesuu",
+                "location": [58.405000, 26.076182]
+            }
+        }
+    },
+    "nina": {
+        "id": "peipsi_nina",
+        "name": "Nina",
+        "group": "peipsi",
+        "location": [58.598889, 27.209722],
+        "hstations": {
+            "wsds": {
+                "id": "peipsi_nina",
+                "location": [58.598889, 27.209722]
+            }
+        },
+        "hstations_new": {
+            "wsds": {
+                "id": "peipsi_nina",
+                "location": [58.598889, 27.209722]
+            },
+            "emhi": {
+                "id": "Peipsi_Nina",
+                "location": [58.598889, 27.209722]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "nina",
+                "link": "20401",
+                "location": [58.598889, 27.209722]
+            },
+            "yr": {
+                "id": "nina",
+                "link": "2-589982",
+                "location": [58.598889, 27.209722]
+            },
+            "emhi": {
+                "id": "nina",
+                "location": [58.606881, 27.203583]
+            }
+        }
+    },
+    "rapina": {
+        "id": "peipsi_rapina",
+        "name": "Räpina Sadam",
+        "group": "peipsi",
+        "location": [58.126, 27.532],
+        "hstations": {
+            "wsds": {
+                "id": "peipsi_rapina",
+                "location": [58.126, 27.532]
+            },
+            "mnt": {
+                "id": "rapina",
+                "location": [57.957275, 27.626020]
+            },
+            "ttu": {
+                "id": "rapina",
+                "location": [57.957275, 27.626020]
+            }
+        },
+        "hstations_new": {
+            "wsds": {
+                "id": "peipsi_rapina",
+                "location": [58.9578, 23.4901]
+            },
+            "emhi": [
+                {
+                    "id": "Räpina",
+                    "location": [58.9578, 23.4901]
+                },
+                {
+                    "id": "Praaga",
+                    "location": [58.9578, 23.4901]
+                }
+            ],
+            "ttu": {
+                "id": "laaksaare",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "rapina",
+                "link": "183648",
+                "location": [58.124988, 27.530086]
+            },
+            "yr": {
+                "id": "rapina",
+                "location": [58.126, 27.532]
+            },
+            "emhi": {
+                "id": "rapina",
+                "location": [58.235806, 27.470503]
+            }
+        }
+    },
+    "haademeeste": {
+        "id": "haademeeste",
+        "name": "Häädemeeste",
+        "group": "meri",
+        "location": [58.071644, 24.478816],
+        "hstations": {
+            "emhi": {
+                "id": "haademeeste",
+                "location": [58.071644, 24.478816]
+            },
+            "mnt": {
+                "id": "haademeeste",
+                "location": [58.071644, 24.478816]
+            }
+        },
+        "hstations_new": {
+            "emhi": {
+                "id": "Häädemeeste",
+                "location": [58.071644, 24.478816]
+            },
+            "mnt": {
+                "id": "haademeeste",
+                "location": [58.071644, 24.478816]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "haademeeste",
+                "link": "246420",
+                "location": [58.071644, 24.478816]
+            },
+            "yr": {
+                "id": "haademeeste",
+                "link": "2-592231",
+                "location": [58.071644, 24.478816]
+            },
+            "emhi": {
+                "id": "haademeeste",
+                "location": [58.079101, 24.493466]
+            }
+        }
+    },
+    "parnu": {
+        "id": "parnu",
+        "name": "Pärnu",
+        "group": "meri",
+        "location": [58.365958, 24.526257],
+        "hstations": {
+            "ttu": {
+                "id": "parnu",
+                "location": [58.365958, 24.526257]
+            },
+            "emhi": {
+                "id": "parnu",
+                "location": [58.365958, 24.526257]
+            },
+            "mnt": {
+                "id": "parnu",
+                "location": [58.365958, 24.526257]
+            }
+        },
+        "hstations_new": {
+            "ttu": {
+                "id": "parnu",
+                "location": [58.365958, 24.526257]
+            },
+            "emhi": {
+                "id": "Pärnu",
+                "location": [58.365958, 24.526257]
+            },
+            "mnt": {
+                "id": "parnu",
+                "location": [58.365958, 24.526257]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "parnu",
+                "link": "92781",
+                "location": [58.365958, 24.526257]
+            },
+            "yr": {
+                "id": "parnu",
+                "link": "2-592231",
+                "location": [58.35, 24.545]
+            },
+            "emhi": {
+                "id": "parnu",
+                "location": [58.382515, 24.510179]
+            }
+        }
+    },
+    "paatsalu": {
+        "id": "paatsalu",
+        "name": "Virtsu",
+        "group": "meri",
+        "location": [58.508902, 23.663027],
+        "hstations": {
+            "ttu": {
+                "id": "paatsalu",
+                "location": [58.508902, 23.663027]
+            },
+            "emhi": {
+                "id": "paatsalu",
+                "location": [58.508902, 23.663027]
+            }
+        },
+        "hstations_new": {
+            "ttu": {
+                "id": "virtsusadam",
+                "location": [58.508902, 23.663027]
+            },
+            "emhi": {
+                "id": "Virtsu",
+                "location": [58.508902, 23.663027]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "paatsalu",
+                "link": "479054",
+                "location": [58.508902, 23.663027]
+            },
+            "yr": {
+                "id": "paatsalu",
+                "link": "2-589817",
+                "location": [58.508902, 23.663027]
+            },
+            "emhi": {
+                "id": "paatsalu",
+                "location": [58.529210, 23.700999]
+            }
+        }
+    },
+    "sorve": {
+        "id": "sorve",
+        "name": "Sõrve",
+        "group": "meri",
+        "location": [57.909984, 22.055313],
+        "hstations": {
+            "emhi": [
+                {
+                    "id": "sorve",
+                    "location": [57.909984, 22.055313]
+                }
+            ],
+            "mnt": {
+                "id": "sorve",
+                "location": [57.909984, 22.055313]
+            }
+        },
+        "hstations_new": {
+            "emhi": [
+                {
+                    "id": "Sõrve",
+                    "location": [57.909984, 22.055313]
+                },
+                {
+                    "id": "Mõntu",
+                    "location": [57.909984, 22.055313]
+                }
+            ],
+            "mnt": {
+                "id": "sorve",
+                "location": [57.909984, 22.055313]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "sorve",
+                "link": "108163",
+                "location": [57.906, 22.045]
+            },
+            "yr": {
+                "id": "sorve",
+                "link": "2-589817",
+                "location": [57.906, 22.045]
+            },
+            "emhi": {
+                "id": "sorve",
+                "location": [57.918654, 22.059625]
+            }
+        }
+    },
+    "saaretirp": {
+        "id": "saaretirp",
+        "name": "Heltermaa",
+        "group": "meri",
+        "location": [58.866845079804946, 23.04607326381741],
+        "hstations": {
+            "ttu": {
+                "id": "saaretirp",
+                "location": [58.866845079804946, 23.04607326381741]
+            },
+            "emhi": {
+                "id": "saaretirp",
+                "location": [58.866845079804946, 23.04607326381741]
+            }
+        },
+        "hstations_new": {
+            "ttu": {
+                "name": "Heltermaa",
+                "id": "heltermaa",
+                "location": [58.9578, 23.4901]
+            },
+            "emhi": {
+                "id": "Heltermaa",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "saaretirp",
+                "link": "1299399",
+                "location": [58.758, 22.789]
+            },
+            "yr": {
+                "id": "saaretirp",
+                "link": "2-589817",
+                "location": [58.758, 22.789]
+            },
+            "emhi": {
+                "id": "saaretirp",
+                "location": [58.758, 22.789]
+            }
+        }
+    },
+    "ristna": {
+        "id": "ristna",
+        "name": "Ristna",
+        "group": "meri",
+        "location": [58.927304, 22.041023],
+        "hstations": {
+            "emhi": {
+                "id": "ristna",
+                "location": [58.927304, 22.041023]
+            },
+            "mnt": {
+                "id": "ristna",
+                "location": [58.927304, 22.041023]
+            }
+        },
+        "hstations_new": {
+            "emhi": {
+                "id": "Ristna",
+                "location": [58.9578, 23.4901]
+            },
+            "mnt": {
+                "name": "Ristna",
+                "id": "ristna",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "ristna",
+                "link": "96592",
+                "location": [58.927304, 22.041023]
+            },
+            "yr": {
+                "id": "ristna",
+                "link": "2-794818",
+                "location": [58.927304, 22.041023]
+            },
+            "emhi": {
+                "id": "ristna",
+                "location": [58.928326, 22.069358]
+            }
+        }
+    },
+    "rohukyla": {
+        "id": "rohukyla",
+        "name": "Rohuküla",
+        "group": "meri",
+        "link": "",
+        "location": [58.9578, 23.4901],
+        "hstations": {
+            "ttu": {
+                "id": "rohukyla",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "hstations_new": {
+            "ttu": {
+                "name": "Rohuküla",
+                "id": "rohukyla",
+                "location": [58.9578, 23.4901]
+            },
+            "emhi": {
+                "id": "Rohuküla",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "rohukyla",
+                "link": "245713",
+                "location": [58.911, 23.420]
+            },
+            "yr": {
+                "id": "rohukyla",
+                "link": "2-794818",
+                "location": [58.911, 23.420]
+            },
+            "emhi": {
+                "id": "rohukyla",
+                "location": [58.911, 23.420]
+            }
+        }
+    },
+    "dirhami": {
+        "id": "dirhami",
+        "name": "Dirhami",
+        "group": "meri",
+        "location": [59.2133, 23.5031],
+        "hstations": {
+            "emhi": {
+                "id": "dirhami",
+                "location": [59.2133, 23.5031]
+            }
+        },
+        "hstations_new": {
+            "emhi": {
+                "id": "Dirhami",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "dirhami",
+                "link": "261785",
+                "location": [59.2133, 23.5031]
+            },
+            "yr": {
+                "id": "dirhami",
+                "link": "2-796115",
+                "location": [59.2133, 23.5031]
+            },
+            "emhi": {
+                "id": "dirhami",
+                "location": [59.208078, 23.496537]
+            }
+        }
+    },
+    "pirita": {
+        "id": "pirita",
+        "name": "Pirita",
+        "group": "meri",
+        "location": [59.471562, 24.825608],
+        "hstations": {
+            "emhi": {
+                "id": "pirita",
+                "location": [59.471562, 24.825608]
+            },
+            "ttu": {
+                "id": "pirita",
+                "location": [59.471562, 24.825608]
+            }
+        },
+        "hstations_new": {
+            "emhi": {
+                "id": "Pirita",
+                "location": [58.9578, 23.4901]
+            },
+            "ttu": {
+                "name": "Vanasadam",
+                "id": "vanasadam",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "pirita",
+                "link": "125320",
+                "location": [59.471562, 24.825608]
+            },
+            "yr": {
+                "id": "pirita",
+                "link": "2-798565",
+                "location": [59.471562, 24.825608]
+            },
+            "emhi": {
+                "id": "pirita",
+                "location": [59.465992, 24.834083]
+            }
+        }
+    },
+    "rohuneeme": {
+        "id": "rohuneeme",
+        "name": "Rohuneeme",
+        "group": "meri",
+        "location": [59.551945, 24.794094],
+        "hstations": {
+            "emhi": {
+                "id": "rohuneeme",
+                "location": [59.551945, 24.794094]
+            },
+            "ttu": {
+                "id": "rohuneeme",
+                "location": [59.551945, 24.794094]
+            }
+        },
+        "hstations_new": {
+            "emhi": {
+                "id": "Rohuneeme",
+                "location": [59.551945, 24.794094]
+            },
+            "ttu": {
+                "id": "rohuneeme",
+                "location": [59.551945, 24.794094]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "rohuneeme",
+                "link": "70524",
+                "location": [59.554, 24.791]
+            },
+            "yr": {
+                "id": "rohuneeme",
+                "link": "2-798565",
+                "location": [59.554, 24.791]
+            },
+            "emhi": {
+                "id": "rohuneeme",
+                "location": [59.554, 24.791]
+            }
+        }
+    },
+    "loksa": {
+        "id": "loksa",
+        "name": "Loksa",
+        "group": "meri",
+        "location": [59.5872, 25.6943],
+        "hstations": {
+            "ttu": {
+                "id": "koipsi",
+                "location": [58.9578, 23.4901]
+            },
+            "emhi": {
+                "id": "loksa",
+                "location": [59.5872, 25.6943]
+            }
+        },
+        "hstations_new": {
+            "ttu": {
+                "id": "muuga",
+                "location": [58.9578, 23.4901]
+            },
+            "emhi": {
+                "id": "Loksa",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "fcstations": {
+            "wg": {
+                "id": "loksa",
+                "link": "1299411",
+                "location": [59.581387, 25.722052]
+            },
+            "yr": {
+                "id": "loksa",
+                "link": "2-591227",
+                "location": [59.581387, 25.722052]
+            },
+            "emhi": {
+                "id": "koipsi",
+                "location": [59.581387, 25.722052]
+            }
+        }
+    },
+    "haapsalu": {
+        "id": "haapsalu",
+        "previd": "topu",
+        "name": "Haapsalu",
+        "group": "meri",
+        "location": [58.9578, 23.4901],
+        "hstations": {
+            "emhi": {
+                "id": "haapsalu",
+                "location": [58.9578, 23.4901]
+            }
+        },
+        "hstations_new": {
+            "emhi": [
+                {
+                    "id": "Haapsalu_sadam",
+                    "location": [58.9578, 23.4901]
+                },
+                {
+                    "id": "Haapsalu",
+                    "location": [58.9578, 23.4901]
+                }
+            ]
+        },
+        "fcstations": {
+            "wg": {
+                "id": "haapsalu",
+                "link": "245713",
+                "location": [58.9578, 23.4901]
+            },
+            "yr": {
+                "id": "haapsalu",
+                "link": "2-591227",
+                "location": [58.957, 23.543]
+            },
+            "emhi": {
+                "id": "haapsalu",
+                "location": [58.9578, 23.4901]
+            }
+        }
+    },
+    "jogeva": {
+        "id": "jogeva",
+        "name": "Jõgeva",
+        "group": "koht",
+        "location": [58.764849, 26.404618],
+        "hstations": {
+            "mnt": {
+                "id": "jogeva",
+                "location": [58.764849, 26.404618]
+            }
+        },
+        "hstations_new": {
+            "emhi": {
+                "id": "Jõgeva",
+                "location": [58.764849, 26.404618]
+            },
+            "mnt": {
+                "id": "jogeva",
+                "location": [58.764849, 26.404618]
+            }
+        },
+        "fcstations": {
+            "yr": {
+                "id": "jogeva",
+                "link": "2-591902",
+                "location": [58.764849, 26.404618]
+            },
+            "emhi": {
+                "id": "jogeva",
+                "location": [58.746083, 26.395523]
+            }
+        }
+    },
+    "uhmardu": {
+        "id": "uhmardu",
+        "name": "Uhmardu",
+        "group": "koht",
+        "location": [58.640605, 26.791860],
+        "hstations": {
+            "mnt": {
+                "id": "uhmardu",
+                "location": [58.640605, 26.791860]
+            }
+        },
+        "hstations_new": {
+            "mnt": {
+                "id": "uhmardu",
+                "location": [58.640605, 26.791860]
+            },
+            "emhi": {
+                "id": "Kääpa",
+                "location": [58.640605, 26.791860]
+            }
+        },
+        "fcstations": {
+            "yr": {
+                "id": "uhmardu",
+                "link": "2-793979",
+                "location": [58.640605, 26.791860]
+            },
+            "emhi": {
+                "id": "uhmardu",
+                "location": [58.625507, 26.767479]
+            }
+        }
+    },
+    "mustvee": {
+        "id": "mustvee",
+        "name": "Mustvee",
+        "group": "peipsi",
+        "location": [58.848164, 26.937750],
+        "hstations": {
+            "emhi": {
+                "id": "mustvee",
+                "location": [58.7578, 26.7278]
+            }
+        },
+        "hstations_new": {
+            "emhi": {
+                "id": "Mustvee",
+                "location": [58.7578, 26.7278]
+            }
+        },
+        "fcstations": {
+            "yr": {
+                "id": "mustvee",
+                "link": "2-590066",
+                "location": [58.848, 26.952]
+            },
+            "emhi": {
+                "id": "mustvee",
+                "location": [58.848164, 26.937750]
+            }
+        }
+    }
+}

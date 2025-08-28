@@ -304,39 +304,59 @@ a {
 
 .startdate-control {
 	max-width: 100px;
-	left: 30%;
-	top: 3px;
 	>input {
 		width: 100px;
 		padding: 0 5px;
 	}
 }
 
-th .fchead {
-	position: absolute;
-	right: 2em;
-	font-weight: 600;
+.left-side,.right-side {
+	position: relative;
+}
+.left-side {
+	width: 70%;
+	float: left;
+	>div {
+		text-align: left;
+		padding-left: 0.5em;
+	}
+}
+.right-side {
+	width: 30%;
+	float: right;
+	>div {
+		text-align: right;
+		padding-right: 0.5em;
+	}
 }
 
-tr.fcontainer {
-	>th {
+.night-chart {
+	font-weight: 400;
+}
+
+tr.ctrlcontainer {
+	>th>div {
 		position: relative;
 	}
 }
 
-.fckhead {
+.ctrlhead {
 	position: absolute;
-	top: -16px;
-	>span {
+	top: -1em;
+	width: 100%;
+	>.right-side {
+		text-align:right;
+	}
+	>.left-side {
+		text-align:left;
+	}
+	.timeframe-control {
+		padding-left: 0.5em
+	}
+	.sources-control {
 		display: inline-block;
 		margin-right: 0.3em;
 	}
-}
-.fcleft {
-	left: 0.5em;
-}
-.fcright {
-	right: 0.1em;
 }
 
 .settings-dropdown {
@@ -363,25 +383,16 @@ tr.fcontainer {
 	width:100%;
 	position:relative;
 	font-size:80%;
+	min-height: 3em;
 	>div {
 		position: absolute;
 		z-index: 1000;
-		&.timeframe-control {
-			left: 8px;
-			top: -5px;
+		top: 0;
+		width: 100%;
+		top: 0.5em;
+		>div {
+			float:right;
 		}
-		&.viewmode-control {
-			left: 8px;
-			top: 10px;
-		}
-		&.samplemode-control {
-			right: 8px;
-			top: -5px;
-		}
-	}
-	.startdate-control {
-		left: 8px;
-		top: -9px;
 	}
 }
 
@@ -431,11 +442,6 @@ tr.fcontainer {
 	.chartbox {
 		width: 100%;
 		margin: auto;
-		.chart-control-box {
-			>div {
-				top: 5px;
-			}
-		}
 		.chart-frame1, .chart-frame2 {
 			max-width: 750px;
 			padding-left: 3px;
@@ -448,20 +454,6 @@ tr.fcontainer {
 			@media (min-width:1240px) {
 				width: 50%;
 				float: left;
-			}
-		}
-		.chart-control-box {
-			>div {
-				top: 5px;
-				&.timeframe-control {
-					top: 0px;
-				}
-				&.viewmode-control {
-					top: 15px;
-				}
-				&.samplemode-control {
-					top: 0;
-				}
 			}
 		}
 	}

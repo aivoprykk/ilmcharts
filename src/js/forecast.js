@@ -234,7 +234,6 @@
             }
         }
     };
-    var fcsources = ['yr', 'wg', 'em'];
     var ajax_done = 0;
     var last_time = 0;
     var colors = {
@@ -253,24 +252,25 @@
         datalen:[0,0],
         do: function(place, fcid, fillfn) {
             get.now = new Date().getTime();
-            place = (place || my.fcplace || 'tabivere');
+            var fcStruct = my.getCurrentFcProviderStruct();
+            place = (place || (fcStruct && fcStruct.currentStation && fcStruct.currentStation.id) || 'aksi');
             //var self = get;
             if(ajax_done===0) {
                 get.datalen = [0,0];
             }
-            if(my.samplemode==='table' && (my.fcsource!==fcid)) {
-                if(++ajax_done===fcsources.length) get.done();
+            if(my.samplemode==='table' && (fcStruct && fcStruct.provider!==fcid)) {
+                if(++ajax_done===my.fcproviders_available.length) get.done();
                 return false;
             }
-            var fc = my.fcsourcesdata[fcid];
-            var fcidx = my.fcsources.indexOf(fcid);
+            var fc = my.fcprovidersmeta[fcid];
+            var fcidx = my.fcproviders_available.indexOf(fcid);
             var fcfile = fc.fc_file;
-            if(my.sampletype==='long' && /hour_by_hour/.test(fcfile)) {
-                fcfile = 'forecast.xml';
-            }
+            // if(my.sampletype==='long' && /hour_by_hour/.test(fcfile)) {
+            //     fcfile = 'forecast.xml';
+            // }
             var ajaxopt = {
                 type: 'get',
-                url: fc.datadir + '/' + place  + '/' + fcfile + '?' + get.now,
+                url: [my.datadir, fc.datadir, place, fcfile].join('/') + '?' + get.now,
             };
             if(fc.datatype==='json' && fcid!=='yr' && fcid!=='em') {
                 ajaxopt.dataType = 'jsonp';
@@ -302,16 +302,26 @@
                         if(dt.press_series.data.length) temp_options.series.push(dt.press_series);
                         if(dt.temp_series.data.length) temp_options.series.push(dt.temp_series);
                     }
-                    var metadata = get.fclink(fcid,fc.url,my.fcplaces[place][fcid+'link'],fc.name,dt.last,dt.next);
+                    
+                    // Get forecast station link using new structure
+                    var linkId = null;
+                    var fcStruct = my.getCurrentFcProviderStruct();
+                    
+                    // Try new forecast station structure first
+                    if (fcStruct && fcStruct.currentStation) {
+                        linkId = fcStruct.currentStation[fcid + 'link'] || fcStruct.currentStation.link;
+                    }
+                    
+                    var metadata = get.fclink(fcid,fc.url,linkId,fc.name,dt.last,dt.next);
                     get.dometa(fcid, metadata);
                 }
-                if(++ajax_done===fcsources.length) get.done();
+                if(++ajax_done===my.fcproviders_available.length) get.done();
             });
         },
         fclink: function(fc,url,placeid,placename,last,next) {
             var t = '<a onclick="window.open(this.href);return false;" href="<%=url%>"><%=title%><%if(last){%> <%=last%><%}if(next){%>, järgmine <%=next%><%}%></a>';
             var meta = '';
-            if(my.fcsources.indexOf(fc)<0||!url||!placeid||!placename) {
+            if(my.fcproviders_available.indexOf(fc)<0||!url||!placeid||!placename) {
                 var link = {},ll=my.lingid.JSON.list,lm={},ln={},metadata='';
                 for(var i=0,j=ll.length;i<j;++i){
                     if(ll[i].name === 'Ilmalingid') {
@@ -320,7 +330,9 @@
                             if(lm[k].name === fc) {
                                 ln = lm[k].list;
                                 for(var m=0,n=ln.length;m<n;++m){
-                                    var x = new RegExp('.+_('+my.fcplace+')');
+                                    var fcStruct = my.getCurrentFcProviderStruct();
+                                    var currentPlace = (fcStruct && fcStruct.currentStation && fcStruct.currentStation.id);
+                                    var x = new RegExp('.+_('+currentPlace+')');
                                     if(x.test(ln[m].id)) {
                                         url = lm[k].url;
                                         placeid = ln[m].href;
@@ -336,9 +348,7 @@
                     }
                 }
             }
-            var fcurl = fc==='em' ? url + '/ilm/prognoosid/asukoha-prognoos/?coordinates=' + placeid :
-                fc==='yr' ? url+'/en/details/table/'+placeid+'/' :
-                    fc==='wg' ? url + '/' + placeid : url + placeid ;
+            var fcurl = url + placeid + (fc === 'yr' ? '/' : '');
 
             return _.template(t)({title:placename,url:fcurl,last:last?my.getTimeStr(last):null,next:next?my.getTimeStr(next):null});
         },
@@ -373,9 +383,8 @@
             dt.next = from+6*3600000;
         },
         getmax: function(hours){
-            if(my.sampletype==='long') return 0;
-            hours = hours||my.fcmax||my.deffcmax;
-            return (get.now||new Date().getTime())+hours*3600000;
+            hours = hours||(my.fctimeframe * 24);
+            return (get.now||new Date().getTime()) + hours * 3600000;
         },
         do_wg: function(data,dt,fcid){
             var fcmax=get.getmax();
@@ -487,12 +496,23 @@
         done: function() {
             ajax_done = 0;
             var self=my, i1, i2, i3, i=0,j=0,dn=null,
+                fcStruct = my.getCurrentFcProviderStruct(),
                 dtf = Object.keys(get.dataseries)[0],
-                dtp = get.dataseries[my.fcsource||my.fcsources[0]]||get.dataseries[dtf],
-                dt = dtp[my.fcplace]||{},
-                fc=my.fcplaces[my.fcplace],
-                loc=fc.location, sun = {},
-                has = {
+                dtp = get.dataseries[(fcStruct && fcStruct.provider)||my.fcproviders_available[0]]||get.dataseries[dtf],
+                dt = dtp[(fcStruct && fcStruct.currentStation && fcStruct.currentStation.id)]||{},
+                fc = null,
+                loc = null, sun = {}, curplace= my.curplaces[my.curplace];
+                
+            // Get forecast place data using new structure
+            if (fcStruct && fcStruct.currentStation) {
+                fc = {
+                    name: fcStruct.currentStation.name || self.getFcStationDisplayName(curplace),
+                    location: fcStruct.currentStation.location || curplace.location
+                };
+                loc = fc.location;
+            }
+            
+            var has = {
                     ws: (dt.ws_series && dt.ws_series.data.length),
                     wg: (dt.wg_series && dt.wg_series.data.length),
                     wd: (dt.wd_series && dt.wd_series.data.length),
@@ -530,7 +550,7 @@
                 //var htempl = '<tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Sademed</th><th class="d-xs-none">Rõhk</th></tr>';
                 //var templ = '<tr class="<%=night?"night hide":""%>"><td><span class="day hide"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="d-xs-none"><%=press?press:""%></td></tr>';
                 var str='';
-                var hlinks = '<tr class="fcontainer"><th colspan="10"><span class="fc-source" name="em">Ilmateenistus</span>&nbsp;<span class="fc-source" name="wg">Windguru.cz</span>&nbsp;<span class="fc-source" name="yr">Yr.no</span><span class="right fchead">'+fc.name+'</span></th></tr>';
+                var hlinks = '<tr class="ctrlcontainer"><th colspan="10"></th></tr>';
                 var keys = Object.keys(has),tnow=new Date().getTime(),o;
 
                 for(i=0,j=dbase.length;i<j;++i) {
@@ -562,37 +582,129 @@
                 }
                 $('#'+my.chartorder[1]+'2').hide();
                 $('#'+my.chartorder[2]+'2').hide();
-                where = $('.fc-source');
-                _.each(where,function(a){
-                    if($(a).attr('name')===my.fcsource) $(a).css('font-weight','600');
-                    else $(a).css('font-weight','400');
-                });
-                $('.fc-source').on('click',function(){
-                    w.ilm.setFcSource($(this).attr('name'));
-                    //w.ilm.reloadest();
-                });
+                
             }
+            // Get forecast place name using new structure
+            var fcDisplayName = '';
+            if (my.getFcStationDisplayName) {
+                fcDisplayName = my.getFcStationDisplayName();
+            } else if (fc && fc.name) {
+                fcDisplayName = fc.name;
+            }
+            
+            where = my.samplemode==='table' ? '.fc .ctrlcontainer th' : '.fc .ctrlhead';
+            $(where).html('<div class="left-side"></div><div class="right-side"></div>');
+
+            $(where).children().each(function(item, child){
+                $(child).html(function(){
+                    var links = '';
+                    if(item === 0) {
+                        links += `<div class="timeframe-control fc-timeframe-control">
+                                &nbsp;<span class="fc-length" name="3"> 3p </span>
+                                &nbsp;<span class="fc-length" name="7"> 7p </span>
+                                &nbsp;<span class="fc-length" name="10"> 10p </span>
+                                &nbsp;<span class="fc-length" name="17"> 17p </span>
+                                </span>&nbsp;</div>`;
+                        if(my.samplemode==='table') {
+                            links+= '<div class="sources-control fc-sources-control">';
+                            for( i=0, j=my.fcproviders_available.length; i<j; i++) {
+                                var fcsrc = my.fcproviders_available[i];
+                                links += '<span class="fc-source" name="'+fcsrc+'">'+ my.fcprovidersmeta[fcsrc].name+'</span>&nbsp;';
+                            }
+                            links += '</div>';
+                        }
+                    } 
+                    else {
+                        links += '<div class="title-control fc-name';
+                        if (my.samplemode !== 'table') links += ' badge bg-info';
+                        links += '"> ' + fc.name + '</div>';
+                        if (self.samplemode === 'table') 
+                            links += ('<div class="night-chart" name="' + (self.fcshownight ? 'fcsnf' : 'fcsnt') + '"> ' + (self.fcshownight ? '-' : '+') + 'Ööd</div>');
+                    }
+                    return links;
+                });
+                var el = $(child), where;
+                if(item === 0) {
+                    where = el.find('.fc-length');
+                    _.each(where,function(a){
+                        var member=$(a), c = member.attr('name'), b = parseInt(c,10);
+                        if(my.samplemode == 'graph') member.addClass('badge bg-primary');
+                        member.off('click');
+                        member.on('click',function(){
+                            if(b===my.timeframe) return false;
+                            my.fctimeframe = b;
+                            my.state.set({ fctimeframe: my.fctimeframe });
+                            w.ilm.reloadest();
+                        });
+                        if(b===my.fctimeframe) member.css('font-weight','600');
+                        else member.css('font-weight','400');
+                    });
+                    where = el.find('.fc-source');
+                    _.each(where,function(a){
+                        var member=$(a), c = member.attr('name');
+                        if(c===(fcStruct && fcStruct.provider) || c===my.fcprovider) member.css('font-weight','600');
+                        else member.css('font-weight','400');
+                        member.off('click');
+                        member.on('click',function(){
+                            w.ilm.setFcProvider(c, true);
+                            w.ilm.reloadest();
+                        });
+                    });
+                }
+                else {
+                    el.find('.night-chart').on('click', function(e) {
+                        var member = $(this).attr('name');
+                        if (('fcsnf' === member && !my.fcshownight) || ('fcsnt' === member && my.fcshownight)) return false;
+                        my.loadGraph(e, member);
+                        w.ilm.reloadest();
+                    });
+                }
+            });
+            
             $('#fctitle').html(
-                'Prognoos <b>'+my.fcplaces[my.fcplace].name+'</b> ' + my.getTimeStr(last_time)
+                'Prognoos <b>'+fcDisplayName+'</b> ' + my.getTimeStr(last_time)
             ).show();
-            var list = _.map(my.fcplaces,function(a){if(!my.showgroup||my.fcplaces[a.id].group===my.showgroup) {
-                return '<li><a href="#" name="'+a.id+'" class="fcplace-select'+(a.id===my.fcplace?' active':'')+'">'+a.name+'</a></li>';
-            }}).join('');
+            
+            // Build forecast provider list using new structure
+            var list = '';
+            if (my.getAvailableFcStations) {
+                var fcStations = my.getAvailableFcStations();
+                list = _.map(fcStations, function(station) {
+                    if (!my.showgroup || !station.group || station.group === my.showgroup) {
+                        return '<li><a href="#" name="'+station.id+'" class="fcplace-select'+(station.id===((fcStruct && fcStruct.currentStation && fcStruct.currentStation.id) || my.fcprovider)?' active':'')+'">'+station.name+'</a></li>';
+                    }
+                }).join('');
+            }
+            
             $('#fcmenu').html(list);
             $('#fcsel').show();
             $('.fcplace-select').on('click',function(){
-                w.ilm.fcsource = $(this).attr('name');
-                w.ilm.reloadest();
+                if (my.setFcProvider) {
+                    my.setFcProvider($(this).attr('name'));
+                } else {
+                    w.ilm.fcprovider = $(this).attr('name');
+                    w.ilm.reloadest();
+                }
             });
             $('#pagelogo').html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+'</span>');
             var metadata = get.fclink('Meteo.pl');
             if(metadata) get.dometa('meteo-pl', metadata);
+            
+            // Get location data using new structure
+            metadata = null;
+            if (fcStruct && fcStruct.currentStation && fcStruct.currentStation.location) {
+                metadata = fcStruct.currentStation.location;
+            } else if (my.curplaces[my.curplace] && my.curplaces[my.curplace].location) {
+                metadata = my.curplaces[my.curplace].location;
+            }
+            get.dometa('windy-com','<span><a onclick="window.open(this.href);return false;" href="https://windy.com/' + (metadata ? metadata[0]+'/'+metadata[1]+'/?'+metadata[0]+','+metadata[1] : '') + ',12">windy.com</a></span>');
         }
     };
 
     my.loadEst = function (place) {
         if(!$('#'+my.chartorder[0]+'2').length) return;
-        place = (place || my.fcplace || 'tabivere');
+        var fcStruct = my.getCurrentFcProviderStruct();
+        place = (place || (fcStruct && fcStruct.currentStation && fcStruct.currentStation.id) || 'aksi');
 
         ajax_done = 0;
 
@@ -616,8 +728,8 @@
             cnt[1].innerHTML='';
         }
 
-        for (var a='', i = my.fcsources.length - 1; i >= 0; i--) {
-            a = my.fcsources[i];
+        for (var a='', i = my.fcproviders_available.length - 1; i >= 0; i--) {
+            a = my.fcproviders_available[i];
             //get[a](a, place);
             get.do(place, a, get['do_'+a]);
         }

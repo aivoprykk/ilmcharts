@@ -12543,39 +12543,59 @@ a {
 }
 .startdate-control {
   max-width: 100px;
-  left: 30%;
-  top: 3px;
 }
 .startdate-control > input {
   width: 100px;
   padding: 0 5px;
 }
 
-th .fchead {
-  position: absolute;
-  right: 2em;
-  font-weight: 600;
-}
-
-tr.fcontainer > th {
+.left-side, .right-side {
   position: relative;
 }
 
-.fckhead {
-  position: absolute;
-  top: -16px;
+.left-side {
+  width: 70%;
+  float: left;
 }
-.fckhead > span {
+.left-side > div {
+  text-align: left;
+  padding-left: 0.5em;
+}
+
+.right-side {
+  width: 30%;
+  float: right;
+}
+.right-side > div {
+  text-align: right;
+  padding-right: 0.5em;
+}
+
+.night-chart {
+  font-weight: 400;
+}
+
+tr.ctrlcontainer > th > div {
+  position: relative;
+}
+
+.ctrlhead {
+  position: absolute;
+  top: -1em;
+  width: 100%;
+}
+.ctrlhead > .right-side {
+  text-align: right;
+}
+.ctrlhead > .left-side {
+  text-align: left;
+}
+.ctrlhead .timeframe-control {
+  padding-left: 0.5em;
+}
+.ctrlhead .sources-control {
   display: inline-block;
   margin-right: 0.3em;
-}
-
-.fcleft {
-  left: 0.5em;
-}
-
-.fcright {
-  right: 0.1em;
 }
 
 .settings-dropdown {
@@ -12602,26 +12622,17 @@ tr.fcontainer > th {
   width: 100%;
   position: relative;
   font-size: 80%;
+  min-height: 3em;
 }
 .chart-control-box > div {
   position: absolute;
   z-index: 1000;
+  top: 0;
+  width: 100%;
+  top: 0.5em;
 }
-.chart-control-box > div.timeframe-control {
-  left: 8px;
-  top: -5px;
-}
-.chart-control-box > div.viewmode-control {
-  left: 8px;
-  top: 10px;
-}
-.chart-control-box > div.samplemode-control {
-  right: 8px;
-  top: -5px;
-}
-.chart-control-box .startdate-control {
-  left: 8px;
-  top: -9px;
+.chart-control-box > div > div {
+  float: right;
 }
 
 .chart-frame1, .chart-frame2 {
@@ -12678,9 +12689,6 @@ tr.fcontainer > th {
   width: 100%;
   margin: auto;
 }
-.chart-container .chartbox .chart-control-box > div {
-  top: 5px;
-}
 .chart-container .chartbox .chart-frame1, .chart-container .chartbox .chart-frame2 {
   max-width: 750px;
   padding-left: 3px;
@@ -12696,18 +12704,6 @@ tr.fcontainer > th {
     width: 50%;
     float: left;
   }
-}
-.chart-container .chartbox .chart-control-box > div {
-  top: 5px;
-}
-.chart-container .chartbox .chart-control-box > div.timeframe-control {
-  top: 0px;
-}
-.chart-container .chartbox .chart-control-box > div.viewmode-control {
-  top: 15px;
-}
-.chart-container .chartbox .chart-control-box > div.samplemode-control {
-  top: 0;
 }
 @media (min-width: 400px) {
   .chart-container .mapbox {
