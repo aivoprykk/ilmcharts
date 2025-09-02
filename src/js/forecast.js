@@ -316,14 +316,14 @@ import { color } from "highcharts";
                     
                     // Get forecast station link using new structure
                     var linkId = null;
-                    var fcStruct = my.getCurrentFcProviderStruct();
+                    var fcStruct = my.curplaces[my.curplace].fcstations[fcid];
                     
                     // Try new forecast station structure first
-                    if (fcStruct && fcStruct.currentStation) {
-                        linkId = fcStruct.currentStation[fcid + 'link'] || fcStruct.currentStation.link;
+                    if (fcStruct && fcStruct.id) {
+                        linkId = fcStruct.link || (fcStruct.location[0] + (fcid==='emhi' ? ';' : ',') + fcStruct.location[1]) || fcid;
                     }
                     
-                    var metadata = get.fclink(fcid,fc.url,linkId,fc.name,dt.last,dt.next);
+                    var metadata = get.fclink(fcid, fc.url, linkId, fc.name, dt.last, dt.next);
                     get.dometa(fcid, metadata);
                 }
                 if(++ajax_done===my.fcproviders_available.length) get.done();
