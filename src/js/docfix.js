@@ -144,11 +144,28 @@
             //w.ilm.reload();
             return false;
         });
-        w.ilm.loadGrid();
-        w.ilm.loadBase();
-        w.ilm.loadInt(1000 * 60); // 1min
-        w.ilm.loadEstInt(1000 * 60 * 10); // 10min
-        $('#backgr').css({display: 'block'});
+        
+        // Ensure ilm methods are available before calling them
+        if (w.ilm && typeof w.ilm.loadGrid === 'function') {
+            w.ilm.loadGrid();
+            w.ilm.loadBase();
+            // w.ilm.loadInt(1000 * 60); // 1min
+            // w.ilm.loadEstInt(1000 * 60 * 10); // 10min
+            $('#backgr').css({display: 'block'});
+        } else {
+            // Retry after a short delay if ilm methods are not ready
+            setTimeout(function() {
+                if (w.ilm && typeof w.ilm.loadGrid === 'function') {
+                    w.ilm.loadGrid();
+                    w.ilm.loadBase();
+                    // w.ilm.loadInt(1000 * 60); // 1min
+                    // w.ilm.loadEstInt(1000 * 60 * 10); // 10min
+                    $('#backgr').css({display: 'block'});
+                } else {
+                    console.error('ilm object or methods not available after delay');
+                }
+            }, 100);
+        }
         $(w).on('keydown', function (e) {
             //w.console.log("pressed" + e.keyCode);
             var obj = $('#popup');

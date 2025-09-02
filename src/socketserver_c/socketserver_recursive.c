@@ -23,6 +23,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#ifdef FCGI_SUPPORT
+    #include <fcgiapp.h>
+#endif
+
 // Configuration
 #define MAX_PATHS 1000
 #define MAX_FILTERS 100
@@ -32,6 +36,21 @@
 #define MAX_DEPTH 5
 #define MAX_FILE_SIZE 1048576  // 1MB max file size for content tracking
 #define SYNC_DETECTION_WINDOW 2  // seconds to wait for recreate after delete
+
+// FastCGI Configuration
+#define FCGI_BUFFER_SIZE 8192
+#define FCGI_MAX_PARAMS 100
+
+// Operating modes
+typedef enum {
+    MODE_WEBSOCKET,
+    MODE_FCGI,
+    MODE_BOTH
+} operation_mode_t;
+
+// WebSocket/HTTP hybrid server configuration
+#define HTTP_PORT 8081
+#define MAX_HTTP_CONNECTIONS 20
 
 // Global base path for hiding server paths from clients
 static char g_base_path[PATH_MAX] = {0};
@@ -43,6 +62,17 @@ static char g_previous_date[32] = {0}; // Configurable date format
 static time_t g_last_date_check = 0;
 static int g_date_filtering_enabled = 0;
 static char g_date_pattern[32] = "%Y-%m-%d"; // Default yyyy-mm-dd format
+
+// Global operation mode
+static operation_mode_t g_operation_mode = MODE_WEBSOCKET;
+
+#ifdef FCGI_SUPPORT
+// FastCGI globals
+static volatile int g_fcgi_running = 0;
+static pthread_t g_fcgi_thread;
+static pthread_mutex_t g_fcgi_mutex = PTHREAD_MUTEX_INITIALIZER;
+static char g_fcgi_response_buffer[FCGI_BUFFER_SIZE * 4] = {0};
+#endif
 
 typedef struct {
     char **filters;
@@ -175,12 +205,30 @@ int is_directory_visited(visited_dirs_t *visited, const char *path);
 void add_visited_directory(visited_dirs_t *visited, const char *path);
 void init_visited_dirs(visited_dirs_t *visited);
 
+#ifdef FCGI_SUPPORT
+// FastCGI functions
+void *fcgi_server_thread(void *arg);
+void handle_fcgi_request(FCGX_Request *request, monitor_config_t *config);
+void fcgi_send_file_list(FCGX_Request *request, monitor_config_t *config);
+void fcgi_send_file_content(FCGX_Request *request, const char *filepath);
+void fcgi_send_file_status(FCGX_Request *request, const char *filepath);
+void fcgi_send_error(FCGX_Request *request, int status, const char *message);
+char* fcgi_get_query_param(FCGX_Request *request, const char *param_name);
+void fcgi_output_json_header(FCGX_Request *request);
+void fcgi_output_html_header(FCGX_Request *request);
+#endif
+
 // Signal handler
 void signal_handler(int sig) {
     printf("\nReceived signal %d, shutting down...\n", sig);
     fflush(stdout);
     
     running = 0;
+    
+#ifdef FCGI_SUPPORT
+    // Stop FastCGI server
+    g_fcgi_running = 0;
+#endif
     
     // Close all WebSocket client connections
     pthread_mutex_lock(&ws_server.mutex);
@@ -1264,6 +1312,226 @@ void cleanup_watch_rules(void) {
     pthread_mutex_unlock(&watch_rules.mutex);
 }
 
+#ifdef FCGI_SUPPORT
+// FastCGI implementation
+
+char* fcgi_get_query_param(FCGX_Request *request, const char *param_name) {
+    char *query_string = FCGX_GetParam("QUERY_STRING", request->envp);
+    if (!query_string) return NULL;
+    
+    static char param_value[BUFFER_SIZE];
+    char *param_start = strstr(query_string, param_name);
+    if (!param_start) return NULL;
+    
+    param_start += strlen(param_name);
+    if (*param_start != '=') return NULL;
+    param_start++; // Skip '='
+    
+    char *param_end = strchr(param_start, '&');
+    size_t param_len;
+    if (param_end) {
+        param_len = param_end - param_start;
+    } else {
+        param_len = strlen(param_start);
+    }
+    
+    if (param_len >= sizeof(param_value)) {
+        param_len = sizeof(param_value) - 1;
+    }
+    
+    strncpy(param_value, param_start, param_len);
+    param_value[param_len] = '\0';
+    
+    return param_value;
+}
+
+void fcgi_output_json_header(FCGX_Request *request) {
+    FCGX_FPrintF(request->out, "Content-Type: application/json\r\n");
+    FCGX_FPrintF(request->out, "Access-Control-Allow-Origin: *\r\n");
+    FCGX_FPrintF(request->out, "Cache-Control: no-cache\r\n");
+    FCGX_FPrintF(request->out, "\r\n");
+}
+
+void fcgi_output_html_header(FCGX_Request *request) {
+    FCGX_FPrintF(request->out, "Content-Type: text/html\r\n");
+    FCGX_FPrintF(request->out, "Access-Control-Allow-Origin: *\r\n");
+    FCGX_FPrintF(request->out, "Cache-Control: no-cache\r\n");
+    FCGX_FPrintF(request->out, "\r\n");
+}
+
+void fcgi_send_error(FCGX_Request *request, int status, const char *message) {
+    FCGX_FPrintF(request->out, "Status: %d\r\n", status);
+    fcgi_output_json_header(request);
+    FCGX_FPrintF(request->out, "{\"error\":\"%s\",\"status\":%d}\n", message, status);
+}
+
+void fcgi_send_file_content(FCGX_Request *request, const char *filepath) {
+    FILE *file = fopen(filepath, "r");
+    if (!file) {
+        fcgi_send_error(request, 404, "File not found");
+        return;
+    }
+    
+    struct stat st;
+    if (stat(filepath, &st) != 0) {
+        fclose(file);
+        fcgi_send_error(request, 500, "Cannot stat file");
+        return;
+    }
+    
+    if (st.st_size > MAX_FILE_SIZE) {
+        fclose(file);
+        fcgi_send_error(request, 413, "File too large");
+        return;
+    }
+    
+    fcgi_output_json_header(request);
+    
+    FCGX_FPrintF(request->out, "{\"filepath\":\"%s\",\"size\":%ld,\"modified\":%ld,\"content\":\"", 
+                 get_relative_path(filepath), st.st_size, st.st_mtime);
+    
+    char buffer[BUFFER_SIZE];
+    while (fgets(buffer, sizeof(buffer), file)) {
+        // Escape content for JSON
+        char *escaped = escape_json_string(buffer);
+        FCGX_FPrintF(request->out, "%s", escaped);
+    }
+    
+    FCGX_FPrintF(request->out, "\"}\n");
+    fclose(file);
+}
+
+void fcgi_send_file_status(FCGX_Request *request, const char *filepath) {
+    struct stat st;
+    if (stat(filepath, &st) != 0) {
+        fcgi_send_error(request, 404, "File not found");
+        return;
+    }
+    
+    fcgi_output_json_header(request);
+    
+    char *last_line = get_last_line(filepath);
+    char *escaped_last_line = escape_json_string(last_line);
+    
+    FCGX_FPrintF(request->out, 
+                 "{\"filepath\":\"%s\",\"size\":%ld,\"modified\":%ld,\"lines\":%d,\"last_line\":\"%s\"}\n",
+                 get_relative_path(filepath), st.st_size, st.st_mtime, 
+                 count_file_lines(filepath), escaped_last_line);
+}
+
+void fcgi_send_file_list(FCGX_Request *request, monitor_config_t *config) {
+    fcgi_output_json_header(request);
+    
+    FCGX_FPrintF(request->out, "{\"files\":[\n");
+    
+    int first = 1;
+    pthread_mutex_lock(&file_cache.mutex);
+    
+    for (int i = 0; i < file_cache.file_count; i++) {
+        file_state_t *state = &file_cache.files[i];
+        if (state->is_deleted) continue;
+        
+        struct stat st;
+        if (stat(state->filepath, &st) != 0) continue;
+        
+        if (!first) {
+            FCGX_FPrintF(request->out, ",\n");
+        }
+        first = 0;
+        
+        char *escaped_last_line = escape_json_string(state->last_line ? state->last_line : "");
+        
+        FCGX_FPrintF(request->out, 
+                     "  {\"filepath\":\"%s\",\"size\":%ld,\"modified\":%ld,\"lines\":%d,\"last_line\":\"%s\"}",
+                     get_relative_path(state->filepath), st.st_size, st.st_mtime, 
+                     state->line_count, escaped_last_line);
+    }
+    
+    pthread_mutex_unlock(&file_cache.mutex);
+    
+    FCGX_FPrintF(request->out, "\n],\"timestamp\":%ld}\n", time(NULL));
+}
+
+void handle_fcgi_request(FCGX_Request *request, monitor_config_t *config) {
+    char *request_uri = FCGX_GetParam("REQUEST_URI", request->envp);
+    char *request_method = FCGX_GetParam("REQUEST_METHOD", request->envp);
+    
+    if (!request_uri || !request_method) {
+        fcgi_send_error(request, 400, "Invalid request");
+        return;
+    }
+    
+    printf("FastCGI Request: %s %s\n", request_method, request_uri);
+    
+    if (strcmp(request_method, "GET") != 0) {
+        fcgi_send_error(request, 405, "Method not allowed");
+        return;
+    }
+    
+    // Parse request path
+    if (strstr(request_uri, "/api/files") == request_uri) {
+        char *action = fcgi_get_query_param(request, "action");
+        char *filepath = fcgi_get_query_param(request, "file");
+        
+        if (!action) {
+            // Default action: list files
+            fcgi_send_file_list(request, config);
+        } else if (strcmp(action, "list") == 0) {
+            fcgi_send_file_list(request, config);
+        } else if (strcmp(action, "content") == 0 && filepath) {
+            fcgi_send_file_content(request, filepath);
+        } else if (strcmp(action, "status") == 0 && filepath) {
+            fcgi_send_file_status(request, filepath);
+        } else {
+            fcgi_send_error(request, 400, "Invalid action or missing parameters");
+        }
+    } else if (strstr(request_uri, "/api/status") == request_uri) {
+        fcgi_output_json_header(request);
+        FCGX_FPrintF(request->out, 
+                     "{\"status\":\"running\",\"mode\":\"fcgi\",\"files_monitored\":%d,\"timestamp\":%ld}\n",
+                     file_cache.file_count, time(NULL));
+    } else {
+        fcgi_send_error(request, 404, "Not found");
+    }
+}
+
+void *fcgi_server_thread(void *arg) {
+    monitor_config_t *config = (monitor_config_t *)arg;
+    FCGX_Request request;
+    
+    if (FCGX_Init() != 0) {
+        printf("Failed to initialize FastCGI\n");
+        return NULL;
+    }
+    
+    if (FCGX_InitRequest(&request, 0, 0) != 0) {
+        printf("Failed to initialize FastCGI request\n");
+        return NULL;
+    }
+    
+    printf("FastCGI server started\n");
+    g_fcgi_running = 1;
+    
+    while (running && g_fcgi_running) {
+        int rc = FCGX_Accept_r(&request);
+        if (rc < 0) {
+            if (running && g_fcgi_running) {
+                printf("FastCGI accept failed: %d\n", rc);
+            }
+            break;
+        }
+        
+        handle_fcgi_request(&request, config);
+        FCGX_Finish_r(&request);
+    }
+    
+    FCGX_Free(&request, 1);
+    printf("FastCGI server stopped\n");
+    g_fcgi_running = 0;
+    return NULL;
+}
+#endif
+
 #ifdef __linux__
 // Linux inotify implementation
 int add_recursive_watches_with_depth(const char *path, int inotify_fd, monitor_config_t *config, int current_depth, visited_dirs_t *visited) {
@@ -2082,6 +2350,10 @@ void print_usage(const char *program_name) {
     printf("  --watch-pattern PATTERN PATH  Add dynamic watch rule for pattern in path\n");
     printf("  --watch-lines         Enable line-level change detection\n");
     printf("  --watch-daily         Enable daily archive file rotation (ARC-YYYY-MM-DD.txt)\n");
+#ifdef FCGI_SUPPORT
+    printf("  --fcgi               Run as FastCGI application\n");
+    printf("  --both               Run both WebSocket and FastCGI servers\n");
+#endif
     printf("  --help               Show this help message\n");
     printf("\nFeatures:\n");
     printf("  - Sync Detection: Automatically detects when files are deleted and recreated\n");
@@ -2091,6 +2363,9 @@ void print_usage(const char *program_name) {
     printf("  - Dynamic Watch Rules: Auto-watch new files matching patterns\n");
     printf("  - Daily File Rotation: Auto-manage daily archive files\n");
     printf("  - WebSocket API: Real-time file change notifications via WebSocket\n");
+#ifdef FCGI_SUPPORT
+    printf("  - FastCGI API: HTTP-based file access and status via FastCGI\n");
+#endif
     printf("\nEvent Types:\n");
     printf("  CREATED, DELETED, MODIFIED - Standard file system events\n");
     printf("  SYNC_MODIFIED - File recreated with different content (sync detected)\n");
@@ -2118,10 +2393,41 @@ void print_usage(const char *program_name) {
     printf("  When received, clients should update their subscriptions to new date files.\n");
     printf("  Example: Subscribe to 'ARC-2025-08-28.txt', receive DATE_CHANGED, then subscribe to 'ARC-2025-08-29.txt'\n");
     printf("\nWebSocket server will be available on port %d\n", WEBSOCKET_PORT);
+#ifdef FCGI_SUPPORT
+    printf("FastCGI API endpoints:\n");
+    printf("  /api/files?action=list        - List all monitored files\n");
+    printf("  /api/files?action=content&file=PATH - Get file content\n");
+    printf("  /api/files?action=status&file=PATH  - Get file status\n");
+    printf("  /api/status                   - Get server status\n");
+    printf("\nLighttpd FastCGI Configuration:\n");
+    printf("  Add to lighttpd.conf:\n");
+    printf("    fastcgi.server = (\n");
+    printf("      \"/api/\" => ((\n");
+    printf("        \"socket\" => \"/tmp/socketserver-fcgi.sock\",\n");
+    printf("        \"bin-path\" => \"/path/to/socketserver_r\",\n");
+    printf("        \"bin-environment\" => ( \"FCGI_SOCKET_PATH\" => \"/tmp/socketserver-fcgi.sock\" ),\n");
+    printf("        \"max-procs\" => 1,\n");
+    printf("        \"check-local\" => \"disable\"\n");
+    printf("      ))\n");
+    printf("    )\n");
+    printf("\nWebSocket Proxy Configuration:\n");
+    printf("  For WebSocket support, add to lighttpd.conf:\n");
+    printf("    proxy.server = (\n");
+    printf("      \"/ws\" => ((\n");
+    printf("        \"host\" => \"127.0.0.1\",\n");
+    printf("        \"port\" => %d\n", WEBSOCKET_PORT);
+    printf("      ))\n");
+    printf("    )\n");
+#endif
     printf("Sync detection window: %d seconds\n", SYNC_DETECTION_WINDOW);
     printf("\nCompilation:\n");
     printf("  macOS:  gcc -o socketserver_recursive socketserver_recursive.c -lpthread\n");
     printf("  Linux:  gcc -o socketserver_recursive socketserver_recursive.c -lpthread -lssl -lcrypto\n");
+#ifdef FCGI_SUPPORT
+    printf("  With FastCGI support:\n");
+    printf("    macOS:  gcc -DFCGI_SUPPORT -o socketserver_recursive socketserver_recursive.c -lpthread -lfcgi\n");
+    printf("    Linux:  gcc -DFCGI_SUPPORT -o socketserver_recursive socketserver_recursive.c -lpthread -lssl -lcrypto -lfcgi\n");
+#endif
 }
 
 // Main function
@@ -2169,6 +2475,12 @@ int main(int argc, char *argv[]) {
                 watch_daily = 1;
                 // Add default daily archive pattern
                 add_watch_rule("ARC-*.txt", ".");
+#ifdef FCGI_SUPPORT
+            } else if (strcmp(argv[i], "--fcgi") == 0) {
+                g_operation_mode = MODE_FCGI;
+            } else if (strcmp(argv[i], "--both") == 0) {
+                g_operation_mode = MODE_BOTH;
+#endif
             } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
                 print_usage(argv[0]);
                 return 0;
@@ -2198,11 +2510,37 @@ int main(int argc, char *argv[]) {
     signal(SIGTERM, signal_handler);
     signal(SIGALRM, alarm_handler);
     
-    // Start WebSocket server
-    if (pthread_create(&websocket_thread, NULL, websocket_server_thread, NULL) != 0) {
-        perror("pthread_create");
-        return 1;
+    // Start servers based on operation mode
+    printf("Operation mode: ");
+    switch (g_operation_mode) {
+        case MODE_WEBSOCKET:
+            printf("WebSocket only\n");
+            break;
+        case MODE_FCGI:
+            printf("FastCGI only\n");
+            break;
+        case MODE_BOTH:
+            printf("WebSocket + FastCGI\n");
+            break;
     }
+    
+    if (g_operation_mode == MODE_WEBSOCKET || g_operation_mode == MODE_BOTH) {
+        // Start WebSocket server
+        if (pthread_create(&websocket_thread, NULL, websocket_server_thread, NULL) != 0) {
+            perror("pthread_create for WebSocket");
+            return 1;
+        }
+    }
+    
+#ifdef FCGI_SUPPORT
+    if (g_operation_mode == MODE_FCGI || g_operation_mode == MODE_BOTH) {
+        // Start FastCGI server
+        if (pthread_create(&g_fcgi_thread, NULL, fcgi_server_thread, &config) != 0) {
+            perror("pthread_create for FastCGI");
+            return 1;
+        }
+    }
+#endif
     
     // Start file monitoring
     printf("Configuration:\n");
@@ -2228,8 +2566,18 @@ int main(int argc, char *argv[]) {
 #endif
     
     // Clean up
-    printf("Waiting for WebSocket server thread to finish...\n");
-    pthread_join(websocket_thread, NULL);
+    if (g_operation_mode == MODE_WEBSOCKET || g_operation_mode == MODE_BOTH) {
+        printf("Waiting for WebSocket server thread to finish...\n");
+        pthread_join(websocket_thread, NULL);
+    }
+    
+#ifdef FCGI_SUPPORT
+    if (g_operation_mode == MODE_FCGI || g_operation_mode == MODE_BOTH) {
+        printf("Stopping FastCGI server...\n");
+        g_fcgi_running = 0;
+        pthread_join(g_fcgi_thread, NULL);
+    }
+#endif
     
     // Close any remaining client connections
     pthread_mutex_lock(&ws_server.mutex);

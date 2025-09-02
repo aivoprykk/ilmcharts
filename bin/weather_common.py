@@ -317,10 +317,10 @@ def parse_mysql_datetime(s: str):
     return datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
 
 def test_minute_boundary(m: int | None) -> bool:
-    """Return True if minute is on a 5 or 10 minute boundary"""
+    """Return True if minute is on a 5-minute boundary (0, 5, 10, 15, 20, etc.)"""
     if m is None:
         return False
-    return (m % 5 == 0) or (m % 10 == 0) or (m == 0)
+    return (m % 5 == 0)
 
 def s_mean(values):
     """Simple mean with rounding to 0.1"""

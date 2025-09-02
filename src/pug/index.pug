@@ -6,8 +6,37 @@ html(lang=opt.lang)
 		meta(charset=opt.charset)
 		meta(name="viewport", content="width=device-width")
 		meta(name="description" content=opt.desc)
-		link(rel="stylesheet", href= opt.css + min + '.css?' + opt.version, media="screen")
-		link(rel="shortcut icon" type="image/x-icon" href="css/images/favicon.ico")
+		//- CSS: Use webpack require() if available, otherwise use opt.css path
+		if typeof require !== 'undefined'
+			//- Webpack build: CSS and favicon via require - manually inject CSS before scripts
+			link(rel="shortcut icon" type="image/x-icon" href=require("@images/favicon.ico"))
+			//- Manually inject CSS files from webpack in head (before scripts)
+			each cssFile in htmlWebpackPlugin.files.css
+				link(rel="preload" href=cssFile as="style")
+				link(rel="stylesheet" href=cssFile type="text/css")
+		else
+			//- Grunt build: Use traditional paths
+			link(rel="preload" href= opt.css + min + '.css?' + opt.version as="style")
+			link(rel="stylesheet", href= opt.css + min + '.css?' + opt.version, media="screen")
+			link(rel="shortcut icon" type="image/x-icon" href="css/images/favicon.ico")
+		//- Ultra-minimal critical CSS - Only absolute essentials for FOUC prevention
+		style.
+			/* Prevent FOUC - Only what's needed before main CSS loads */
+			body { visibility: hidden; }
+			body.sans { visibility: visible; }
+			/* Prevent layout shift only */
+			.fixed-top { position: fixed !important; top: 0; left: 0; right: 0; z-index: 1030; }
+		//- Minimal script for FOUC prevention and background fade
+		script.
+			document.addEventListener('DOMContentLoaded', function() {
+				// Show body immediately when DOM is ready
+				document.body.style.visibility = 'visible';
+				// Fade in background after a short delay
+				setTimeout(function() {
+					var bg = document.getElementById('backgr');
+					if (bg) bg.style.opacity = '1';
+				}, 150);
+			});
 		// [if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]
 	body.sans
 		nav.navbar.navbar-expand-lg.navbar-dark.bg-dark.fixed-top
@@ -25,18 +54,23 @@ html(lang=opt.lang)
 						li.nav-item.dropdown.dropleft
 							a.nav-link.dropdown-toggle#ilmlinks(href="#" role="button" data-bs-toggle="dropdown"  aria-expanded="false") Info
 							.dropdown-menu(aria-labelledby="ilmlinks" style="right:0;left:auto")
-								a.dropdown-item(href="http://balticroads.net/") Maanteeinfo
-								a.dropdown-item(href="http://ilmateenistus.ee/") Ilmateenistus
-								a.dropdown-item(href="http://energia.emu.ee/") Maaülikool
-								a.dropdown-item(href="http://yr.no/") Yr
-								a.dropdown-item(href="http://windguru.cz/") Windguru
+								a.dropdown-item(href="http://balticroads.net/", target="_blank") Maanteeinfo
+								a.dropdown-item(href="http://ilmateenistus.ee/", target="_blank") Ilmateenistus
+								a.dropdown-item(href="http://energia.emu.ee/", target="_blank") Maaülikool
+								a.dropdown-item(href="http://meteo.ut.ee/", target="_blank") Tartu Ülikooli jaam
+								a.dropdown-item(href="http://yr.no/", target="_blank") Yr
+								a.dropdown-item(href="http://windguru.cz/", target="_blank") Windguru
 								.dropdown-divider
-								a.dropdown-item(href="http://jquery.com/") JQuery
-								a.dropdown-item(href="http://highcharts.com/") Highcharts
-								a.dropdown-item(href="http://getbootstrap.com/") Bootstrap
+								a.dropdown-item(href="http://jquery.com/", target="_blank") JQuery
+								a.dropdown-item(href="http://highcharts.com/", target="_blank") Highcharts
+								a.dropdown-item(href="http://getbootstrap.com/", target="_blank") Bootstrap
 								.dropdown-divider
-								a.dropdown-item(href=opt.giturl) Projekt GitHubis
-		#backgr.ilm-backgr: img(src="css/images/ranna-001.jpg" alt="Peipsi pilt")
+								a.dropdown-item(href=opt.giturl, target="_blank") Projekt GitHubis
+		//- Background image: Use webpack require() if available, otherwise use traditional path
+		if typeof require !== 'undefined'
+			#backgr.ilm-backgr: img(src=require("@images/ranna-001.jpg") alt="Peipsi pilt")
+		else
+			#backgr.ilm-backgr: img(src="css/images/ranna-001.jpg" alt="Peipsi pilt")
 		#bghide.ilm-bghide
 		#dots.ilm-dots
 		#sisu.ilm-sisu.nopadding
@@ -56,7 +90,27 @@ html(lang=opt.lang)
 						h5.modal-title.popup-title Pealkiri
 					.modal-body
 						.container-fluid.popup-sisu Oodake, laadin sisu ...
-		script(src= opt.contrib + min + '.js')
-		script(src= opt.js + min + '.js?' + opt.version)
-		script(async="" defer="" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBKPcJDwBUmu-xio9gPQsi-FjWtY_9XQmg&callback=ilm.loadMap")
+		//- Scripts: Use webpack's automatic injection for proper load order
+		//- For Grunt builds, fallback to manual script tags
+		if typeof require === 'undefined'
+			//- Grunt build: Manual script tags
+			script(src= opt.contrib + min + '.js')
+			script(src= opt.js + min + '.js?' + opt.version)
+		//- Note: When inject: 'body' is used, webpack automatically injects scripts here
+		
+		//- Safe Google Maps API loading with retry mechanism
+		script.
+			// Safe Google Maps callback that waits for ilm to be ready
+			window.initGoogleMaps = function() {
+				function tryLoadMap() {
+					if (window.ilm && typeof window.ilm.loadMap === 'function') {
+						window.ilm.loadMap();
+					} else {
+						// Retry after a short delay
+						setTimeout(tryLoadMap, 100);
+					}
+				}
+				tryLoadMap();
+			};
+		script(async="" defer="" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBKPcJDwBUmu-xio9gPQsi-FjWtY_9XQmg&callback=initGoogleMaps")
 

@@ -1,20 +1,26 @@
 @import "../../node_modules/bootstrap/scss/bootstrap";
 
+// Custom body styles - extend Bootstrap defaults
 body {
-	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif;
 	color: #274b6d;
-	margin: 0;
-	padding: 0;
+	font-size: 14px;
 }
 
 .sans {
-	font-family: "Helvetica Neue", "Segoe UI", Helvetica, "Ubuntu Light", Arial, sans-serif;
+	font-family: "Helvetica Neue", "Roboto", "Segoe UI", Helvetica, "Ubuntu Light", Arial, sans-serif;
 	line-height: 1.5em;
 }
 
 .serif {
 	font-family: Georgia, "MS Serif", "New York", Palatino, serif;
 	line-height: 1.3em;
+}
+
+.dropdown-menu, .form-control { 
+	font-size: 100%; 
+}
+.navbar-brand {
+	font-size: 120%;
 }
 
 .ilm-sisu {
@@ -31,11 +37,10 @@ body {
 }
 
 .ilm-pealkiri {
-	font-size: 14px;
+	font-size: 100%;
 }
 
 .ilm-ajaraam {
-	font-size: 14px;
 	padding: 0.5em 1em;
 	color: white;
 	background-color: green;
@@ -70,14 +75,16 @@ body {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	z-index: -1;
-	opacity: 0.7;
-	display: none;
+	z-index: -2; // Behind everything
+	opacity: 0; // Start hidden, will be faded in via JS
+	transition: opacity 0.3s ease-in-out; // Smooth fade transition
+	
 	img {
 		min-height: 100%;
 		min-width: 1024px;
 		width: 100%;
 		height: auto;
+		object-fit: cover; // Better image scaling
 	}
 }
 
@@ -307,55 +314,74 @@ a {
 	>input {
 		width: 100px;
 		padding: 0 5px;
+		opacity: 0.5;
+		&:hover {
+			opacity: 1;
+		}
+		&:focus {
+			opacity: 1;
+		}
+		&::selection {
+			opacity: 1;
+		}
 	}
 }
 
-.left-side,.right-side {
-	position: relative;
-}
-.left-side {
-	width: 70%;
-	float: left;
-	>div {
-		text-align: left;
-		padding-left: 0.5em;
-	}
-}
-.right-side {
-	width: 30%;
-	float: right;
-	>div {
-		text-align: right;
-		padding-right: 0.5em;
-	}
+.ilm-table {
+	font-size: 90%;
 }
 
 .night-chart {
 	font-weight: 400;
 }
 
-tr.ctrlcontainer {
-	>th>div {
-		position: relative;
-	}
+.data-length, .data-source {
+	cursor: pointer;
 }
-
 .ctrlhead {
-	position: absolute;
-	top: -1em;
-	width: 100%;
-	>.right-side {
-		text-align:right;
+	border-radius: 0.2em;
+	margin-left: 3px;
+	background-color: white;
+	line-height: 2;
+	>.headrow {
+		display: flex;
+		width: 100%;
+		top: -0.5em;
+		border-bottom: 1px solid #eee;
+		>.ctrl-open {
+			flex-grow: none;
+			background-color: #fff;
+			color: #000;
+			display: table-cell;
+			position: absolute;
+			left: 0.4rem;
+			top: -0.5em;
+		}
+		>.ctrl-info {
+			cursor: pointer;
+			padding-left: 1em;
+		}
+		>.title-control {
+			flex-grow: 1;
+			text-align: right;
+			font-weight: 600;
+			font-size: 100%;
+			padding-right: 1em;
+		}
+		@media (min-width: 850px) {
+			>.ctrl-open {
+				top: 1px;
+			}
+		}
 	}
-	>.left-side {
-		text-align:left;
-	}
-	.timeframe-control {
-		padding-left: 0.5em
-	}
-	.sources-control {
-		display: inline-block;
-		margin-right: 0.3em;
+	>.datarow {
+		display: none;
+		padding: 0.5em 1em;
+		border-bottom: 1px solid #eee;
+		background-color: #f3f1f1;
+		>.left-column {
+			flex-grow: 1;
+		}
 	}
 }
 
@@ -383,15 +409,21 @@ tr.ctrlcontainer {
 	width:100%;
 	position:relative;
 	font-size:80%;
-	min-height: 3em;
-	>div {
-		position: absolute;
-		z-index: 1000;
-		top: 0;
-		width: 100%;
-		top: 0.5em;
+	min-height: 1.2em;
+	>.items-container {
+		display: flex;
+		flex-flow: row-reverse;
 		>div {
-			float:right;
+			position: absolute;
+			z-index: 1000;
+			top: -0.7em;
+			display: flex;
+		}
+	}
+	@media (min-width: 850px) {
+		min-height: 1.9em;
+		>.items-container > div {
+			top: 0.1em;
 		}
 	}
 }
@@ -426,7 +458,7 @@ tr.ctrlcontainer {
 		background-color:white;
 		border-radius:5px;
 		color:black;
-		top:1.7rem;
+		top:1.4rem;
 	}
 }
 
@@ -476,6 +508,9 @@ tr.ctrlcontainer {
 .data-menu-row {
 	&:hover {
 		cursor: pointer;
+	}
+	&.selected td {
+		background-color: rgb(238, 238, 238);
 	}
 	@media (max-width:440px) {
 		.desc {

@@ -6,7 +6,8 @@
         SunCalc = w.SunCalc,
         drawupdates = 0,
         updateinterval = 60000,
-        options = {};
+        options = {},
+        intervals = [];
 
     Highcharts.setOptions({
         global : {
@@ -17,6 +18,9 @@
             weekdays: my.weekdays,
             shortWeekdays: my.shortweekdays
         },
+        responsive: {
+            rules: []
+        }
     });
 
     options.wind_speed = $.extend(true, {}, my.chartoptions, {
@@ -116,12 +120,13 @@
             max: 360,
             tickInterval: 45,
             plotBands: [
-                {from: 0,   to: 90,  label: {text: 'NE', style: {color: '#606060'}}},
-                {from: 90,  to: 180, label: {text: 'SE', style: {color: '#606060'}}},
-                {from: 180, to: 270, label: {text: 'SW', style: {color: '#606060'}}},
-                {from: 270, to: 360, label: {text: 'NW', style: {color: '#606060'}}}
+                {from: 0,   to: 90,  label: {text: 'NE', style: {color: '#606060'}}, color: 'rgba(0, 0, 0, 0)'},
+                {from: 90,  to: 180, label: {text: 'SE', style: {color: '#606060'}}, color: 'rgba(0, 0, 0, 0)'},
+                {from: 180, to: 270, label: {text: 'SW', style: {color: '#606060'}}, color: 'rgba(0, 0, 0, 0)'},
+                {from: 270, to: 360, label: {text: 'NW', style: {color: '#606060'}}, color: 'rgba(0, 0, 0, 0)'}
             ]
-        }, {
+        }, 
+        {
             linkedTo: 0,
             gridLineWidth: 0,
             title: {
@@ -156,7 +161,8 @@
             title: {
                 text: null
             }
-        },{ //1.waterlevel
+        },
+        { //1.waterlevel
             gridLineWidth: 0,
             tickInterval: 10,
             labels: {
@@ -171,7 +177,8 @@
                 text: null
             },
             opposite: true
-        },{//2.press
+        },
+        {//2.press
             gridLineWidth: 0,
             tickInterval: 10,
             labels: {
@@ -186,7 +193,8 @@
                 text: null
             },
             opposite: true
-        },{//3.humid
+        },
+        {//3.humid
             gridLineWidth: 0,
             tickInterval: 25,
             min: 0,
@@ -202,7 +210,8 @@
             title: {
                 text: null
             },
-        },{ //4.rain
+        },
+        { //4.rain
             gridLineWidth: 0,
             tickInterval: 2,
             labels: {
@@ -229,9 +238,51 @@
             verticalAlign: 'top',
             y: 40,
             floating: true,
-            backgroundColor: '#FFFFFF'
         }
     });
+
+    function addPlotLine(chart, ts) {
+        if(chart.xAxis!==undefined) {
+            chart.xAxis[0].addPlotLine({
+                value: ts,
+                color: 'rgb(238, 154, 154)',
+                width: 1,
+                id: 'nowline'
+            });
+        }
+    }
+
+    function removePlotLine(chart) {
+        if(chart.xAxis!==undefined) {
+            chart.xAxis[0].removePlotLine('nowline');
+        }
+    }
+
+    function addNightPlots(chart, nightPlots) {
+        if(chart.xAxis!==undefined && nightPlots && nightPlots.length) {
+            chart.xAxis[0].plotBands = [];
+            for(var k = 0, l = nightPlots.length; k < l; ++k) {
+                chart.xAxis[0].addPlotBand(nightPlots[k]);
+            }
+        }
+    }
+
+    function addXPlots(chart, nightPlots) {
+        if(chart) {
+            removePlotLine(chart);
+            addPlotLine(chart, my.getTime());
+            addNightPlots(chart, nightPlots);
+        }
+    }
+
+    function intPlotLine(chart, intval, nightPlots) {
+        // clearInterval(intval);
+        addXPlots(chart, nightPlots);
+        // intval = setInterval(function () {
+        //     addXPlots(chart, nightPlots);
+        // }, updateinterval);
+        return intval;
+    }
 
     var ajaxopt = {
         delta:'2y', // data from past...
@@ -286,7 +337,7 @@
             html += '</tbody>';
             var $html = $(html);
             //var rev = _.filter($html.children('.item').get().reverse(),function(a,i){return i<15;});
-            var hlinks = '<tr class="ctrlcontainer"><th colspan="10"></th></tr>';
+            var hlinks = '';
             var rev = $html.children('.item').get().reverse();
             $html.html(rev);
             d = new Date(my.lastdate);
@@ -343,7 +394,6 @@
                 my.rowToSeries(o, s);
             }, 0, my.start);
 
-            options.wind_speed.series = null;
             options.wind_speed.series = [];
             options.wind_speed.series.push(s.min_ws_series);
             options.wind_speed.series.push(s.max_ws_series);
@@ -410,14 +460,12 @@
                 options.temp.title.text = 'Temperatuur, õhurõhk ja -niiskus';
             }
 
-            options.wind_dir.series = null;
             options.wind_dir.series = [];
 
             options.wind_dir.series.push(s.min_wd_series);
             options.wind_dir.series.push(s.max_wd_series);
             options.wind_dir.series.push(s.avg_wd_series);
 
-            options.temp.series = null;
             options.temp.series = [];
             options.temp.series.push(s.avg_temp_series);
             options.temp.series.push(s.avg_wl_series);
@@ -431,20 +479,23 @@
             //console.log(JSON.stringify(options));
 
 
-            options.wind_speed.chart.renderTo = 'wind_speed1';
-            options.wind_dir.chart.renderTo = 'wind_dir1';
-            options.temp.chart.renderTo = 'temp1';
+            // options.wind_speed.chart.renderTo = 'wind_speed1';
+            // options.wind_dir.chart.renderTo = 'wind_dir1';
+            // options.temp.chart.renderTo = 'temp1';
 
-            if(my.chartorder.indexOf('wind_speed') >= 0) my.charts[0] = new Highcharts.Chart(options.wind_speed);
-            if(my.chartorder.indexOf('wind_dir') >= 0)  my.charts[1] = new Highcharts.Chart(options.wind_dir);
-            if(my.chartorder.indexOf('temp') >= 0)  my.charts[2] = new Highcharts.Chart(options.temp);
+            // if(my.chartorder.indexOf('wind_speed') >= 0) my.charts[0] = new Highcharts.Chart(options.wind_speed);
+            // if(my.chartorder.indexOf('wind_dir') >= 0)  my.charts[1] = new Highcharts.Chart(options.wind_dir);
+            // if(my.chartorder.indexOf('temp') >= 0)  my.charts[2] = new Highcharts.Chart(options.temp);
 
             var dt = my.curplaces[my.curplace], loc=dt.location;
             var nightPlots = my.nightPlots(get.datalen,loc);
-            var i, j, k, l;
+            var i, j, m;
             for(i=0,j=3;i<j;++i) {
-                for(k=0,l=nightPlots.length;k<l;++k) {
-                    if(my.charts[i]) my.charts[i].xAxis[0].addPlotBand(nightPlots[k]);
+                m = my.graphs[i];
+                options[m].chart.renderTo = m + '1';
+                if(my.chartorder.indexOf(m) >= 0) {
+                    my.charts[i] = new Highcharts.Chart(options[m]);
+                    intervals[i] = intPlotLine(my.charts[i+3], intervals[i], nightPlots);
                 }
             }
 
@@ -505,89 +556,95 @@
             get.dohmeta(my.curplace, metadata);
             $('#pagelogo').html(my.logo + ' <span style="font-size:70%">' + my.getTimeStr(my.getTime())+'</span>');
             
-            var where = my.samplemode==='table' ? '.cur .ctrlcontainer th' : '.cur .ctrlhead';
-            $(where).html('<div class="left-side"></div><div class="right-side"></div>');
-
-            $(where).children().each(function(item, child){
-                $(child).html(function() {
-                    var links = '';
-                    if(item === 0) {
-                        links += `<div class="timeframe-control hist-timeframe-control">
-                        <span class="hist-length" name="4"> 4h </span>&nbsp;
-                        <span class="hist-length" name="6"> 6h </span>&nbsp;
-                        <span class="hist-length" name="12"> 12h </span>&nbsp;
-                        <span class="hist-length" name="24"> 24h </span>&nbsp;
-                        <span class="hist-length" name="48"> 2p </span>&nbsp;
-                        <span class="hist-length" name="72"> 3p </span>&nbsp;
-                        </div>`;
-                        //if(my.samplemode === 'table') {
-                        links += '<div class="sources-control hist-sources-control">';
-                        for( var i=0, j=my.hproviders_available.length; i<j; i++) {
-                            var hsrc = my.hproviders_available[i];
-                            
-                            // Use the normalized approach to get stations for any provider
-                            var place = my.curplaces[my.curplace];
-                            var sources = my.useNewHistPlaces ? place.hstations_new : place.hstations;
-                            var hstations = sources && sources[hsrc] ? my.normalizeHistValue(sources[hsrc]) : [];
-                            
-                            if (hstations && hstations.length > 1) {
-                                for(var k = 0; k < hstations.length; k++) {
-                                    links += '<span class="h-source" name="'+hsrc+'-'+k+'">'+ hstations[k].id+'</span>&nbsp;';
-                                }
-                            } else {
-                                links += '<span class="h-source" name="'+hsrc+'">'+ my.hprovidersmeta[hsrc].name+'</span>&nbsp;';
-                            }
+            var where = $('.cur .ctrlhead');
+            if(!where.length) {
+                where = $('<div>', {
+                    class: 'ctrlhead',
+                    html: `<div class="headrow">
+                        <div class="ctrl-info">Info</div><div class="title-control fc-name"> ` + my.curplaces[my.curplace].name + `</div>
+                        </div>
+                        <div class="datarow"></div>`
+                }).prependTo($('.two-lg.cur'));
+            }
+            
+            where.find('.datarow').html(function() {
+                var links = '';
+                links += `<div class="left-column"><div class="timeframe-control hist-timeframe-control">
+                <span class="data-length" name="4"> 4h </span>&nbsp;
+                <span class="data-length" name="6"> 6h </span>&nbsp;
+                <span class="data-length" name="12"> 12h </span>&nbsp;
+                <span class="data-length" name="24"> 24h </span>&nbsp;
+                <span class="data-length" name="48"> 2p </span>&nbsp;
+                <span class="data-length" name="72"> 3p </span>&nbsp;
+                </div>`;
+                links += '<div class="sources-control hist-sources-control">';
+                for( var i=0, j=my.hproviders_available.length; i<j; i++) {
+                    var hsrc = my.hproviders_available[i];
+                    
+                    // Use the normalized approach to get stations for any provider
+                    var place = my.curplaces[my.curplace];
+                    var sources = my.useNewHistPlaces ? place.hstations_new : place.hstations;
+                    var hstations = sources && sources[hsrc] ? my.normalizeHistValue(sources[hsrc]) : [];
+                    
+                    if (hstations && hstations.length > 1) {
+                        for(var k = 0; k < hstations.length; k++) {
+                            links += '<span class="data-source" name="'+hsrc+'-'+k+'">'+ hstations[k].id+'</span>&nbsp;';
                         }
-                        links += '</div>';
-                        //}
-                    } 
-                    else {
-                        links += '<div class="title-control cur-name';
-                        if (my.samplemode !== 'table') links += ' badge bg-info';
-                        links += '"> '+my.curplaces[my.curplace].name+'</div>';
-                        links += `<div class="startdate-control">
-                        <input type="text" class="form-control datepicker" id="datepicker" name="datepicker" value="` + my.getDateString(my.start) + `" placeholder="Vali kuupäev" onchange="ilm.setDate(this.value);return false;">
-                        </div>`;
+                    } else {
+                        links += '<span class="data-source" name="'+hsrc+'">'+ my.hprovidersmeta[hsrc].name+'</span>&nbsp;';
                     }
-                    return links;
-                });
-                var el = $(child), where;
-                if(item === 0) {
-                    where = el.find('.hist-length');
-                    _.each(where,function(a){
-                        var member = $(a), c = member.attr('name'), b = parseInt(c,10)*3600*1000;
-                        if(my.samplemode == 'graph') member.addClass('badge bg-primary');
-                        if(b===my.timeframe) {
-                            member.css('font-weight','600');
-                        }
-                        else {
-                            member.css('font-weight','400');
-                        }
-                        member.off('click');
-                        member.on('click',function(){
-                            var c = member.attr('name'), b = parseInt(c,10)*3600*1000;
-                            if(b===my.timeframe) return false;
-                            my.setFrame(c+'h', true, true);
-                        });
-                    });
-                    where = el.find('.h-source');
-                    _.each(where,function(a){
-                        var member = $(a), c = member.attr('name'), b = c.split('-');
-                        if(my.samplemode == 'graph') member.addClass('badge bg-primary');
-                        var providerStruct = my.getCurrentHProviderStruct(my.curplace);
-                        if(b[0] == providerStruct.provider && ((b.length > 1 && b[1]==providerStruct.currentIndex) || b.length < 2)) member.css('font-weight','600');
-                        else member.css('font-weight','400');
-                        member.off('click');
-                        member.on('click',function(){
-                            w.ilm.setHProvider(b[0], true);
-                            if(b.length > 1) {
-                                w.ilm.setHStationIndex(parseInt(b[1], 10), true);
-                            }
-                            w.ilm.reload();
-                        });
-                    });
+                }
+                links += `</div></div><div class="right-column"><div class="startdate-control">
+                <input type="text" class="form-control datepicker" id="datepicker" name="datepicker" value="` + my.getDateString(my.start) + `" placeholder="Vali kuupäev" onchange="ilm.setDate(this.value);return false;">
+                </div></div>`;
+                return links;
+            });
+            var member = where.find('.headrow');
+            member.off('click');
+            member.on('click', function() {
+                var e = where.find('.datarow');
+                if (e.css('display') === 'none') {
+                    e.css('display', 'flex');
+                } else {
+                    e.css('display', 'none');
                 }
             });
+            var infotxt = '';
+            where.find('.data-source').each(function(a, obj){
+                member = $(obj);
+                var c = member.attr('name'), b = c.split('-');
+                var providerStruct = my.getCurrentHProviderStruct(my.curplace);
+                if(b[0] == providerStruct.provider && ((b.length > 1 && b[1]==providerStruct.currentIndex) || b.length < 2)) {
+                    member.css('font-weight','600');
+                    infotxt += ' ' + my.hprovidersmeta[b[0]].name;
+                }
+                else member.css('font-weight','400');
+                member.off('click');
+                member.on('click',function(){
+                    w.ilm.setHProvider(b[0], true);
+                    if(b.length > 1) {
+                        w.ilm.setHStationIndex(parseInt(b[1], 10), true);
+                    }
+                    w.ilm.reload();
+                });
+            });
+            where.find('.data-length').each(function(a, obj){
+                member = $(obj);
+                var c = member.attr('name'), b = parseInt(c,10)*3600*1000;
+                if(b===my.timeframe) {
+                    member.css('font-weight','600');
+                    infotxt += ' ' + c + 't';
+                }
+                else {
+                    member.css('font-weight','400');
+                }
+                member.off('click');
+                member.on('click',function(){
+                    if(b===my.timeframe) return false;
+                    my.setFrame(c+'h', true, true);
+                });
+            });
+            where.find('.ctrl-info').html(infotxt);
         }
     };
     my.loadCur = function (url) {
@@ -659,4 +716,4 @@
 
     return my;
 
-})(ilm || {});
+})(window.ilm || {});

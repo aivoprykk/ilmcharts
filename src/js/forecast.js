@@ -1,3 +1,5 @@
+import { color } from "highcharts";
+
 (function (my) {
     'use strict';
     var w = window,
@@ -6,7 +8,8 @@
         Highcharts = w.Highcharts,
         SunCalc = w.SunCalc,
         updateinterval = 600000,
-        options = {};
+        options = {},
+        intervals = [];
 
     Highcharts.setOptions({
         global: {
@@ -17,9 +20,12 @@
             weekdays: my.weekdays,
             shortWeekdays: my.shortweekdays
         },
+        responsive: {
+            rules: []
+        }
     });
 
-    var wind_speed_options = $.extend(true, {}, my.chartoptions, {
+    options.wind_speed = $.extend(true, {}, my.chartoptions, {
         title: {
             text: 'Tuule kiiruse prognoos'
         },
@@ -38,7 +44,7 @@
         }
     });
 
-    var wind_dir_options = $.extend(true, {}, my.chartoptions, {
+    options.wind_dir = $.extend(true, {}, my.chartoptions, {
         title: {
             text: 'Tuule suuna prognoos'
         },
@@ -48,13 +54,7 @@
             },
             min: 0,
             max: 360,
-            tickInterval: 45,
-            plotBands: [
-                {from: 0,   to: 90,  label: {text: 'NE', style: {color: '#606060'}}},
-                {from: 90,  to: 180, label: {text: 'SE', style: {color: '#606060'}}},
-                {from: 180, to: 270, label: {text: 'SW', style: {color: '#606060'}}},
-                {from: 270, to: 360, label: {text: 'NW', style: {color: '#606060'}}}
-            ]
+            tickInterval: 45
         }, {
             linkedTo: 0,
             title: {
@@ -72,7 +72,7 @@
         }
     });
 
-    var temp_options = $.extend(true, {}, my.chartoptions, {
+    options.temp = $.extend(true, {}, my.chartoptions, {
         title: {
             text: 'Temperatuuri, rõhu, niiskuse prognoos'
         },
@@ -145,38 +145,49 @@
             verticalAlign: 'top',
             y: 40,
             floating: true,
-            backgroundColor: '#FFFFFF'
         }
     });
 
     function addPlotLine(chart, ts) {
-        if(chart.xAxis!==undefined)
+        if(chart.xAxis!==undefined) {
             chart.xAxis[0].addPlotLine({
                 value: ts,
                 color: 'rgb(238, 154, 154)',
                 width: 1,
                 id: 'nowline'
             });
-    }
-    function addNight(chart, from, to) {
-        if(chart && chart.xAxis!==undefined) chart.xAxis[0].addPlotBand({color:'#f9f9f9',from:from,to:to, zIndex:0});
+        }
     }
 
     function removePlotLine(chart) {
-        if(chart.xAxis!==undefined)
+        if(chart.xAxis!==undefined) {
             chart.xAxis[0].removePlotLine('nowline');
+        }
     }
 
-    function intPlotLine(chart, intval) {
-        var interval = 60000;
-        var now = my.getTime();
-        clearInterval(intval);
-        removePlotLine(chart);
-        addPlotLine(chart, now);
-        intval = setInterval(function () {
+    function addNightPlots(chart, nightPlots) {
+        if(chart.xAxis!==undefined && nightPlots && nightPlots.length) {
+            chart.xAxis[0].plotBands = [];
+            for(var k = 0, l = nightPlots.length; k < l; ++k) {
+                chart.xAxis[0].addPlotBand(nightPlots[k]);
+            }
+        }
+    }
+
+    function addXPlots(chart, nightPlots) {
+        if(chart) {
             removePlotLine(chart);
-            addPlotLine(chart, now);
-        }, interval);
+            addPlotLine(chart, my.getTime());
+            addNightPlots(chart, nightPlots);
+        }
+    }
+
+    function intPlotLine(chart, intval, nightPlots) {
+        //clearInterval(intval);
+        addXPlots(chart, nightPlots);
+        // intval = setInterval(function () {
+        //     addXPlots(chart, nightPlots);
+        // }, updateinterval);
         return intval;
     }
 
@@ -294,13 +305,13 @@
                     if(fillfn) fillfn(data, dt, fcid);
 
                     if(my.samplemode==='graph') {
-                        if(dt.ws_series.data.length) wind_speed_options.series.push(dt.ws_series);
-                        if(dt.wg_series.data.length) wind_speed_options.series.push(dt.wg_series);
-                        if(dt.wd_series.data.length) wind_dir_options.series.push(dt.wd_series);
-                        if(dt.humid_series.data.length) temp_options.series.push(dt.humid_series);
-                        if(dt.rain_series.data.length) temp_options.series.push(dt.rain_series);
-                        if(dt.press_series.data.length) temp_options.series.push(dt.press_series);
-                        if(dt.temp_series.data.length) temp_options.series.push(dt.temp_series);
+                        if(dt.ws_series.data.length) options.wind_speed.series.push(dt.ws_series);
+                        if(dt.wg_series.data.length) options.wind_speed.series.push(dt.wg_series);
+                        if(dt.wd_series.data.length) options.wind_dir.series.push(dt.wd_series);
+                        if(dt.humid_series.data.length) options.temp.series.push(dt.humid_series);
+                        if(dt.rain_series.data.length) options.temp.series.push(dt.rain_series);
+                        if(dt.press_series.data.length) options.temp.series.push(dt.press_series);
+                        if(dt.temp_series.data.length) options.temp.series.push(dt.temp_series);
                     }
                     
                     // Get forecast station link using new structure
@@ -522,35 +533,27 @@
                     temp: (dt.temp_series && dt.temp_series.data.length)
                 },
                 dbase = has.ws ? dt.ws_series.data : has.temp ? dt.temp_series.data : has.wd ? dt.wd_series.data : [],
-                k=0, l=0, kn='', night=false, nightplot=[], doplot=false;
+                k=0, l=0, kn='', night=false;
 
             if(my.samplemode==='graph') {
                 $('#'+my.chartorder[0]+'2').css({height:''});
                 $('#'+my.chartorder[1]+'2').show();
                 $('#'+my.chartorder[2]+'2').show();
-                if(my.chartorder.indexOf('wind_speed')>=0) {
-                    my.charts[3] = new Highcharts.Chart(wind_speed_options);
-                    i1 = intPlotLine(my.charts[3], i1);
-                }
-                if(my.chartorder.indexOf('wind_dir')>=0) {
-                    my.charts[4] = new Highcharts.Chart(wind_dir_options);
-                    i2 = intPlotLine(my.charts[4], i2);
-                }
-                if(my.chartorder.indexOf('temp')>=0) {
-                    my.charts[5] = new Highcharts.Chart(temp_options);
-                    i3 = intPlotLine(my.charts[5], i3);
-                }
-                var nightPlots = my.nightPlots(get.datalen,loc);
-                for(i=3,j=6;i<j;++i) {
-                    for(k=0,l=nightPlots.length;k<l;++k) {
-                        if(my.charts[i]) my.charts[i].xAxis[0].addPlotBand(nightPlots[k]);
+                var nightPlots = my.nightPlots(get.datalen, loc), m, n;
+                for(i=0,j=3;i<j;++i) {
+                    n = i+3;
+                    m = my.graphs[i];
+                    options[m].chart.renderTo = m + '2';
+                    if(my.chartorder.indexOf(m)>=0) {
+                        my.charts[n] = new Highcharts.Chart(options[m]);
+                        intervals[i] = intPlotLine(my.charts[n], intervals[i], nightPlots);
                     }
                 }
             } else {
                 //var htempl = '<tr><th>Aeg</th><th>Tuul</th><th>Suund</th><th>Temp</th><th>Sademed</th><th class="d-xs-none">Rõhk</th></tr>';
                 //var templ = '<tr class="<%=night?"night hide":""%>"><td><span class="day hide"><%=day%>&nbsp;</span><%=time%></td><td><span class="ws"<%if(wscolor){%> style="color:<%=wscolor%>"<%}%>><%=ws?ws:""%></span><%if(wg){%>/<span class="wg"<%if(wgcolor){%> style="color:<%=wgcolor%>"<%}%>><%=wg%></span><%}%></td><td><%=wd?wd:""%></td><td><%=temp?temp:""%></td><td><%=rain?rain:""%></td><td class="d-xs-none"><%=press?press:""%></td></tr>';
                 var str='';
-                var hlinks = '<tr class="ctrlcontainer"><th colspan="10"></th></tr>';
+                var hlinks = '';
                 var keys = Object.keys(has),tnow=new Date().getTime(),o;
 
                 for(i=0,j=dbase.length;i<j;++i) {
@@ -592,73 +595,86 @@
                 fcDisplayName = fc.name;
             }
             
-            where = my.samplemode==='table' ? '.fc .ctrlcontainer th' : '.fc .ctrlhead';
-            $(where).html('<div class="left-side"></div><div class="right-side"></div>');
-
-            $(where).children().each(function(item, child){
-                $(child).html(function(){
-                    var links = '';
-                    if(item === 0) {
-                        links += `<div class="timeframe-control fc-timeframe-control">
-                                &nbsp;<span class="fc-length" name="3"> 3p </span>
-                                &nbsp;<span class="fc-length" name="7"> 7p </span>
-                                &nbsp;<span class="fc-length" name="10"> 10p </span>
-                                &nbsp;<span class="fc-length" name="17"> 17p </span>
-                                </span>&nbsp;</div>`;
-                        if(my.samplemode==='table') {
-                            links+= '<div class="sources-control fc-sources-control">';
-                            for( i=0, j=my.fcproviders_available.length; i<j; i++) {
-                                var fcsrc = my.fcproviders_available[i];
-                                links += '<span class="fc-source" name="'+fcsrc+'">'+ my.fcprovidersmeta[fcsrc].name+'</span>&nbsp;';
-                            }
-                            links += '</div>';
-                        }
-                    } 
-                    else {
-                        links += '<div class="title-control fc-name';
-                        if (my.samplemode !== 'table') links += ' badge bg-info';
-                        links += '"> ' + fc.name + '</div>';
-                        if (self.samplemode === 'table') 
-                            links += ('<div class="night-chart" name="' + (self.fcshownight ? 'fcsnf' : 'fcsnt') + '"> ' + (self.fcshownight ? '-' : '+') + 'Ööd</div>');
+            where = $('.fc .ctrlhead');
+            if(!where.length) {
+                where = $('<div>', {
+                    class: 'ctrlhead',
+                    html: `<div class="headrow">
+                        <div class="ctrl-info">Info</div><div class="title-control fc-name"> ` + fc.name + `</div>
+                        </div>
+                        <div class="datarow"></div>`
+                }).prependTo($('.two-lg.fc'));
+            }
+            where.find('.datarow').html(function(){
+                var links = '';
+                links += `<div class="left-column"><div class="timeframe-control">
+                        &nbsp;<span class="data-length" name="3"> 3p </span>
+                        &nbsp;<span class="data-length" name="7"> 7p </span>
+                        &nbsp;<span class="data-length" name="10"> 10p </span>
+                        &nbsp;<span class="data-length" name="17"> 17p </span>
+                        </span>&nbsp;</div>`;
+                if(my.samplemode==='table') {
+                    links+= '<div class="sources-control">';
+                    for( i=0, j=my.fcproviders_available.length; i<j; i++) {
+                        var fcsrc = my.fcproviders_available[i];
+                        links += '<span class="data-source" name="'+fcsrc+'">'+ my.fcprovidersmeta[fcsrc].name+'</span>&nbsp;';
                     }
-                    return links;
+                    links += '</div></div><div class="right-column">';
+                    links += ('<div class="night-chart" name="' + (self.fcshownight ? 'fcsnf' : 'fcsnt') + '"> ' + (self.fcshownight ? '-' : '+') + 'Ööd</div></div>');
+                }
+                links += '</div>';
+                return links;
+            });
+            var member = where.find('.headrow');
+            member.off('click');
+            member.on('click', function() {
+                var e = where.find('.datarow');
+                if (e.css('display') === 'none') {
+                    e.css('display', 'flex');
+                } else {
+                    e.css('display', 'none');
+                }
+            });
+            var infotxt = '';
+            where.find('.data-source').each(function(a, obj){
+                member=$(obj);
+                var c = member.attr('name');
+                if(c===(fcStruct && fcStruct.provider) || c===my.fcprovider){ 
+                    member.css('font-weight','600');
+                    infotxt += my.fcprovidersmeta[c].name;
+                }
+                else member.css('font-weight','400');
+                member.off('click');
+                member.on('click',function(){
+                    w.ilm.setFcProvider(c, true);
+                    w.ilm.reloadest();
                 });
-                var el = $(child), where;
-                if(item === 0) {
-                    where = el.find('.fc-length');
-                    _.each(where,function(a){
-                        var member=$(a), c = member.attr('name'), b = parseInt(c,10);
-                        if(my.samplemode == 'graph') member.addClass('badge bg-primary');
-                        member.off('click');
-                        member.on('click',function(){
-                            if(b===my.timeframe) return false;
-                            my.fctimeframe = b;
-                            my.state.set({ fctimeframe: my.fctimeframe });
-                            w.ilm.reloadest();
-                        });
-                        if(b===my.fctimeframe) member.css('font-weight','600');
-                        else member.css('font-weight','400');
-                    });
-                    where = el.find('.fc-source');
-                    _.each(where,function(a){
-                        var member=$(a), c = member.attr('name');
-                        if(c===(fcStruct && fcStruct.provider) || c===my.fcprovider) member.css('font-weight','600');
-                        else member.css('font-weight','400');
-                        member.off('click');
-                        member.on('click',function(){
-                            w.ilm.setFcProvider(c, true);
-                            w.ilm.reloadest();
-                        });
-                    });
+            });
+            where.find('.data-length').each(function(a, obj){
+                member=$(obj);
+                var c = member.attr('name'), b = parseInt(c,10);
+                member.off('click');
+                member.on('click',function(){
+                    if(b===my.timeframe) return false;
+                    my.fctimeframe = b;
+                    my.state.set({ fctimeframe: my.fctimeframe });
+                    w.ilm.reloadest();
+                });
+                if(b===my.fctimeframe) {
+                    member.css('font-weight','600');
+                    infotxt += ' ' + b+'p';
                 }
-                else {
-                    el.find('.night-chart').on('click', function(e) {
-                        var member = $(this).attr('name');
-                        if (('fcsnf' === member && !my.fcshownight) || ('fcsnt' === member && my.fcshownight)) return false;
-                        my.loadGraph(e, member);
-                        w.ilm.reloadest();
-                    });
-                }
+                else member.css('font-weight','400');
+            });
+            where.find('.ctrl-info').html(infotxt);
+            member = where.find('.night-chart');
+            member.off('click');
+            member.on('click', function() {
+                var member = $(this).attr('name');
+                if (('fcsnf' === member && !my.fcshownight) || ('fcsnt' === member && my.fcshownight)) return false;
+                self.fcshownight = member === 'fcsnt' ? true : false;
+                self.state.set({ fcshownight: self.fcshownight });
+                w.ilm.reloadest();
             });
             
             $('#fctitle').html(
@@ -708,18 +724,10 @@
 
         ajax_done = 0;
 
-        wind_speed_options.series = null;
-        wind_speed_options.series = [];
-        wind_speed_options.chart.renderTo = 'wind_speed2';
-
-        wind_dir_options.series = null;
-        wind_dir_options.series = [];
-        wind_dir_options.chart.renderTo = 'wind_dir2';
-
-        temp_options.series = null;
-        temp_options.series = [];
-        temp_options.chart.renderTo = 'temp2';
-
+        options.wind_speed.series = [];
+        options.wind_dir.series = [];
+        options.temp.series = [];
+        
         var cnt = $('.meta');
         if(cnt.length===1) {
             cnt[0].innerHTML='';

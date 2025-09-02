@@ -6,8 +6,14 @@ html(lang=opt.lang)
 		meta(charset=opt.charset)
 		meta(name="viewport", content="width=device-width")
 		meta(name="description" content=opt.desc)
-		link(rel="stylesheet", href= opt.css + min + '.css?' + opt.version, media="screen")
-		link(rel="shortcut icon" type="image/x-icon" href="css/images/favicon.ico")
+		//- CSS: Use webpack require() if available, otherwise use opt.css path
+		if typeof require !== 'undefined'
+			//- Webpack build: CSS and favicon via require
+			link(rel="shortcut icon" type="image/x-icon" href=require("@images/favicon.ico"))
+		else
+			//- Grunt build: Use traditional paths
+			link(rel="stylesheet", href= opt.css + min + '.css?' + opt.version, media="screen")
+			link(rel="shortcut icon" type="image/x-icon" href="css/images/favicon.ico")
 		// [if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]
 	body(style='padding-top:25px')
 		#header
@@ -42,7 +48,11 @@ html(lang=opt.lang)
 									li: a(href="http://getbootstrap.com/") Bootstrap
 									li.divider
 									li: a(href=opt.giturl) Projekt GitHubis
-		#backgr.ilm-backgr: img(src="css/images/ranna-001.jpg" alt="Peipsi pilt")
+		//- Background image: Use webpack require() if available, otherwise use traditional path
+		if typeof require !== 'undefined'
+			#backgr.ilm-backgr: img(src=require("@images/ranna-001.jpg") alt="Peipsi pilt")
+		else
+			#backgr.ilm-backgr: img(src="css/images/ranna-001.jpg" alt="Peipsi pilt")
 		#bghide.ilm-bghide
 		#dots.ilm-dots
 		#sisu.ilm-sisu
@@ -71,6 +81,10 @@ html(lang=opt.lang)
 				b.panel-title
 					a#sl.ilm-sl(href="#" onclick="return ilm.Popup();") Sulge
 			#lingid.panel-body
-		script(src= opt.contrib + min + '.js')
-		script(src= opt.js + min + '.js?' + opt.version)
+		//- Scripts: Webpack will auto-inject JS chunks
+		//- For Grunt builds, fallback to manual script tags
+		if typeof require === 'undefined'
+			//- Grunt build: Manual script tags
+			script(src= opt.contrib + min + '.js')
+			script(src= opt.js + min + '.js?' + opt.version)
 

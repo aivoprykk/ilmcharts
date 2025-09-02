@@ -85,7 +85,7 @@ class WSDSConfig(BaseConfig):
         # WSDS native fields from DB (for reference)
         self.WSDS_FIELDS: List[str] = [
             'temperature', 'heat_index', 'dewpoint', 'wind_direction',
-            'wind_speed', 'wind_gust', 'humidity', 'pressure'
+            'wind_speed', 'wind_gust', 'humidity', 'pressure', 'rain'
         ]
 
         self.PUHVERAEG_SECONDS = 20 + 60 * 5  # 20 seconds + 5 minutes
@@ -200,7 +200,7 @@ def process_stations(config: WSDSConfig, stations: List[str]) -> None:
 
 def query_rows(conn, station_db_id: str, start_dt: dt.datetime, end_dt: dt.datetime, debug: bool=False) -> List[Tuple]:
     sql = (
-        "SELECT time, temperature, heat_index, dewpoint, wind_direction, wind_speed, wind_gust, humidity, pressure "
+        "SELECT time, temperature, heat_index, dewpoint, wind_direction, wind_speed, wind_gust, humidity, pressure, rain "
         "FROM wsds WHERE station_id=%s AND time BETWEEN %s AND %s ORDER BY time ASC"
     )
     params = (station_db_id, start_dt.strftime('%Y-%m-%d %H:%M:%S'), end_dt.strftime('%Y-%m-%d %H:%M:%S'))
@@ -262,10 +262,12 @@ def process_station(conn, station_folder: str, base_dir: Path, start_dt: dt.date
         laststamp = laststamp_per_date[date_str]
         nowstamp = int(now_dt.replace(second=0, microsecond=0).timestamp())
 
-        # Buffer guard: skip writing if within laststamp + PUHVERAEG_SECONDS
-        if laststamp and (laststamp + cfg.PUHVERAEG_SECONDS) >= nowstamp:
+        # Buffer guard: skip writing if same 5-minute boundary was already written
+        if laststamp and laststamp == nowstamp:
             # Reset buffers to avoid duplicate write
             tdata = {}
+            if debug:
+                print(f"Skipping duplicate write for {now_dt.strftime('%H:%M')} (already written)")
             return
 
         # Aggregate WSDS-native values first
@@ -277,6 +279,7 @@ def process_station(conn, station_folder: str, base_dir: Path, start_dt: dt.date
         wind_gust = round(max(tdata.get(6, [])) if tdata.get(6) else 0.0, 1)
         humidity = s_mean(tdata.get(7, [])) if tdata.get(7) else 0.0
         pressure = s_mean(tdata.get(8, [])) if tdata.get(8) else 0.0
+        rain = s_mean(tdata.get(9, [])) if tdata.get(9) else 0
 
         # Map to common obs_fields keys
         mapped_values: Dict[str, Optional[float]] = {
@@ -286,6 +289,7 @@ def process_station(conn, station_folder: str, base_dir: Path, start_dt: dt.date
             'windspeedmax': wind_gust,
             'relativehumidity': humidity,
             'airpressure': pressure,
+            'precipitations': rain,
             # extras not in obs_fields but preserved
             'heat_index': heat_index,
             'dewpoint': dewpoint,
@@ -328,9 +332,40 @@ def process_station(conn, station_folder: str, base_dir: Path, start_dt: dt.date
         if prev_date_str is None:
             prev_date_str = now_date_str
 
-        # Decide whether to flush at this record
-        delta = abs(now_minute - (prev_minute if prev_minute is not None else now_minute))
-        do_flush = (prev_minute is not None) and test_minute_boundary(now_minute) and (not test_minute_boundary(prev_minute) or delta > 4)
+        # Improved flush logic: accumulate data in buckets by 5-minute boundaries
+        # and flush when we move to a new boundary
+        current_boundary = (now_minute // 5) * 5
+        
+        # Check if we need to flush accumulated data
+        do_flush = False
+        flush_dt = None
+        
+        if prev_minute is not None and tdata:
+            prev_boundary = (prev_minute // 5) * 5
+            
+            # Flush if we've moved to a different 5-minute boundary
+            if current_boundary != prev_boundary:
+                do_flush = True
+                # Calculate flush timestamp: use previous row's time rounded to boundary
+                # We'll construct this from the previous minute and current row's date/hour
+                flush_dt = row_dt.replace(minute=prev_boundary, second=0, microsecond=0)
+                
+                # Handle hour boundary crossing (e.g., from 59 to 0)
+                if prev_minute >= 55 and now_minute <= 5:
+                    # Crossed hour boundary, flush time should be in previous hour
+                    flush_dt = flush_dt - dt.timedelta(hours=1)
+                    flush_dt = flush_dt.replace(minute=prev_boundary)
+                    
+            # Also handle date changes and large gaps
+            elif now_minute < prev_minute or (now_minute - prev_minute) > 10:
+                do_flush = True
+                flush_dt = row_dt.replace(minute=prev_boundary, second=0, microsecond=0)
+
+        # Flush accumulated data BEFORE processing current row if boundary changed
+        if do_flush and flush_dt:
+            if debug:
+                print(f"Flushing at {flush_dt.strftime('%H:%M')} (accumulated {sum(len(v) for v in tdata.values())} values)")
+            flush_if_needed(flush_dt)
 
         # Accumulate values for this record
         for i in range(1, 9):
@@ -344,18 +379,41 @@ def process_station(conn, station_folder: str, base_dir: Path, start_dt: dt.date
                 continue
             tdata.setdefault(i, []).append(num)
 
-        if do_flush:
-            # Flush at the current minute mark
-            flush_if_needed(row_dt.replace(second=0, microsecond=0))
-
         prev_minute = now_minute
         prev_date_str = now_date_str
 
-    # End: flush any remaining buffer at the last record rounded down to the minute boundary if needed
+    # End: flush any remaining buffer
     if tdata:
         last_dt = rows[-1][0] if isinstance(rows[-1][0], dt.datetime) else dt.datetime.strptime(str(rows[-1][0]), '%Y-%m-%d %H:%M:%S')
-        last_dt = last_dt.replace(second=0, microsecond=0)
-        flush_if_needed(last_dt)
+        last_boundary = (last_dt.minute // 5) * 5
+        last_boundary_time = last_dt.replace(minute=last_boundary, second=0, microsecond=0)
+        
+        # Determine if this is a CLI run (with --hours or --time) vs cron run
+        # CLI runs typically have larger datasets or specific time windows
+        is_cli_run = len(sys.argv) > 1 and ('--hours' in sys.argv or '--time' in sys.argv)
+        is_small_dataset = len(rows) < 30
+        
+        if is_cli_run:
+            # CLI Mode: Process specified time range, save up to last complete 5-min boundary
+            # Always flush remaining data - CLI users want to process all available data
+            if debug:
+                print(f"CLI mode: Final flush at {last_boundary_time.strftime('%H:%M')} (accumulated {sum(len(v) for v in tdata.values())} values)")
+            flush_if_needed(last_boundary_time)
+        
+        elif is_small_dataset:
+            # Cron Mode with small dataset: likely catching up on recent data
+            # Use next boundary for proper timestamp (e.g., 11:35 for data 11:31-11:34)
+            flush_time = last_boundary_time + dt.timedelta(minutes=5)
+            if debug:
+                print(f"Cron mode (small): Final flush at {flush_time.strftime('%H:%M')} (accumulated {sum(len(v) for v in tdata.values())} values)")
+            flush_if_needed(flush_time)
+        
+        else:
+            # Cron Mode with large dataset: processing historical backlog
+            # Use boundary time for historical data
+            if debug:
+                print(f"Cron mode (large): Final flush at {last_boundary_time.strftime('%H:%M')} (accumulated {sum(len(v) for v in tdata.values())} values)")
+            flush_if_needed(last_boundary_time)
 
     # No manual write-out: lines were written via common_process_stations
 

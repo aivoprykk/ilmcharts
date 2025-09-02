@@ -1,4 +1,5 @@
-var ilm = (function(my) {
+// Initialize ilm object immediately to prevent race conditions
+(function(my) {
     'use strict';
     var w = window,
         doc = document,
@@ -437,29 +438,6 @@ var ilm = (function(my) {
             emhi: { name: 'EMHI', url: 'http://www.ilmateenistus.ee/ilm/prognoosid/asukoha-prognoos/?coordinates=', datadir: 'empg_data', fc_file: 'empg_forecast.json', datatype: 'json' }
         };
         this.fcproviders_available = [];
-        this.fcplaces = {
-            tartu: { id: 'tartu', name: 'Tartu', wglink: '266923', yrlink: '2-588335', emlink: '58.380052;26.722116', group: 'koht', bind: 'tartu', location: [58.380756, 26.723452] },
-            aksi: { id: 'aksi', name: 'Äksi Saadjärv', wglink: '266923', yrlink: '58.535,26.666', emlink: '58.529725;26.639348', group: 'saadjarv', bind: 'wsds_saadjarv_saadjarve', location: [58.535, 26.666] },
-            uhmardu: { id: 'uhmardu', name: 'Uhmardu', yrlink: '2-793979', emlink: '58.625507;26.767479', group: 'koht', link: '', bind: 'mnt_uhmardu', location: [58.640605, 26.791860] },
-            jogeva: { id: 'jogeva', name: 'Jõgeva', group: 'koht', yrlink: '2-591902', emlink: '58.746083;26.395523', link: '', bind: 'mnt_jogeva', location: [58.764849, 26.404618] },
-            tamme: { id: 'tamme', name: 'Tamme Võrtsjärv', wglink: 192609, yrlink: '58.271,26.132', emlink: '58.224666;26.135578', group: 'vortsjarv-tamme', bind: 'wsds_vortsjarv_tamme', location: [58.271, 26.132] },
-            joesuu: { id: 'joesuu', name: 'Jõesuu Võrtsjärv', wglink: 692681, yrlink: '58.384,26.127', emlink: '58.405000;26.076182', group: 'vortsjarv-joesuu', bind: 'wsds_vortsjarv_joesuu', location: [58.384, 26.127] },
-            rapina: { id: 'rapina', name: 'Räpina Peipsi', wglink: 183648, yrlink: '58.126,27.532', emlink: '58.235806;27.470503', group: 'peipsi', bind: 'wsds_peipsi_rapina', location: [58.126, 27.532] },
-            nina: { id: 'nina', name: 'Nina Peipsi', wglink: 20401, yrlink: '2-589982', emlink: '58.606881;27.203583', group: 'peipsi', bind: 'wsds_peipsi_nina', location: [58.598889, 27.209722] },
-            pirita: { id: 'pirita', name: 'Pirita Tallinn', wglink: 125320, yrlink: '2-798565', emlink: '59.465992;24.834083', group: 'meri', bind: 'emhi_pirita', location: [59.471562, 24.825608] },
-            rohuneeme: { id: 'rohuneeme', name: 'Rohuneeme Viimsi', wglink: 70524, yrlink: '59.554,24.791', group: 'meri', bind: 'emhi_rohuneeme', location: [59.554,24.791] },
-            haapsalu: { id: 'haapsalu', previd: 'topu', name: 'Haapsalu', wglink: 245713, yrlink: '58.957,23.543', emlink: '183', group: 'meri', bind: 'emhi_haapsalu', location: [58.9578, 23.4901] },
-            rohukyla: { id: 'rohukyla', name: 'Rohuküla', wglink: 245713, yrlink: '58.911,23.420', emlink: '58.907889;23.428161', group: 'meri', bind: 'ttu_rohukyla', location: [58.911, 23.420] },
-            parnu: { id: 'parnu', name: 'Pärnu', wglink: 92781, yrlink: '58.350,24.545', emlink: '58.382515;24.510179', group: 'meri', bind: 'emhi_parnu', location: [58.365958, 24.526257] },
-            haademeeste: { id: 'haademeeste', name: 'Häädemeeste', wglink: 246420, yrlink: '2-592231', emlink: '58.079101;24.493466', group: 'meri', bind: 'emhi_haademeeste', location: [58.071644, 24.478816] },
-            sorve: { id: 'sorve', name: 'Sõrve Saaremaa', wglink: 108163, yrlink: '57.906,22.045', emlink: '57.918654;22.059625', group: 'meri', bind: 'emhi_sorve', location: [57.906, 22.045] },
-            saaretirp: { id: 'saaretirp', name: 'Sääretirp Hiiumaa', wglink: 1299399, yrlink: '58.758,22.789', emlink: '7950', group: 'meri', bind: 'ttu_saaretirp', location: [58.758, 22.789] },
-            ristna: { id: 'ristna', name: 'Ristna Hiiumaa', wglink: 96592, yrlink: '2-794818', emlink: '58.928326;22.069358', group: 'meri', bind: 'emhi_ristna', location: [58.927304, 22.041023] },
-            koipsi: { id: 'koipsi', name: 'Koipsi', wglink: 1299411, yrlink: '2-591227', emlink: '59.581387;25.722052', group: 'meri', bind: 'emhi_loksa', location: [59.5872, 25.6943] },
-            dirhami: { id: 'dirhami', name: 'Dirhami', wglink: 261785, yrlink: '2-796115', emlink: '59.208078;23.496537', group: 'meri', bind: 'emhi_dirhami', location: [59.2133, 23.5031] },
-            paatsalu: { id: 'paatsalu', name: 'Paatsalu', wglink: 479054, yrlink: '2-589817', emlink: '58.529210;23.700999', group: 'meri', bind: 'ttu_paatsalu', location: [58.508902, 23.663027] }
-        };
-
         // History settings
         this.hprovidersmeta = {
             emhi: { name:'Emhi', url: 'https://www.ilmateenistus.ee/ilm/ilmavaatlused/vaatlusandmed/'},
@@ -471,7 +449,6 @@ var ilm = (function(my) {
             ttu: { name:'TTU', url: 'http://on-line.msi.ttu.ee/'},
         };
         this.hproviders_available = [];
-        
         this.useNewHistPlaces = true;
                 
         this.addDst = this.isDst();
@@ -482,6 +459,9 @@ var ilm = (function(my) {
         this.logo = 'Ilmainfo';
 
         this.chartoptions = {
+            accessibility: {
+                enabled: false
+            },
             chart: {
                 zoomType: 'x',
                 spacingRight: 20,
@@ -1365,7 +1345,7 @@ var ilm = (function(my) {
                 var html = '<tbody>';
                 
                 // Get current grid index
-                var stations = self.getGridIndex();
+                var stations = this.getGridIndex();
                 
                 // Get all viewStates for efficiency
                 var viewStates = this.state.attr.viewStates || {};
@@ -1387,94 +1367,93 @@ var ilm = (function(my) {
                     }
                     
                     // Only store place key in DOM - all provider info comes from savedState
-                    html += '<tr id="' + uniqueId + '" name="' + placeKey + '" class="' + rowClass + '" style="background-color:white">';
+                    html += '<tr id="' + uniqueId + '" name="' + placeKey + '" class="' + rowClass + '" ';
                     html += '<td class="sortable-is-active d-none">-</td><td colspan="100">' + displayName + '</td>';
                     html += '</tr>';
                 }
                 html += '</tbody>';
-                el.innerHTML = '<div>&nbsp;</div>' + _.template(self.dataTableTemplate)({ classes: 'table sortable-table table-sm', thead: self.gridHeadTemplate, tbody: html });
-                self.ready(doc, function() {
-                    clearInterval(self.gridintval);
-                    self.fillGridLast(self);
-                    setInterval(self.fillGridLast, 120000, self); //120sec
-                    $('.data-menu-row').on('click', function() {
-                        _.each($('.data-menu-row'), function(a) { a.style['background-color'] = 'white'; });
-                        $(this).css({ 'background-color': 'rgb(236, 236, 236)' });
-                        var placeKey = $(this).attr('name');
-                        
-                        // Set place first to update available providers
-                        self.setCurPlace(placeKey, true, false);
-                        
-                        // Get saved provider info from viewStates using helper functions
-                        var hStruct = self.getCurrentHProviderStruct(placeKey);
-                        var fcStruct = self.getCurrentFcProviderStruct(placeKey);
-                        
-                        // Apply saved historical provider if available for this place
-                        if (hStruct && hStruct.provider && self.hproviders_available.indexOf(hStruct.provider) !== -1) {
-                            self.setHProvider(hStruct.provider, false);
-                            if (hStruct.currentStation && hStruct.currentIndex !== undefined) {
-                                // Verify that the saved station still exists at the saved index
-                                var currentPlace = self.curplaces[placeKey];
-                                var hStations = self.useNewHistPlaces ? currentPlace.hstations_new : currentPlace.hstations;
-                                if (hStations && hStations[hStruct.provider]) {
-                                    var hStationList = self.normalizeHistValue(hStations[hStruct.provider]);
-                                    if (hStruct.currentIndex < hStationList.length && 
-                                        hStationList[hStruct.currentIndex].id === hStruct.currentStation.id) {
-                                        self.setHStationIndex(hStruct.currentIndex, false);
-                                    } else {
-                                        // Fallback to finding by ID
-                                        var actualIndex = hStationList.findIndex(function(s) { return s.id === hStruct.currentStation.id; });
-                                        if (actualIndex !== -1) {
-                                            self.setHStationIndex(actualIndex, false);
-                                        }
+                $(el).html(_.template(this.dataTableTemplate)({ classes: 'table sortable-table table-sm', thead: this.gridHeadTemplate, tbody: html }))
+                clearInterval(this.gridintval);
+                this.fillGridLast(this);
+                setInterval(this.fillGridLast, 120000, this); //120sec
+                $('.data-menu-row').on('click', function() {
+                    $('.data-menu-row').each(function(b, a) { a.className = a.className.replace(' selected', ''); });
+                    this.className += ' selected';
+                    var placeKey = $(this).attr('name');
+                    
+                    // Set place first to update available providers
+                    self.setCurPlace(placeKey, true, false);
+                    
+                    // Get saved provider info from viewStates using helper functions
+                    var hStruct = self.getCurrentHProviderStruct(placeKey);
+                    var fcStruct = self.getCurrentFcProviderStruct(placeKey);
+                    
+                    // Apply saved historical provider if available for this place
+                    if (hStruct && hStruct.provider && self.hproviders_available.indexOf(hStruct.provider) !== -1) {
+                        self.setHProvider(hStruct.provider, false);
+                        if (hStruct.currentStation && hStruct.currentIndex !== undefined) {
+                            // Verify that the saved station still exists at the saved index
+                            var currentPlace = self.curplaces[placeKey];
+                            var hStations = self.useNewHistPlaces ? currentPlace.hstations_new : currentPlace.hstations;
+                            if (hStations && hStations[hStruct.provider]) {
+                                var hStationList = self.normalizeHistValue(hStations[hStruct.provider]);
+                                if (hStruct.currentIndex < hStationList.length && 
+                                    hStationList[hStruct.currentIndex].id === hStruct.currentStation.id) {
+                                    self.setHStationIndex(hStruct.currentIndex, false);
+                                } else {
+                                    // Fallback to finding by ID
+                                    var actualIndex = hStationList.findIndex(function(s) { return s.id === hStruct.currentStation.id; });
+                                    if (actualIndex !== -1) {
+                                        self.setHStationIndex(actualIndex, false);
                                     }
                                 }
                             }
                         }
-                        
-                        // Apply saved forecast provider if available for this place
-                        if (fcStruct && fcStruct.provider && self.fcproviders_available.indexOf(fcStruct.provider) !== -1) {
-                            self.setFcProvider(fcStruct.provider, false);
-                            if (fcStruct.currentStation && fcStruct.currentIndex !== undefined) {
-                                // Verify that the saved station still exists
-                                var currentPlace2 = self.curplaces[placeKey];
-                                if (currentPlace2.fcstations && currentPlace2.fcstations[fcStruct.provider]) {
-                                    var fcStationList = self.normalizeHistValue(currentPlace2.fcstations[fcStruct.provider]);
-                                    if (fcStruct.currentIndex < fcStationList.length && 
-                                        fcStationList[fcStruct.currentIndex].id === fcStruct.currentStation.id) {
-                                        // Station still exists at saved index, use it directly
-                                        // (fcplace is managed internally by setFcProvider)
-                                    } else {
-                                        // Station moved or was removed, find it by ID
-                                        var targetFcStation = fcStationList.find(function(s) { return s.id === fcStruct.currentStation.id; });
-                                        if (targetFcStation) {
-                                            // Station exists but at different index - it will be handled by setFcProvider
-                                        }
+                    }
+                    
+                    // Apply saved forecast provider if available for this place
+                    if (fcStruct && fcStruct.provider && self.fcproviders_available.indexOf(fcStruct.provider) !== -1) {
+                        self.setFcProvider(fcStruct.provider, false);
+                        if (fcStruct.currentStation && fcStruct.currentIndex !== undefined) {
+                            // Verify that the saved station still exists
+                            var currentPlace2 = self.curplaces[placeKey];
+                            if (currentPlace2.fcstations && currentPlace2.fcstations[fcStruct.provider]) {
+                                var fcStationList = self.normalizeHistValue(currentPlace2.fcstations[fcStruct.provider]);
+                                if (fcStruct.currentIndex < fcStationList.length && 
+                                    fcStationList[fcStruct.currentIndex].id === fcStruct.currentStation.id) {
+                                    // Station still exists at saved index, use it directly
+                                    // (fcplace is managed internally by setFcProvider)
+                                } else {
+                                    // Station moved or was removed, find it by ID
+                                    var targetFcStation = fcStationList.find(function(s) { return s.id === fcStruct.currentStation.id; });
+                                    if (targetFcStation) {
+                                        // Station exists but at different index - it will be handled by setFcProvider
                                     }
                                 }
                             }
                         }
-                        
-                        // Load the graph with applied viewState
-                        self.loadGraph(this, placeKey);
-                    });
-                    $('.data-menu-order').on('click', function() {
-                        if ($(this).hasClass('change')) {
-                            $(this).removeClass('change');
-                            self.makeSortable('.sortable-table tbody');
-                            $('.sortable-is-active').each(function(i, a) { $(a).removeClass('d-none'); });
-                        } else {
-                            $(this).addClass('change');
-                            self.makeUnSortable('.sortable-table tbody');
-                            $('.sortable-is-active').each(function(i, a) { $(a).addClass('d-none'); });
-                        }
-                    });
-                    if(self.req_curplace) {
-                        self.loadGraph(this, self.req_curplace);
-                        self.req_curplace = '';
-                        self.doReload('both');
+                    }
+                    
+                    // Load the graph with applied viewState
+                    self.loadGraph(this, placeKey);
+                });
+                $('.data-menu-order').on('click', function() {
+                    if ($(this).hasClass('change')) {
+                        $(this).removeClass('change');
+                        self.makeSortable('.sortable-table tbody');
+                        $('.sortable-is-active').each(function(i, a) { $(a).removeClass('d-none'); });
+                    } else {
+                        $(this).addClass('change');
+                        self.makeUnSortable('.sortable-table tbody');
+                        $('.sortable-is-active').each(function(i, a) { $(a).addClass('d-none'); });
                     }
                 });
+                if(self.req_curplace) {
+                    self.loadGraph(this, self.req_curplace);
+                    self.req_curplace = '';
+                    self.doReload('both');
+                }
+               
             }
             this.initialized = true;
         },
@@ -1500,22 +1479,18 @@ var ilm = (function(my) {
                     var u = 0,
                         xlarge = (self.getWidth() >= 1240) ? true : false,
                         s = '';
-                    if(self.samplemode==='table') s+= '<style>.chart-control-box{min-height:2em;}</style>';
-                    else {
-                        s+= '<style>.chart-control-box{min-height:' + (self.viewmode === 'cur' || xlarge ? '4' : '3') + '.5em;}';
-                        if(self.viewmode === 'cur' || xlarge)
-                            s+= '.ctrlhead{top:-' + (!xlarge ? '2':'3') + 'em;}';
-                        s+='</style>';
-                    }
                     s += '<div class="x-container chartbox">';
                     s += `<div class="chart-control-box">
-                        <div>
+                        <div class="items-container"><div>
                         <div class="viewmode-control">`;
                     s += '<span class="title-chart"></span>&nbsp;<span class="change-chart badge bg-primary" name="' + (self.viewmode === 'cur' ? 'est' : 'cur') + '">Näita ' + (self.viewmode === 'cur' ? 'Prognoosi' : 'Ajalugu') + '</span>';
                     s += '</div>';
                     s += '<div class="samplemode-control">';
                     s += '<span class="sample-chart badge bg-primary" name="' + (self.samplemode === 'table' ? 'graph' : 'table') + '">Näita ' + (self.samplemode === 'table' ? 'Graafikut' : 'Tabelit') + '</span>&nbsp;';
-                    s += '</div></div>';
+                    s += '</div>';
+                    s += '<div class="view-control">';
+                    s += '<span class="close-chart badge bg-primary">Sulge</span>&nbsp;';
+                    s += '</div></div></div>';
                     el.html(s);
                     var v = self.getWidth(null, el[0]);
                     if (!self.timeframe) {
@@ -1526,9 +1501,9 @@ var ilm = (function(my) {
                     }
                     s = '<div class="float two-lg';
                     s += (!xlarge) ? ' ' + (self.viewmode==='est'?'fc':'cur') : ' cur';
-                    s += '"><div class="meta"></div><div class="ctrlhead" ></div></div></div>';
+                    s += '"><div class="meta"></div></div></div>';
                     if (xlarge) {
-                        s += '<div class="float two-lg fc"><div class="meta"></div><div class="ctrlhead"></div></div>';
+                        s += '<div class="float two-lg fc"><div class="meta"></div></div>';
                     }
                     u = $(el).find('.chartbox');
                     u.append(s);
@@ -1557,6 +1532,10 @@ var ilm = (function(my) {
                         self.loadGraph(e, a);
                         self.doReload('both');
                     });
+                    $('.close-chart').on('click', function(e) {
+                        self.loadGraph(e, 'closechart');
+                        self.doReload('both');
+                    });
                     return false;
                 },
                 modechanged = false;
@@ -1571,7 +1550,7 @@ var ilm = (function(my) {
                 var c = name.match(/fctimeframe-(\d+)/)[1], b = parseInt(c,10);
                 self.state.set({ fctimeframe: b });
                 modechanged = true;
-                _.each($('.fc-length'), function(el) { $(el).off('click'); });
+                //_.each($('.fc-length'), function(el) { $(el).off('click'); });
                 self.changed = 'fctimeframe';
             } else if (/(fcsnt|fcsnf)$/.test(name)) {
                 self.fcshownight = name === 'fcsnt' ? true : false;
@@ -1592,13 +1571,14 @@ var ilm = (function(my) {
                 if (me && modechanged) { //(me.hasClass('change-chart')||me.hasClass('long-chart'))) {
                     me = m.prev();
                 }
-                _.each($('.chart-box'), function(a) { a.remove(); });
-                _.each($('.chartbox'), function(a) { a.remove(); });
-                // if (o === self.curplace && !modechanged) {
-                //     _.each($('.data-menu-row'), function(a) { a.style['background-color'] = 'white'; });
-                //     self.loadMap();
-                //     return false;
-                // } else 
+                $('.chart-box').each(function(i, a) { $(a).remove(); });
+                $('.chartbox').each(function(i, a) { $(a).remove(); });
+                
+                if (name === 'closechart') {
+                    $('.data-menu-row').each(function(b, a) { a.className = a.className.replace(' selected', ''); });
+                    self.loadMap();
+                    return false;
+                }
                 if (!modechanged) {
                     self.curplace = o;
                 }
@@ -1635,7 +1615,7 @@ var ilm = (function(my) {
             }
             return false;
         },
-        dataTableTemplate: '<table class="<%=classes%>" style="background-color:white;font-size:80%"><%=thead%><%=tbody%></table>',
+        dataTableTemplate: '<table class="<%=classes%> ilm-table"><%=thead%><%=tbody%></table>',
         fcHeadTemplate: '<thead><%=inforows%><tr><th scope="col">Aeg</th><th scope="col">Tuul</th><th scope="col">Suund</th><th scope="col">Temp</th><th scope="col">Sadu</th><th scope="col" class="d-xs-none">Rõhk</th></tr></thead>',
         fcRowTemplate: `<tr class="<%=night?"night":""%><%=night&&hide?" hide":""%>">
         <td><span class="day"><%=day%>&nbsp;</span><%=time%></td>
@@ -1660,8 +1640,8 @@ var ilm = (function(my) {
         <td class="avg_wl"><span class="grid-cell-title">Vesi:&nbsp;</span><span class="grid-em"><%=d.avg_wl%></span></td>
         <td class="avg_wtemp"><span class="grid-cell-title">Vtemp:&nbsp;</span><span class="grid-em"><%=d.avg_wtemp%></span></td>
         <td class="avg_rain"><span class="grid-cell-title">Sadu:&nbsp;</span><span class="grid-em"><%=d.avg_rain%></span></td></tr>`,
-        gridHeadTemplate: `<thead><tr style="background-color:white">
-        <th><span class="data-menu-order change btn btn-sm btn-primary" style="position:absolute;display:table-cell;background-color:white;border-radius:5px;color:black;top:1.5rem">+</span></th>
+        gridHeadTemplate: `<thead><tr>
+        <th><span class="data-menu-order change btn btn-sm btn-primary">+</span></th>
         <th class="sortable-is-active d-none"></th>
         <th scope="col" class="avg_ws">Tuul</th>
         <th scope="col" class="avg_wd">Suund</th>
@@ -1740,21 +1720,76 @@ var ilm = (function(my) {
                                     var map = w.getMap();
                                     return (map !== null && typeof map !== 'undefined');
                                 };
+                                
+                                // Function to open InfoWindow positioned above the custom marker
+                                var openInfoWindowAboveMarker = function() {
+                                    var markerPos = marker.getPosition();
+                                    var map = marker.get('map');
+                                    var zoom = map.getZoom();
+                                    
+                                    // Calculate offset to position above the 30px marker
+                                    var scale = Math.pow(2, zoom);
+                                    var pixelOffset = 40 / scale; // 40px above the marker in lat/lng units
+                                    var offsetLat = pixelOffset / 111320; // Convert pixels to degrees
+                                    
+                                    var offsetPos = new w.google.maps.LatLng(
+                                        markerPos.lat() + offsetLat,
+                                        markerPos.lng()
+                                    );
+                                    
+                                    infowindow.setPosition(offsetPos);
+                                    infowindow.open(map);
+                                };
+                                
+                                // Add timeout variables to prevent blinking
+                                var openTimeout = null;
+                                var closeTimeout = null;
+                                
                                 if (marker && marker.mclick) w.google.maps.event.removeListener(marker.mclick);
                                 marker.mclick = marker.addListener('click', function() {
+                                    // Clear any pending timeouts on click
+                                    if (openTimeout) clearTimeout(openTimeout);
+                                    if (closeTimeout) clearTimeout(closeTimeout);
+                                    
                                     if (isOpen(infowindow)) {
                                         infowindow.close();
                                         return false;
                                     }
-                                    infowindow.open(marker.get('map'), marker);
+                                    
+                                    openInfoWindowAboveMarker();
                                 });
+                                
                                 if (marker && marker.mover) w.google.maps.event.removeListener(marker.mover);
                                 marker.mover = marker.addListener('mouseover', function() {
-                                    infowindow.open(marker.get('map'), marker);
+                                    // Clear any pending close timeout
+                                    if (closeTimeout) {
+                                        clearTimeout(closeTimeout);
+                                        closeTimeout = null;
+                                    }
+                                    
+                                    // Only open if not already open, with slight delay to prevent rapid opening
+                                    if (!isOpen(infowindow)) {
+                                        openTimeout = setTimeout(function() {
+                                            openInfoWindowAboveMarker();
+                                            openTimeout = null;
+                                        }, 150);
+                                    }
                                 });
                                 if (marker && marker.mout) w.google.maps.event.removeListener(marker.mout);
                                 marker.mout = marker.addListener('mouseout', function() {
-                                    infowindow.close();
+                                    // Clear any pending open timeout
+                                    if (openTimeout) {
+                                        clearTimeout(openTimeout);
+                                        openTimeout = null;
+                                    }
+                                    
+                                    // Close with delay to prevent blinking when mouse quickly moves between markers
+                                    if (isOpen(infowindow)) {
+                                        closeTimeout = setTimeout(function() {
+                                            infowindow.close();
+                                            closeTimeout = null;
+                                        }, 300);
+                                    }
                                 });
                             };
                             self.normalizeData(n, provider, json, function(obj) {
@@ -3288,7 +3323,7 @@ var ilm = (function(my) {
                 } else {
                     night[1] = d.sunrise.getTime();
                     if (night[1] > times[1]) night[1] = times[1];
-                    if (night[0] && night[1] && night[1] > night[0]) plots.push({ color: '#f9f9f9', from: night[0], to: night[1] });
+                    if (night[0] && night[1] && night[1] > night[0]) plots.push({ color: '#eee', from: night[0], to: night[1] });
                     //night=[];
                 }
                 night[0] = d.sunset.getTime();
@@ -3769,13 +3804,11 @@ temp 5 <td class="number">9,8</td>
     }
     ];
 
-
-    if (w.ilm === undefined) {
+    if(!my.state) {
         my = new App();
-    } else {
-        my = w.ilm;
+        w.ilm = my;
     }
-    
+
     // Provider enum for fast numeric comparisons - accessible from all modules
     my.HPROVIDER = {
         UNKNOWN: 0,
@@ -3804,10 +3837,9 @@ temp 5 <td class="number">9,8</td>
     //my.setFrame('3d');
     //console.log(my.getTimeStr(my.date) + " " + my.timeframe);
     return my;
-})(ilm || {});
+})(window.ilm || {});
 
-
-window.$(function() {
+(function() {
     var w = window,
         $ = w.$;
     var WindBarbArrowHandler = {
@@ -3936,4 +3968,4 @@ window.$(function() {
     };
     window.WindBarbArrowHandler = window.WindBarbArrowHandler || WindBarbArrowHandler;
     //WindBarbArrowHandler.WindArrow(30, 45, $("#windBarbArrow"), 40);
-});
+})();
